@@ -8,7 +8,7 @@
 
 **在当前会话发起审查，让独立 Agent 检查代码并带回报告**
 
-[English](README.md) · [开发文档](docs/00-交接入口/00-阅读导航.md) · [Apache-2.0](LICENSE)
+[English](README.md) · [开发文档](docs/00-交接入口/00-阅读导航.md) · [更新日志](CHANGELOG.md) · [Apache-2.0](LICENSE)
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
 [![DSH Plugin](https://img.shields.io/badge/DSH-Plugin-0f766e.svg)](https://github.com/MichengAI/dsh-code-review)
@@ -23,7 +23,7 @@ DSH Code Review 是 DeepSeek Harness 的社区代码审查插件，包名 `@mich
 
 当前版本针对 **DSH `0.1.5-rc.2`** 开发与验证，通过 `dsh.bundle.patch` 加载。需要原生 `spawn` provider、`userQuestions` 服务、当前平台的问题回答器，以及支持工具调用的模型。
 
-当前尚未发布 npm，请从源码构建安装。已验证离线宿主与安装包链路；真实模型的审查质量、语言遵循和不同平台的交互仍需实际验收。
+可从 npm 安装，也可从源码构建。已验证离线宿主与安装包链路；真实模型的审查质量、语言遵循和不同平台的交互仍需实际验收。
 
 ## 你可以做什么
 
@@ -54,23 +54,20 @@ DSH Code Review 是 DeepSeek Harness 的社区代码审查插件，包名 `@mich
 
 ### 让 Agent 安装（推荐）
 
-将以下要求发送给能访问本地终端的 Agent，并提供本仓库的实际路径：
+将以下要求发送给能访问本地终端的 Agent：
 
 ```text
-请从本地 dsh-code-review 仓库安装插件到 DSH 的 web profile：核对 Node.js 与 DSH 兼容性，在仓库中执行 npm ci --ignore-scripts、npm run check、npm pack，然后执行 dsh plugin --profile web add .\michengai-dsh-code-review-0.1.0.tgz --ignore-scripts。运行 dsh --profile web --dump-config，确认 @michengai/dsh-code-review 已加载，并说明如何重启 DSH 和使用 /review。任一步失败请停止并报告原因。
+请安装 DSH 插件 @michengai/dsh-code-review 到本机 web profile：执行 dsh plugin --profile web add @michengai/dsh-code-review@latest --registry=https://registry.npmjs.org/，再运行 dsh --profile web --dump-config，确认插件已加载，并说明如何重启 DSH 和使用 /review。任一步失败请停止并报告原因。
 ```
 
 ### 手动安装
 
-在本仓库目录执行：
+执行以下命令：
 
 ```powershell
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $OutputEncoding = [System.Text.Encoding]::UTF8
-npm ci --ignore-scripts
-npm run check
-npm pack
-dsh plugin --profile web add .\michengai-dsh-code-review-0.1.0.tgz --ignore-scripts
+dsh plugin --profile web add @michengai/dsh-code-review@latest --registry=https://registry.npmjs.org/
 dsh --profile web --dump-config
 ```
 
@@ -126,6 +123,7 @@ $OutputEncoding = [System.Text.Encoding]::UTF8
 npm ci --ignore-scripts
 npm run check
 npm run verify:package
+dsh plugin --profile web add .\michengai-dsh-code-review-0.1.0.tgz --ignore-scripts
 ```
 
 `check` 包含 TypeScript、提示词哈希、短任务与真实 AgentLoop 配合离线模型的回归，以及文档链接检查。`verify:package` 在隔离 profile 验证 bundle、peer 和安装包宿主链路。这些检查不替代在线模型验收。

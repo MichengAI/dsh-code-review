@@ -8,7 +8,7 @@
 
 **Start a review in your conversation. Let an independent agent inspect the code and bring back findings.**
 
-[简体中文](README.zh-CN.md) · [Developer docs](docs/00-交接入口/00-阅读导航.md) · [Apache-2.0](LICENSE)
+[简体中文](README.zh-CN.md) · [Developer docs](docs/00-交接入口/00-阅读导航.md) · [Changelog](CHANGELOG.md) · [Apache-2.0](LICENSE)
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
 [![DSH Plugin](https://img.shields.io/badge/DSH-Plugin-0f766e.svg)](https://github.com/MichengAI/dsh-code-review)
@@ -23,7 +23,7 @@ DSH Code Review is a community code review plugin for DeepSeek Harness, packaged
 
 The current version targets **DSH `0.1.5-rc.2`** and loads through `dsh.bundle.patch`. It requires the native `spawn` provider, the `userQuestions` service, a question answerer for your platform, and a model that supports tool calls.
 
-The package has not been published to npm yet. Build and install from source. Offline host and package integration checks have passed; review quality, language adherence, and interaction across platforms still need live validation.
+Install the package from npm or build from source. Offline host and package integration checks have passed; review quality, language adherence, and interaction across platforms still need live validation.
 
 ## What you can do
 
@@ -54,23 +54,20 @@ The package has not been published to npm yet. Build and install from source. Of
 
 ### Ask an agent to install it (recommended)
 
-Send this prompt to an agent with local terminal access and provide the actual path to this repository:
+Send this prompt to an agent with local terminal access:
 
 ```text
-Install the plugin from my local dsh-code-review repository into the DSH web profile. Check Node.js and DSH compatibility. In the repository, run npm ci --ignore-scripts, npm run check, and npm pack, then run dsh plugin --profile web add .\michengai-dsh-code-review-0.1.0.tgz --ignore-scripts. Run dsh --profile web --dump-config, confirm @michengai/dsh-code-review is loaded, and explain how to restart DSH and use /review. Stop and report the cause if any step fails.
+Install the DSH plugin @michengai/dsh-code-review into my local web profile: run dsh plugin --profile web add @michengai/dsh-code-review@latest --registry=https://registry.npmjs.org/, then dsh --profile web --dump-config. Confirm the plugin is loaded and explain how to restart DSH and use /review. Stop and report the cause if any step fails.
 ```
 
 ### Install manually
 
-Run these commands from this repository:
+Run these commands:
 
 ```powershell
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $OutputEncoding = [System.Text.Encoding]::UTF8
-npm ci --ignore-scripts
-npm run check
-npm pack
-dsh plugin --profile web add .\michengai-dsh-code-review-0.1.0.tgz --ignore-scripts
+dsh plugin --profile web add @michengai/dsh-code-review@latest --registry=https://registry.npmjs.org/
 dsh --profile web --dump-config
 ```
 
@@ -126,6 +123,7 @@ $OutputEncoding = [System.Text.Encoding]::UTF8
 npm ci --ignore-scripts
 npm run check
 npm run verify:package
+dsh plugin --profile web add .\michengai-dsh-code-review-0.1.0.tgz --ignore-scripts
 ```
 
 `check` covers TypeScript, prompt hashes, short tasks, real AgentLoop regression tests with offline models, and documentation links. `verify:package` checks bundle loading, peers, and installed-package host integration in an isolated profile. These checks do not replace live model validation.

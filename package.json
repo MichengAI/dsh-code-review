@@ -24,7 +24,8 @@
     "README.md",
     "README.zh-CN.md",
     "LICENSE",
-    "NOTICE"
+    "NOTICE",
+    "CHANGELOG.md"
   ],
   "dsh": {
     "bundle": {
@@ -64,5 +65,17 @@
     "@deepseek-ai/dsh-settings": {
       "optional": true
     }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MichengAI/dsh-code-review.git"
+  },
+  "homepage": "https://github.com/MichengAI/dsh-code-review#readme",
+  "bugs": {
+    "url": "https://github.com/MichengAI/dsh-code-review/issues"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   }
 }
