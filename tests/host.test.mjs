@@ -17,12 +17,57 @@ import { SessionStore } from '@deepseek-ai/dsh-session';
 import { SessionProjectionRegistry } from '@deepseek-ai/dsh-session-projection';
 import { SystemPrompt } from '@deepseek-ai/dsh-system-prompt';
 import { ToolRuntime } from '@deepseek-ai/dsh-tools';
+import { SettingsProvider } from '@deepseek-ai/dsh-settings';
+import z from '@deepseek-ai/schemastery';
 import { validateStoredEvents } from '@deepseek-ai/dsh-session-persistence';
 import { createHash } from 'node:crypto';
 import * as plugin from '../lib/index.js';
 import { runReview } from '../lib/runtime.js';
 
 const empty = JSON.stringify({ findings: [], overall_correctness: 'patch is correct', overall_explanation: '未发现有证据的新增缺陷', overall_confidence_score: 0.8 });
+test('宿主语言控制菜单与模型输出指令，切换后下一次生效且原文不变', async t => {
+  const s = await setup(t, empty, { locale: 'en', answer: async request => ({ answers: [{ id: request.questions[0].id, selected: [request.questions[0].options[1].label] }] }) });
+  const first = await s.run('/review');
+  assert.equal(first.result.kind, 'success', first.result.text);
+  assert.match(first.result.text, /Code review · Completed/);
+  assert.equal(s.questions[0].questions[0].options[1].label, 'Review uncommitted changes');
+  assert.match(JSON.stringify(s.requests[0].messages), /Write user-facing review content in English/);
+  const original = await readFile(new URL('../assets/codex/review/rubric.md', import.meta.url), 'utf8');
+  assert.ok(JSON.stringify(s.requests[0]).includes(JSON.stringify(original).slice(1, -1)));
+  await s.ctx.settings.update('locale', { preference: 'zh' });
+  assert.match((await s.run('/review')).result.text, /完成 · 零发现/);
+  assert.match(JSON.stringify(s.requests[1].messages), /Write user-facing review content in Simplified Chinese/);
+  assert.equal(s.questions[1].questions[0].options[1].label, '审查未提交的更改');
+});
+test('审查开始后切换语言不改变本轮选择，报告字段和路径原样保留', async t => {
+  const response = root => JSON.stringify({ findings: [{ title: '[P2] Preserve behavior', body: 'A concrete finding.', priority: 2, confidence_score: 0.9,
+    code_location: { absolute_file_path: join(root, 'a.ts'), line_range: { start: 1, end: 1 } } }],
+    overall_correctness: 'patch is incorrect', overall_explanation: 'One issue found.', overall_confidence_score: 0.9 });
+  const s = await setup(t, response, { locale: 'en', answer: async request => {
+    await s.ctx.settings.update('locale', { preference: 'zh' });
+    const q = request.questions[0];
+    return { answers: [{ id: q.id, selected: [q.options[q.id === 'review-scope' ? 2 : 0].label] }] };
+  } });
+  const result = await s.run('/review');
+  assert.equal(result.result.kind, 'success', result.result.text);
+  assert.match(result.result.text, /Code review · Completed · Findings/);
+  assert.match(s.questions[1].questions[0].question, /Select a commit/);
+  assert.match(JSON.stringify(s.requests[0].messages), /Write user-facing review content in English/);
+  assert.ok(result.result.text.includes(join(s.root, 'a.ts') + ':1–1'));
+  assert.match(result.result.text, /\[P2\] Preserve behavior/);
+  const path = join(s.journalDirectory, createHash('sha256').update(s.parent.id).digest('hex') + '.json');
+  assert.equal(JSON.parse(await readFile(path, 'utf8')).result.report.overallCorrectness, 'patch is incorrect');
+  assert.match((await s.run('/review-status')).result.text, /One issue found/);
+});
+test('英文宿主反馈和失败信息跟随语言，缺少 settings 默认中文', async t => {
+  const s = await setup(t, empty, { locale: 'en', error: true });
+  assert.match((await s.command('/review-cancel')).result.text, /No review is running/);
+  assert.match((await s.command('/review-status')).result.text, /No saved review result/);
+  assert.match((await s.run('/review custom instructions')).result.text, /Code review · Failed/);
+  const fallback = await setup(t);
+  await fallback.run('/review 自定义要求');
+  assert.match(JSON.stringify(fallback.requests[0].messages), /Write user-facing review content in Simplified Chinese/);
+});
 async function setup(t, response = empty, opts = {}) {
   const root = await mkdtemp(join(tmpdir(), 'dsh-review-host-'));
   const git = (...args) => execFileSync('git', args, { cwd: root, windowsHide: true, stdio: 'ignore' });
@@ -67,6 +112,15 @@ async function setup(t, response = empty, opts = {}) {
     }
   }
   const ctx = new Context();
+  if (opts.locale) {
+    class MemorySettings extends SettingsProvider {
+      writable = true;
+      async load() { return { locale: { preference: opts.locale } }; }
+      async persist() {}
+    }
+    await ctx.plugin(MemorySettings).await();
+    ctx.settings.register('locale', z.object({ preference: z.string().required(false) }));
+  }
   new SessionStore(ctx); new AgentRegistry(ctx); new SessionProjectionRegistry(ctx); new LlmRuntime(ctx);
   new SystemPrompt(ctx, { includeHarnessIdentity: false }); new ToolRuntime(ctx); new CommandRuntime(ctx); new AgentLoop(ctx, { agents: [] });
   new SubagentRuntime(ctx); new UserQuestionService(ctx); new ApprovalService(ctx, { policy: 'ask' });

@@ -46,7 +46,8 @@
     "@deepseek-ai/dsh-system-prompt": "0.1.5-rc.2",
     "@deepseek-ai/dsh-tools": "0.1.5-rc.2",
     "@deepseek-ai/dsh-user-approval": "0.1.5-rc.2",
-    "@deepseek-ai/dsh-user-questions": "0.1.5-rc.2"
+    "@deepseek-ai/dsh-user-questions": "0.1.5-rc.2",
+    "@deepseek-ai/dsh-settings": "0.1.5-rc.2"
   },
   "devDependencies": {
     "@deepseek-ai/dsh-agent-loop": "0.1.5-rc.2",
@@ -54,6 +55,12 @@
     "@deepseek-ai/dsh-session-projection": "0.1.5-rc.2",
     "@deepseek-ai/dsh-subagent-spawn-in-process": "0.1.5-rc.2",
     "@types/node": "22.18.6",
-    "typescript": "5.9.3"
+    "typescript": "5.9.3",
+    "@deepseek-ai/schemastery": "3.18.2"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/dsh-settings": {
+      "optional": true
+    }
   }
 }

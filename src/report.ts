@@ -1,3 +1,4 @@
+import { translate, type Locale } from './i18n.js';
 export { REVIEW_PROMPT } from './prompt.js';
 
 // 保留旧报告字段用于恢复；新报告不采集额外证据或要求 side/limitations 扩展。
@@ -32,7 +33,8 @@ export function parseReport(raw: string): Report {
   return { findings: [], summary: raw, limitations: [], format: 'text' };
 }
 
-export function renderReport(report: Report): string {
-  return [report.summary, ...report.findings.map(f => `${/^\[P[0-3]\]/.test(f.title) || f.priority == null ? '' : `[P${f.priority}] `}${f.title}\n${f.path}:${f.start}–${f.end}${f.side === 'left' ? '（基线）' : ''}\n${f.body}${f.evidence ? `\n证据：${f.evidence}` : ''}`),
-    ...report.limitations.map(l => `未覆盖：${l}`)].filter(Boolean).join('\n\n');
+export function renderReport(report: Report, locale: Locale = 'zh'): string {
+  const t = (key: Parameters<typeof translate>[1]) => translate(locale, key);
+  return [report.summary, ...report.findings.map(f => `${/^\[P[0-3]\]/.test(f.title) || f.priority == null ? '' : `[P${f.priority}] `}${f.title}\n${f.path}:${f.start}–${f.end}${f.side === 'left' ? t('（基线）') : ''}\n${f.body}${f.evidence ? `\n${t('证据：')}${f.evidence}` : ''}`),
+    ...report.limitations.map(l => `${t('未覆盖：')}${l}`)].filter(Boolean).join('\n\n');
 }
