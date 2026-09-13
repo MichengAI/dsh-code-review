@@ -18,9 +18,11 @@
   "files": [
     "lib",
     "assets/codex",
+    "assets/branding",
     "docs",
     "cordis.patch.yml",
     "README.md",
+    "README.zh-CN.md",
     "LICENSE",
     "NOTICE"
   ],

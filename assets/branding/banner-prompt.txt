@@ -1,0 +1,10 @@
+为 GitHub 项目 DSH Code Review 制作一张精致超宽 README banner，2400×800，3:1。输入图片是同系列 DSH PUA 的视觉参考，只继承深海军蓝背景、星点、地平线光弧、青蓝紫色渐变、细霓虹圆角边框、大号排版和错落卡片的风格。彻底替换 PUA 文案与循环任务主题，不出现 PUA。
+
+左侧 47% 为文字，右侧 53% 为三张沿流程递进的抽象卡片。至少 60 像素安全边距。标题保持非常醒目，但不要挤到卡片区。
+左上胶囊精确文字：DSH PLUGIN ECOSYSTEM
+主标题两行精确文字：DSH / CODE REVIEW。DSH 白色，CODE REVIEW 青蓝至紫色渐变，粗体无衬线。
+副标题精确文字：Review code. Find what matters.
+下方两个胶囊精确文字：Native Agent / Flexible Scope
+右侧三张卡片从左上至右下排列，以纤细青蓝线连接，卡片标题精确文字：SCOPE / INSPECT / REPORT。图标分别为分支、放大镜与带标注的文档。卡片内容仅抽象代码短线与紫色橙色小标记，不出现真实代码或伪造截图，不用全绿勾选暗示无缺陷。
+底部精确文字：Built for DeepSeek Harness
+只使用指定英文，不添加中文、其它文字、水印、人物或标志。高端科技产品感，文字清晰，留白充足，整体与输入 PUA banner 属于同一产品系列。

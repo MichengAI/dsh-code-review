@@ -10,12 +10,12 @@ async function scan(directory) {
   }
   return result;
 }
-const files = [resolve('README.md'), ...await scan('docs')];
+const files = [resolve('README.md'), resolve('README.zh-CN.md'), ...await scan('docs')];
 let links = 0;
 for (const file of files) {
   const text = await readFile(file, 'utf8');
-  for (const match of text.matchAll(/\]\(([^)]+)\)/g)) {
-    const target = match[1].split('#')[0];
+  for (const match of text.matchAll(/\]\(([^)]+)\)|<img\b[^>]*\bsrc="([^"]+)"/g)) {
+    const target = (match[1] ?? match[2]).split('#')[0];
     if (!target || /^[a-z]+:/i.test(target)) continue;
     await access(resolve(dirname(file), decodeURIComponent(target))); links++;
   }

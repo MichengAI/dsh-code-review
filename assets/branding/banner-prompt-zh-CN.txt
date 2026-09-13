@@ -1,0 +1,10 @@
+将输入的 DSH Code Review 英文 README banner 本地化为中文版，保持原图 3:1 超宽构图、深海军蓝星空背景、地平线光弧、青蓝紫色渐变、霓虹细边框、卡片位置、图标与品牌主标题完全一致。只替换以下文字；按中文长度微调字号，确保文字清晰且不拥挤，不改变整体视觉风格。
+
+左上胶囊 DSH PLUGIN ECOSYSTEM 替换为：DSH 插件生态
+品牌主标题 DSH 与 CODE REVIEW 保留英文原样。
+副标题 Review code. Find what matters. 替换为：审查代码，发现关键问题。
+底部两个胶囊 Native Agent / Flexible Scope 分别替换为：原生子代理 / 灵活审查范围
+右侧三张卡片 SCOPE / INSPECT / REPORT 分别替换为：选择范围 / 检查代码 / 返回报告
+底部 Built for DeepSeek Harness 替换为：为 DeepSeek Harness 打造
+
+不增加任何额外文字、人物、水印或图标。不把报告卡片改成全绿通过，不暗示审查结果无缺陷。中文字形准确，简体中文，现代黑体，粗细与原图层次一致。最终图像 2400×800，完整保留画面边框及所有文字的安全边距。
