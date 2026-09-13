@@ -1,0 +1,2 @@
+# 上游原文需保持原始字节，避免 Windows 自动换行转换破坏来源校验。
+assets/codex/review/rubric.md -text

@@ -1,0 +1,16 @@
+DSH Code Review
+Copyright 2026 MichengAI contributors
+
+本项目分发 OpenAI Codex 的完整英文审查规范原文：
+Copyright OpenAI. Licensed under the Apache License, Version 2.0.
+固定参考提交：a592c38c16cdd7623dacc9168926ebccedfb67d3
+https://github.com/openai/codex
+
+参考文件：codex-rs/prompts/templates/review/rubric.md、
+codex-rs/core/src/tasks/review.rs、codex-rs/prompts/src/review_request.rs、
+codex-rs/git-utils/src/branch.rs、codex-rs/protocol/src/protocol.rs。
+assets/codex/review/rubric.md 保持上游原始字节，不删减、不翻译。
+来源、Git blob 与 SHA-256 记录于同目录 source.json。
+src/prompt.ts 直接载入上游原文，不追加自定义适配或输出协议扩展。
+src/request.ts、src/runtime.ts、src/report.ts 使用 TypeScript 适配上述公开审查流程，
+通过 DSH 原生宿主运行，不包含或调用 Codex 运行时。

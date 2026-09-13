@@ -1,0 +1,3 @@
+- insert:
+    - id: michengai-code-review
+      name: '@michengai/dsh-code-review'

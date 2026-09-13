@@ -1,0 +1,8 @@
+{
+  "repository": "https://github.com/openai/codex",
+  "commit": "a592c38c16cdd7623dacc9168926ebccedfb67d3",
+  "path": "codex-rs/prompts/templates/review/rubric.md",
+  "gitBlob": "85e89cb7eeadb97fa9e4868d2b9977c87225506d",
+  "sha256": "ec60e7f36a1d1c2679ce095c0205ecc56f7dd8fb57707a13ef362072390f219f",
+  "license": "Apache-2.0"
+}
