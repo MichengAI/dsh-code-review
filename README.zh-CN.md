@@ -41,14 +41,21 @@ DSH Code Review 是 DeepSeek Harness 的社区代码审查插件，包名 `@mich
 
 ## DSH 产品生态
 
-[DSH Codex Desktop](https://github.com/MichengAI/dsh-codex-desktop/releases) 提供桌面工作台。已有 DSH 环境可按需搭配以下插件；Code Review 的安装以本文说明为准。
+想使用桌面工作台，可下载 [DSH Codex Desktop](https://github.com/MichengAI/dsh-codex-desktop/releases)；已有 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 环境，可按各项目 README 按需安装。以下列出 11 个自研插件；桌面端实际随附范围以对应版本的发行说明和内置清单为准。
 
-| 插件 | 用途 |
+| 插件 | 你可以用它做什么 |
 | --- | --- |
-| [Codex UI](https://github.com/MichengAI/dsh-codex-ui) | 组织项目和会话，搜索任务与跳转对话 |
-| [Agency Agents](https://github.com/MichengAI/dsh-agency-agents) | 选择和召唤不同领域的专家 |
-| [Simplify](https://github.com/MichengAI/dsh-simplify) | 使用 `/simplify` 改进 Git 更改中的代码 |
-| [BTW](https://github.com/MichengAI/dsh-btw) | 在不中断主任务的情况下提出旁支问题 |
+| [Codex UI](https://github.com/MichengAI/dsh-codex-ui) | 整理项目与会话、搜索任务、跳转对话轮次 |
+| [Agency Agents](https://github.com/MichengAI/dsh-agency-agents) | 按任务选择并召唤专业角色 |
+| [Skills Manager](https://github.com/MichengAI/dsh-skills-manager) | 统一查找、启停、创建和导入本机技能 |
+| [Archive Manager](https://github.com/MichengAI/dsh-archive-manager) | 搜索、恢复或清理已归档会话 |
+| [IM Connect](https://github.com/MichengAI/dsh-im-connect) | 从消息平台下任务、收回复 |
+| [Automation](https://github.com/MichengAI/dsh-automation) | 按计划执行任务，查看每次运行的结果 |
+| [BTW](https://github.com/MichengAI/dsh-btw) | 在当前上下文中临时旁问，不打断主任务 |
+| [Simplify](https://github.com/MichengAI/dsh-simplify) | 用 `/simplify` 整理 Git 改动范围内的代码 |
+| [PUA](https://github.com/MichengAI/dsh-pua) | 引导 Agent 在失败时换方法、查原因，并在完成前验证结果 |
+| [Code Review](https://github.com/MichengAI/dsh-code-review) | 用 `/review` 发起独立 Agent 代码审查，在当前会话接收报告 |
+| [Codex Pet](https://github.com/MichengAI/dsh-codex-pet) | 通过桌面宠物查看会话提醒、处理工具审批和问题回答 |
 
 ## 安装
 
