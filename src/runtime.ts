@@ -14,15 +14,17 @@ export type Status = 'no-changes' | 'completed-clean' | 'completed-findings' | '
 export interface Outcome { id: string; status: Status; detail: string; fingerprint?: string; base?: string; target?: string; report?: Report; raw?: string }
 const creationScope = new AsyncLocalStorage<object>();
 // 对应 Codex 关闭 web/collab/image 功能；其余工具继承 DSH 的部署和权限配置。
-const disabledTools = ['code_review', 'subagent', 'spawn_agent', 'spawn_teammate', 'summon_expert', 'summon_experts',
+const disabledTools = ['code_review', 'subagent', 'subagent_fork', 'spawn_agent', 'spawn_teammate', 'summon_expert', 'summon_experts',
   'send_message', 'interrupt_agent', 'list_agents', 'wait_agent', 'team_task_create', 'team_task_list', 'team_task_get', 'team_task_update',
-  'web_search', 'web_fetch', 'view_image'];
+  'web_search', 'web_fetch', 'view_image', 'read_image'];
 
 /** 仅设置原版审查规范及 never 审批；保留原生工具和运行上下文。 */
-export function configureReviewer(agent: Agent, parent: Agent): void {
+export function configureReviewer(agent: Agent): void {
   setApprovalPolicy(agent.session, 'never');
   agent.ctx.tools.presentAs('native');
-  const deny = disabledTools.filter(name => parent.ctx.tools.get(name, parent) !== undefined);
+  // get(name, parent) 会包含局部工具；restrict 不接受子 Agent 自己注册的工具。
+  // 只过滤全局注册项，局部和后续注册工具由下方 guard 统一限制执行。
+  const deny = disabledTools.filter(name => agent.ctx.tools.get(name) !== undefined);
   if (deny.length) agent.ctx.tools.restrict({ deny });
   agent.ctx.tools.guard(exec => disabledTools.includes(exec.name) ? '审查模式不提供网页、图片或继续委派能力。' : undefined);
   agent.ctx.systemPrompt.section({ name: 'michengai:review', order: 0, complete: true, text: REVIEW_PROMPT });
@@ -44,7 +46,7 @@ export async function runReview(ctx: Context, parent: Agent, target: Target, sig
     let configured = false;
     const stopSetup = ctx.on('agent/created', ({ agent }) => {
       if (creationScope.getStore() !== scope || agent.session.header.parentSession !== parent.id) return;
-      configureReviewer(agent, parent);
+      configureReviewer(agent);
       configured = true;
     });
     try {

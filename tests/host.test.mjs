@@ -82,9 +82,13 @@ async function setup(t, response = empty, opts = {}) {
   const tool = name => ({ name, description: '禁止执行的内存夹具', parameters: { type: 'object' },
     output: { schema: { type: 'string' }, render: (_, value) => [{ type: 'text', text: value }] }, async execute() { executions++; return 'executed'; } });
   ctx.tools.register(tool('dangerous_global'));
-  for (const name of ['subagent', 'summon_expert', 'web_search', 'view_image']) ctx.tools.register(tool(name));
+  for (const name of ['subagent', 'subagent_fork', 'summon_expert', 'web_search', 'view_image', 'read_image']) {
+    if (opts.scopedSubagent && name === 'subagent') continue;
+    ctx.tools.register(tool(name));
+  }
   ctx.tools.register({ ...tool('native_git'), async execute(_args, exec) { executions++; assert.equal(ctx.approval.overrideOf(exec.agent.session), 'never'); return execFileSync('git', ['diff', 'HEAD'], { cwd: exec.agent.session.header.cwd, encoding: 'utf8', windowsHide: true }); } });
   ctx.on('agent/created', ({ agent }) => {
+    if (opts.scopedSubagent) agent.ctx.tools.register(tool('subagent'));
     if (agent.session.header.parentSession === 'parent') {
       agent.ctx.tools.register(tool('dangerous_scoped'));
       agent.ctx.on('tools/pre-execute', async () => ({ kind: 'allow' }));
@@ -165,7 +169,7 @@ test('有发现报告保留原生路径行号，不能丢失实际问题', async
   const result = await s.run('/review');
   assert.equal(result.result.kind, 'success'); assert.match(result.result.text, /完成 · 有发现/); assert.match(result.result.text, /a.ts:1–1/);
 });
-for (const tool of ['subagent', 'summon_expert', 'web_search', 'view_image']) test(`原生工具限制关闭 ${tool}`, async t => {
+for (const tool of ['subagent', 'subagent_fork', 'summon_expert', 'web_search', 'view_image', 'read_image']) test(`原生工具限制关闭 ${tool}`, async t => {
   const s = await setup(t, empty, { tool });
   await s.run('/review');
   assert.equal(s.executions(), 0);
@@ -347,4 +351,18 @@ test('自定义历史要求不会被工作区无变更短路，也不预读仓�
   assert.equal((await s.run('/review ' + instruction)).result.kind, 'success');
   assert.equal(s.requests.length, 1);
   assert.equal(s.requests[0].messages.filter(m => m.role === 'user')[0].content[0].text, instruction);
+});
+
+test('subagent 仅在父子 Agent 本地注册时仍可启动审查，局部委派不能执行', async t => {
+  const s = await setup(t, empty, { scopedSubagent: true, tool: 'native_git' });
+  assert.equal(s.ctx.tools.get('subagent'), undefined);
+  assert.ok(s.ctx.tools.get('subagent', s.parent));
+  const result = await s.run('/review');
+  assert.equal(result.result.kind, 'success', result.result.text);
+  assert.equal(s.executions(), 1);
+  assert.equal(s.ctx.agents.list().length, 1);
+  const denied = await setup(t, empty, { scopedSubagent: true, tool: 'subagent' });
+  assert.equal((await denied.run('/review')).result.kind, 'success');
+  assert.equal(denied.executions(), 0);
+  assert.match(JSON.stringify(denied.requests[1].messages), /审查模式不提供/);
 });
