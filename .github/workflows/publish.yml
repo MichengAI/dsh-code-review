@@ -1,0 +1,56 @@
+name: 发布 npm 与 GitHub Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  check:
+    uses: ./.github/workflows/ci.yml
+    with:
+      full: true
+
+  publish:
+    needs: check
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+          registry-url: https://registry.npmjs.org/
+      - name: 校验版本并生成双语说明
+        run: node scripts/release-notes.mjs "$GITHUB_REF_NAME" "$RUNNER_TEMP/release-notes.md"
+      - run: npm ci --ignore-scripts
+      - name: 构建并校验发布包
+        run: npm pack --pack-destination "$RUNNER_TEMP"
+      - name: 通过 npm Trusted Publishing 发布
+        run: npm publish "$RUNNER_TEMP/michengai-dsh-code-review-${GITHUB_REF_NAME#v}.tgz" --access public --provenance --registry=https://registry.npmjs.org/
+      - name: 同步 GitHub Release（仅说明）
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: pwsh
+        run: |
+          [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+          $OutputEncoding = [System.Text.Encoding]::UTF8
+          $tags = gh api --paginate "repos/$env:GITHUB_REPOSITORY/releases" --jq '.[].tag_name'
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $notes = Join-Path $env:RUNNER_TEMP 'release-notes.md'
+          if ($env:GITHUB_REF_NAME -in $tags) {
+            gh release edit $env:GITHUB_REF_NAME --title $env:GITHUB_REF_NAME --notes-file $notes
+          } else {
+            gh release create $env:GITHUB_REF_NAME --verify-tag --title $env:GITHUB_REF_NAME --notes-file $notes
+          }
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
