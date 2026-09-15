@@ -130,7 +130,7 @@ $OutputEncoding = [System.Text.Encoding]::UTF8
 npm ci --ignore-scripts
 npm run check
 npm run verify:package
-dsh plugin --profile web add .\michengai-dsh-code-review-0.1.0.tgz --ignore-scripts
+dsh plugin --profile web add .\michengai-dsh-code-review-0.1.1.tgz --ignore-scripts
 ```
 
 `check` covers TypeScript, prompt hashes, short tasks, real AgentLoop regression tests with offline models, and documentation links. `verify:package` checks bundle loading, peers, and installed-package host integration in an isolated profile. These checks do not replace live model validation.

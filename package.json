@@ -1,6 +1,6 @@
 {
   "name": "@michengai/dsh-code-review",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "基于 Codex 原版审查流程的 DSH 原生子 Agent 插件",
   "type": "module",
   "license": "Apache-2.0",

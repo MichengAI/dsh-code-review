@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.1 — 2026-09-15
+
+## 简体中文
+
+- 增加 GitHub Actions：推送正式版本标签后，通过 npm Trusted Publishing 发布，并同步中英 GitHub Release 说明。
+
+## English
+
+- Add GitHub Actions so a version tag publishes via npm Trusted Publishing and syncs bilingual GitHub Release notes.
+
 ## 0.1.0 — 2026-09-13
 
 ## 简体中文

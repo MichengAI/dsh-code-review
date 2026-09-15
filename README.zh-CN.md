@@ -130,7 +130,7 @@ $OutputEncoding = [System.Text.Encoding]::UTF8
 npm ci --ignore-scripts
 npm run check
 npm run verify:package
-dsh plugin --profile web add .\michengai-dsh-code-review-0.1.0.tgz --ignore-scripts
+dsh plugin --profile web add .\michengai-dsh-code-review-0.1.1.tgz --ignore-scripts
 ```
 
 `check` 包含 TypeScript、提示词哈希、短任务与真实 AgentLoop 配合离线模型的回归，以及文档链接检查。`verify:package` 在隔离 profile 验证 bundle、peer 和安装包宿主链路。这些检查不替代在线模型验收。
