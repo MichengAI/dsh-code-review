@@ -49,9 +49,10 @@ export async function runReview(ctx: Context, parent: Agent, target: Target, sig
     const scope = {};
     let configured = false;
     const stopSetup = ctx.on('agent/created', ({ agent }) => {
-      if (creationScope.getStore() !== scope || agent.session.header.parentSession !== parent.id) return;
+      if (creationScope.getStore() !== scope || agent.session.header.parentSession !== parent.id) return undefined;
       configureReviewer(agent, locale);
       configured = true;
+      return undefined;
     });
     try {
       run = await creationScope.run(scope, () => ctx.subagents.start('spawn', {
