@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.3 — 2026-09-18
+
+## 简体中文
+
+- 将 peer 与开发依赖对齐官方 DSH `0.1.6-alpha.2`，并适配 `SubagentRuntime` 构造函数；已在该宿主上完成离线回归与安装包端到端验证。
+
+## English
+
+- Align peer and development dependencies with official DSH `0.1.6-alpha.2`, update the `SubagentRuntime` constructor, and verify offline regression plus packaged host integration on that host.
+
 ## 0.1.2 — 2026-09-16
 
 ## 简体中文

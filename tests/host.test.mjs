@@ -123,7 +123,7 @@ async function setup(t, response = empty, opts = {}) {
   }
   new SessionStore(ctx); new AgentRegistry(ctx); new SessionProjectionRegistry(ctx); new LlmRuntime(ctx);
   new SystemPrompt(ctx, { includeHarnessIdentity: false }); new ToolRuntime(ctx); new CommandRuntime(ctx); new AgentLoop(ctx, { agents: [] });
-  new SubagentRuntime(ctx); new UserQuestionService(ctx); new ApprovalService(ctx, { policy: 'ask' });
+  new SubagentRuntime(ctx, {}); new UserQuestionService(ctx); new ApprovalService(ctx, { policy: 'ask' });
   const questions = [];
   ctx.on('user-questions/request', async (request) => {
     questions.push(request);
@@ -294,7 +294,7 @@ test('磁盘日志 JSON 往返后新 Agent 能恢复结构化报告', async t =>
   const restarted = new Context();
   new SessionStore(restarted); new AgentRegistry(restarted); new SessionProjectionRegistry(restarted); new LlmRuntime(restarted);
   new SystemPrompt(restarted, { includeHarnessIdentity: false }); new ToolRuntime(restarted); new CommandRuntime(restarted); new AgentLoop(restarted, { agents: [] });
-  new SubagentRuntime(restarted); new UserQuestionService(restarted); new ApprovalService(restarted, { policy: 'ask' });
+  new SubagentRuntime(restarted, {}); new UserQuestionService(restarted); new ApprovalService(restarted, { policy: 'ask' });
   await restarted.plugin(spawn, { providerName: 'spawn' }).await();
   await restarted.plugin(plugin, { reportDirectory: s.journalDirectory }).await();
   const restored = await restarted.agents.create({ sessionId: 'parent', seed, meta: { cwd: s.root }, agentOptions: s.parent.options });

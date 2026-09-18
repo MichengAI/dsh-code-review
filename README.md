@@ -12,7 +12,7 @@
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
 [![DSH Plugin](https://img.shields.io/badge/DSH-Plugin-0f766e.svg)](https://github.com/MichengAI/dsh-code-review)
-[![DSH 0.1.6-alpha.1](https://img.shields.io/badge/DSH-0.1.6--alpha.1-2563eb.svg)](https://github.com/deepseek-ai/deepseek-harness)
+[![DSH 0.1.6-alpha.2](https://img.shields.io/badge/DSH-0.1.6--alpha.2-2563eb.svg)](https://github.com/deepseek-ai/deepseek-harness)
 [![Node.js](https://img.shields.io/badge/Node.js-%E2%89%A522.19.0-339933.svg?logo=node.js&logoColor=white)](https://nodejs.org/)
 
 </div>
@@ -21,7 +21,7 @@ DSH Code Review is a community code review plugin for DeepSeek Harness, packaged
 
 ## Host compatibility
 
-The current version targets **DSH `0.1.6-alpha.1`** and loads through `dsh.bundle.patch`. It requires the native `spawn` provider, the `userQuestions` service, a question answerer for your platform, and a model that supports tool calls.
+The current version targets **DSH `0.1.6-alpha.2`** and loads through `dsh.bundle.patch`. It requires the native `spawn` provider, the `userQuestions` service, a question answerer for your platform, and a model that supports tool calls.
 
 Install the package from npm or build from source. Offline host and package integration checks have passed; review quality, language adherence, and interaction across platforms still need live validation.
 
@@ -130,7 +130,7 @@ $OutputEncoding = [System.Text.Encoding]::UTF8
 npm ci --ignore-scripts
 npm run check
 npm run verify:package
-dsh plugin --profile web add .\michengai-dsh-code-review-0.1.2.tgz --ignore-scripts
+dsh plugin --profile web add .\michengai-dsh-code-review-0.1.3.tgz --ignore-scripts
 ```
 
 `check` covers TypeScript, prompt hashes, short tasks, real AgentLoop regression tests with offline models, and documentation links. `verify:package` checks bundle loading, peers, and installed-package host integration in an isolated profile. These checks do not replace live model validation.

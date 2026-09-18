@@ -12,7 +12,7 @@
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
 [![DSH Plugin](https://img.shields.io/badge/DSH-Plugin-0f766e.svg)](https://github.com/MichengAI/dsh-code-review)
-[![DSH 0.1.6-alpha.1](https://img.shields.io/badge/DSH-0.1.6--alpha.1-2563eb.svg)](https://github.com/deepseek-ai/deepseek-harness)
+[![DSH 0.1.6-alpha.2](https://img.shields.io/badge/DSH-0.1.6--alpha.2-2563eb.svg)](https://github.com/deepseek-ai/deepseek-harness)
 [![Node.js](https://img.shields.io/badge/Node.js-%E2%89%A522.19.0-339933.svg?logo=node.js&logoColor=white)](https://nodejs.org/)
 
 </div>
@@ -21,7 +21,7 @@ DSH Code Review 是 DeepSeek Harness 的社区代码审查插件，包名 `@mich
 
 ## 宿主兼容性
 
-当前版本针对 **DSH `0.1.6-alpha.1`** 开发与验证，通过 `dsh.bundle.patch` 加载。需要原生 `spawn` provider、`userQuestions` 服务、当前平台的问题回答器，以及支持工具调用的模型。
+当前版本针对 **DSH `0.1.6-alpha.2`** 开发与验证，通过 `dsh.bundle.patch` 加载。需要原生 `spawn` provider、`userQuestions` 服务、当前平台的问题回答器，以及支持工具调用的模型。
 
 可从 npm 安装，也可从源码构建。已验证离线宿主与安装包链路；真实模型的审查质量、语言遵循和不同平台的交互仍需实际验收。
 
@@ -130,7 +130,7 @@ $OutputEncoding = [System.Text.Encoding]::UTF8
 npm ci --ignore-scripts
 npm run check
 npm run verify:package
-dsh plugin --profile web add .\michengai-dsh-code-review-0.1.2.tgz --ignore-scripts
+dsh plugin --profile web add .\michengai-dsh-code-review-0.1.3.tgz --ignore-scripts
 ```
 
 `check` 包含 TypeScript、提示词哈希、短任务与真实 AgentLoop 配合离线模型的回归，以及文档链接检查。`verify:package` 在隔离 profile 验证 bundle、peer 和安装包宿主链路。这些检查不替代在线模型验收。
