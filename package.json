@@ -1,7 +1,7 @@
 {
   "name": "@michengai/dsh-code-review",
   "version": "0.1.3",
-  "description": "基于 Codex 原版审查流程的 DSH 原生子 Agent 插件",
+  "description": "DSH Code Review — 为 DeepSeek Harness 提供 Codex 风格代码审查、原生独立子 Agent、灵活范围选择和中英文报告 · Codex-style code review with native independent agents, flexible scope selection, and bilingual reports for DSH",
   "type": "module",
   "license": "Apache-2.0",
   "engines": {
