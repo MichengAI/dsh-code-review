@@ -1,6 +1,6 @@
 {
   "name": "@michengai/dsh-code-review",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "DSH Code Review — 为 DeepSeek Harness 提供 Codex 风格代码审查、原生独立子 Agent、灵活范围选择和中英文报告 · Codex-style code review with native independent agents, flexible scope selection, and bilingual reports for DSH",
   "type": "module",
   "license": "Apache-2.0",
@@ -13,6 +13,9 @@
     ".": {
       "types": "./lib/index.d.ts",
       "default": "./lib/index.js"
+    },
+    "./client": {
+      "default": "./lib/client.js"
     }
   },
   "files": [
@@ -30,10 +33,17 @@
   "dsh": {
     "bundle": {
       "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-commands",
+        "@deepseek-ai/dsh-client-ui-primitives"
+      ],
+      "platform": "web"
     }
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.json && node scripts/build-client.mjs",
     "test": "npm run build && node --test tests/*.test.mjs",
     "check": "npm test && node scripts/check-docs.mjs",
     "verify:package": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/verify-package.ps1",
@@ -45,21 +55,22 @@
     "@deepseek-ai/dsh-commands": "0.1.6-alpha.2",
     "@deepseek-ai/dsh-llm": "0.1.6-alpha.2",
     "@deepseek-ai/dsh-session": "0.1.6-alpha.2",
+    "@deepseek-ai/dsh-settings": "0.1.6-alpha.2",
     "@deepseek-ai/dsh-subagent": "0.1.6-alpha.2",
     "@deepseek-ai/dsh-system-prompt": "0.1.6-alpha.2",
     "@deepseek-ai/dsh-tools": "0.1.6-alpha.2",
     "@deepseek-ai/dsh-user-approval": "0.1.6-alpha.2",
-    "@deepseek-ai/dsh-user-questions": "0.1.6-alpha.2",
-    "@deepseek-ai/dsh-settings": "0.1.6-alpha.2"
+    "@deepseek-ai/dsh-user-questions": "0.1.6-alpha.2"
   },
   "devDependencies": {
     "@deepseek-ai/dsh-agent-loop": "0.1.6-alpha.2",
     "@deepseek-ai/dsh-session-persistence": "0.1.6-alpha.2",
     "@deepseek-ai/dsh-session-projection": "0.1.6-alpha.2",
     "@deepseek-ai/dsh-subagent-spawn-in-process": "0.1.6-alpha.2",
+    "@deepseek-ai/schemastery": "3.18.2",
     "@types/node": "22.18.6",
-    "typescript": "5.9.3",
-    "@deepseek-ai/schemastery": "3.18.2"
+    "esbuild": "0.25.12",
+    "typescript": "5.9.3"
   },
   "peerDependenciesMeta": {
     "@deepseek-ai/dsh-settings": {

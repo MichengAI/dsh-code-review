@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.1.4 — 2026-09-18
+
+## 简体中文
+
+- `/` 菜单为 `/review`、`/review-status`、`/review-cancel` 补上图标和中文标题，描述继续跟随宿主语言。
+- 将 npm 包描述改为与 GitHub 仓库一致的中英双语。
+
+## English
+
+- Add slash-menu icons and localized titles for `/review`, `/review-status`, and `/review-cancel`; descriptions still follow the host locale.
+- Make the npm package description bilingual to match the GitHub About text.
+
 ## 0.1.3 — 2026-09-18
 
 ## 简体中文

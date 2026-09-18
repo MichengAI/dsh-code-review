@@ -420,3 +420,18 @@ test('subagent 仅在父子 Agent 本地注册时仍可启动审查，局部委�
   assert.equal(denied.executions(), 0);
   assert.match(JSON.stringify(denied.requests[1].messages), /审查模式不提供/);
 });
+
+test('命令目录提供中英文描述', async t => {
+  const zh = await setup(t);
+  assert.deepEqual(Object.fromEntries(zh.ctx.commands.list(zh.parent).map(item => [item.name, item.description])), {
+    review: '代码审查：选择范围或输入自定义要求',
+    'review-status': '查看最近代码审查报告',
+    'review-cancel': '取消当前代码审查',
+  });
+  const en = await setup(t, empty, { locale: 'en' });
+  assert.deepEqual(Object.fromEntries(en.ctx.commands.list(en.parent).map(item => [item.name, item.description])), {
+    review: 'Code review: select a scope or enter custom instructions',
+    'review-status': 'Show the latest code review report',
+    'review-cancel': 'Cancel the current code review',
+  });
+});
