@@ -4,23 +4,15 @@
 
 ## 简体中文
 
-- 只兼容 DSH `0.1.7-rc.1`。不再接受 `0.1.6-alpha.2` 与 `0.1.7-alpha.1`。peer、开发依赖和离线回归都使用这一版；可选的设置服务也按同一版本安装，供类型检查使用。`cordis` 对齐宿主的 `4.0.4`。
-- 语言偏好读取 `settings.describe()` 返回的 `locale` 配置条目。读取失败时插件继续加载并默认中文。
-- 子 Agent 未完成时，失败说明带上宿主给出的 `diagnostic`。
-- 斜杠菜单图标使用 `0.1.7` 的 `*Regular` 组件。
-- `/review` 写入会话的消息改用插件自己的来源 `michengai-code-review`。V4 不再接受 `kind: 'plugin'`。
-- `/review` 的菜单说明去掉重复的「代码审查：」，保留「选择范围或输入自定义要求」。
-- 审查标准仍用 Codex rubric。会话里直接写结论和发现，不输出 JSON。模型若仍交回字段不齐的 JSON，插件会整理成标题、文件和行号，不再把原文贴出来。看不清 diff 时不能写成补丁正确。
+- 只支持 DSH `0.1.7-rc.1`。
+- `/review` 的菜单说明改为「选择范围或输入自定义要求」。
+- 审查结果直接给出结论和发现，不再把 JSON 贴进会话。看不清改动时，不会把补丁说成正确。
 
 ## English
 
-- Support only DSH `0.1.7-rc.1`. Drop `0.1.6-alpha.2` and `0.1.7-alpha.1`. Peers, development dependencies, and offline regression all use this release. The optional settings service is installed at the same version for type checking. `cordis` matches the host at `4.0.4`.
-- Read the locale preference from the `locale` profile entry returned by `settings.describe()`. A failed read keeps the plugin loaded and defaults to Chinese.
-- When a subagent does not complete, include the host `diagnostic` in the failure text.
-- Slash-menu icons use the `0.1.7` `*Regular` components.
-- `/review` now records its session message with the plugin-owned source `michengai-code-review`. Format V4 rejects `kind: 'plugin'`.
-- The `/review` menu description drops the repeated “Code review:” prefix and keeps “Select a scope or enter custom instructions”.
-- Keep the Codex rubric for review judgment. The conversation receives the verdict and findings directly, without JSON. If the model still returns irregular JSON, the plugin renders a title, file, and line range instead of pasting the raw object. A review that cannot inspect the diff must not call the patch correct.
+- Support only DSH `0.1.7-rc.1`.
+- The `/review` menu description is now “Select a scope or enter custom instructions”.
+- Reviews state the verdict and findings directly, without pasting JSON into the conversation. A review that cannot inspect the diff will not call the patch correct.
 
 ## 0.1.4 — 2026-09-18
 
