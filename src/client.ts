@@ -1,10 +1,22 @@
-import { IconChecklistOutline14, IconCloseOutline16, IconInfoOutline14 } from '@deepseek-ai/dsh-client-ui-primitives';
+import * as primitives from '@deepseek-ai/dsh-client-ui-primitives';
+
+type Icon = (props: { size?: number }) => unknown;
+
+/** 0.1.7 用 Regular；0.1.6 仍导出带尺寸的旧名。菜单自己传入 size。 */
+function slashIcon(...names: string[]): Icon | undefined {
+  const bag = primitives as Record<string, unknown>;
+  for (const name of names) {
+    const icon = bag[name];
+    if (typeof icon === 'function') return icon as Icon;
+  }
+  return undefined;
+}
 
 /** Host `/` 行没有 icon/label；官方只给一等命令画脸。同名贡献会撞车，只能补 candidates。 */
 const FACES = {
-  review: { icon: IconChecklistOutline14, zh: '审查', en: 'Review' },
-  'review-status': { icon: IconInfoOutline14, zh: '审查状态', en: 'Review status' },
-  'review-cancel': { icon: IconCloseOutline16, zh: '取消审查', en: 'Cancel review' },
+  review: { icon: slashIcon('IconChecklistOutlineRegular', 'IconChecklistOutline14'), zh: '审查', en: 'Review' },
+  'review-status': { icon: slashIcon('IconInfoOutlineRegular', 'IconInfoOutline14'), zh: '审查状态', en: 'Review status' },
+  'review-cancel': { icon: slashIcon('IconCloseOutlineRegular', 'IconCloseOutline16'), zh: '取消审查', en: 'Cancel review' },
 } as const;
 
 type Lookup = { get?: (name: string) => unknown };
@@ -29,7 +41,7 @@ function decorateSlashFaces(commandUi: unknown, ctx: Lookup): () => void {
       if (!face) return item;
       return {
         ...item,
-        ...(item.icon === undefined ? { icon: face.icon } : {}),
+        ...(item.icon === undefined && face.icon !== undefined ? { icon: face.icon } : {}),
         ...(item.label === undefined ? { label: en ? face.en : face.zh } : {}),
       };
     });

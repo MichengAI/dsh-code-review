@@ -4,7 +4,7 @@ import { writeFile, readFile, mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { execFileSync } from 'node:child_process';
-import { Context } from '@deepseek-ai/cordis';
+import { Context, Service } from '@deepseek-ai/cordis';
 import { AgentRegistry } from '@deepseek-ai/dsh-agent';
 import { SubagentRuntime } from '@deepseek-ai/dsh-subagent';
 import * as spawn from '@deepseek-ai/dsh-subagent-spawn-in-process';
@@ -17,8 +17,6 @@ import { SessionStore } from '@deepseek-ai/dsh-session';
 import { SessionProjectionRegistry } from '@deepseek-ai/dsh-session-projection';
 import { SystemPrompt } from '@deepseek-ai/dsh-system-prompt';
 import { ToolRuntime } from '@deepseek-ai/dsh-tools';
-import { SettingsProvider } from '@deepseek-ai/dsh-settings';
-import z from '@deepseek-ai/schemastery';
 import { validateStoredEvents } from '@deepseek-ai/dsh-session-persistence';
 import { createHash } from 'node:crypto';
 import * as plugin from '../lib/index.js';
@@ -79,7 +77,8 @@ async function setup(t, response = empty, opts = {}) {
     async *stream(options) {
       requests.push(options);
       if (opts.orchestrate && options.tools?.some(tool => tool.name === 'code_review')) {
-        if (!options.messages.some(message => message.content.some(block => block.type === 'tool-result'))) {
+        const sawToolResult = options.messages.some(message => message.role === 'tool' || message.content?.some(block => block.type === 'tool-result'));
+        if (!sawToolResult) {
           const block = { type: 'tool-call', id: 'native-review', name: 'code_review', arguments: JSON.stringify({ input: opts.reviewInput ?? '' }) };
           yield { type: 'block-start', index: 0, blockType: 'tool-call' };
           yield { type: 'tool-call-delta', index: 0, id: block.id, name: block.name, argumentsDelta: block.arguments };
@@ -113,16 +112,21 @@ async function setup(t, response = empty, opts = {}) {
   }
   const ctx = new Context();
   if (opts.locale) {
-    class MemorySettings extends SettingsProvider {
-      writable = true;
-      async load() { return { locale: { preference: opts.locale } }; }
-      async persist() {}
+    class MemorySettings extends Service {
+      constructor(ctx) {
+        super(ctx, 'settings');
+        this.value = { preference: opts.locale };
+      }
+      describe() { return [{ ns: 'locale', value: this.value }]; }
+      async update(ns, patch) {
+        if (ns !== 'locale') throw new Error(`未知设置条目：${ns}`);
+        this.value = { ...this.value, ...patch };
+      }
     }
     await ctx.plugin(MemorySettings).await();
-    ctx.settings.register('locale', z.object({ preference: z.string().required(false) }));
   }
   new SessionStore(ctx); new AgentRegistry(ctx); new SessionProjectionRegistry(ctx); new LlmRuntime(ctx);
-  new SystemPrompt(ctx, { includeHarnessIdentity: false }); new ToolRuntime(ctx); new CommandRuntime(ctx); new AgentLoop(ctx, { agents: [] });
+  new SystemPrompt(ctx, { includeHarnessIdentity: false }); new ToolRuntime(ctx); new CommandRuntime(ctx); new AgentLoop(ctx, { agents: [], maxParallelToolCalls: { get: () => 10 } });
   new SubagentRuntime(ctx, {}); new UserQuestionService(ctx); new ApprovalService(ctx, { policy: 'ask' });
   const questions = [];
   ctx.on('user-questions/request', async (request) => {
@@ -185,7 +189,7 @@ test('斜杠命令唤醒主会话，经原生 spawn 返回工具结果及主会�
   assert.match(accepted.result.text, /提交到当前会话/);
   await s.parent.whenIdle();
   const events = s.parent.session.snapshotEvents();
-  assert.ok(events.some(event => event.type === 'user/message' && event.data.source.plugin === '@michengai/dsh-code-review'));
+  assert.ok(events.some(event => event.type === 'user/message' && event.data.source.kind === 'michengai-code-review'));
   assert.ok(events.some(event => event.type === 'tool/call' && event.data.name === 'code_review'));
   assert.ok(events.some(event => event.type === 'tool/result' && JSON.stringify(event.data).includes('完成 · 零发现')));
   assert.ok(events.some(event => event.type === 'assistant/message' && JSON.stringify(event.data).includes('主会话报告')));
@@ -424,13 +428,13 @@ test('subagent 仅在父子 Agent 本地注册时仍可启动审查，局部委�
 test('命令目录提供中英文描述', async t => {
   const zh = await setup(t);
   assert.deepEqual(Object.fromEntries(zh.ctx.commands.list(zh.parent).map(item => [item.name, item.description])), {
-    review: '代码审查：选择范围或输入自定义要求',
+    review: '选择范围或输入自定义要求',
     'review-status': '查看最近代码审查报告',
     'review-cancel': '取消当前代码审查',
   });
   const en = await setup(t, empty, { locale: 'en' });
   assert.deepEqual(Object.fromEntries(en.ctx.commands.list(en.parent).map(item => [item.name, item.description])), {
-    review: 'Code review: select a scope or enter custom instructions',
+    review: 'Select a scope or enter custom instructions',
     'review-status': 'Show the latest code review report',
     'review-cancel': 'Cancel the current code review',
   });

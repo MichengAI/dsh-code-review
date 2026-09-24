@@ -3,11 +3,32 @@ import type {} from '@deepseek-ai/dsh-settings';
 
 export type Locale = 'zh' | 'en';
 
-/** 沿用专家插件的宿主语言入口；未保存偏好时后端无法获知浏览器语言。 */
+function preferenceOf(section: unknown): unknown {
+  return section && typeof section === 'object' ? (section as { preference?: unknown }).preference : undefined;
+}
+
+/** 0.1.7-rc.1 的设置服务没有命名空间 `get`；语言在 profile 条目 `locale` 的表单值里。若宿主仍提供 `get`，优先使用。 */
+function readLocalePreference(settings: unknown): unknown {
+  if (!settings || typeof settings !== 'object') return undefined;
+  const api = settings as { get?: (ns: string) => unknown; describe?: () => unknown };
+  if (typeof api.get === 'function') {
+    try { return preferenceOf(api.get('locale')); } catch { /* 新宿主已移除命名空间读取。 */ }
+  }
+  if (typeof api.describe !== 'function') return undefined;
+  try {
+    const forms = api.describe();
+    if (!Array.isArray(forms)) return undefined;
+    const form = forms.find(item => item && typeof item === 'object' && (item as { ns?: unknown }).ns === 'locale') as { value?: unknown } | undefined;
+    return preferenceOf(form?.value);
+  } catch { return undefined; }
+}
+
+/** 沿用宿主 `locale.preference`；未保存偏好时后端无法获知浏览器语言。读取失败时保持中文，避免插件无法加载。 */
 export function readHostLocale(ctx: Context): Locale {
-  const settings = ctx.get('settings');
-  const section = settings?.get('locale') as { preference?: unknown } | undefined;
-  return typeof section?.preference === 'string' && /^en(?:-|$)/i.test(section.preference) ? 'en' : 'zh';
+  let settings: unknown;
+  try { settings = ctx.get('settings'); } catch { settings = undefined; }
+  const preference = readLocalePreference(settings);
+  return typeof preference === 'string' && /^en(?:-|$)/i.test(preference) ? 'en' : 'zh';
 }
 
 const en = {
@@ -35,7 +56,7 @@ const en = {
   '审查或范围选择进行中。': 'Review or scope selection is in progress.',
   '审查中断：存在启动记录但没有完成报告，请重新运行。': 'Review interrupted: a start record exists without a completed report. Please run it again.',
   '没有已保存的审查结果。': 'No saved review result.', '审查记录读取失败：': 'Failed to read the review record: ',
-  '代码审查：选择范围或输入自定义要求': 'Code review: select a scope or enter custom instructions',
+  '选择范围或输入自定义要求': 'Select a scope or enter custom instructions',
   '留空提交以选择范围；或输入完整的自定义审查要求': 'Submit empty to select a scope, or enter complete custom review instructions',
   '已将审查请求提交到当前会话，将通过原生子 Agent 执行。': 'Review requested in the current session; a native subagent will perform it.',
   '当前会话已有审查运行，请等待或 /review-cancel。': 'A review is already running in this session. Wait or use /review-cancel.',
@@ -51,7 +72,11 @@ export function translate(locale: Locale, key: keyof typeof en): string {
   return locale === 'en' ? en[key] : key;
 }
 
-/** 单独追加语言上下文，不改变 Codex rubric、任务原文或结构化输出协议。 */
+/** 审查标准沿用 Codex rubric。会话里写给人看的报告，不输出 JSON。 */
 export function outputLanguage(locale: Locale): string {
-  return `Write user-facing review content in ${locale === 'en' ? 'English' : 'Simplified Chinese'}. This includes finding titles, bodies, the overall explanation, and plain-text reports. Preserve JSON keys, protocol enum values (including overall_correctness), priority labels, code, commands, and file paths unchanged.`;
+  const language = locale === 'en' ? 'English' : 'Simplified Chinese';
+  return `Write user-facing review content in ${language}. The guidelines above decide which issues qualify, but ignore their JSON output schema.
+This review runs in DeepSeek Harness. Reply with the review itself: one to three sentences for the overall verdict, then each finding as a title, the file path and line range, and one paragraph. Use [P0] through [P3] at the start of a title when you assign a priority.
+Do not output JSON, markdown fences, or field names such as findings, overall_correctness, overall_explanation, or code_location.
+If there are no findings, say so. If the diff cannot be inspected, say that and do not claim the patch is correct.`;
 }

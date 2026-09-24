@@ -64,7 +64,7 @@ export async function runReview(ctx: Context, parent: Agent, target: Target, sig
     if (!configured || !run.localAgent) throw new Error(t('原生审查 Agent 未完成配置。'));
     const result = await run.result;
     combined.throwIfAborted();
-    if (result.stopReason !== 'completed') throw new Error(`${t('原生子 Agent 未完成：')}${result.stopReason}`);
+    if (result.stopReason !== 'completed') throw new Error(`${t('原生子 Agent 未完成：')}${result.stopReason}${result.diagnostic ? ` ${result.diagnostic}` : ''}`);
     const raw = result.output.filter(b => b.type === 'text').map(b => b.text).join('');
     if (!raw.trim()) throw new Error(t('审查 Agent 未返回报告。'));
     const report = parseReport(raw);

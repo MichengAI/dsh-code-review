@@ -2,6 +2,15 @@ import { readHostLocale, translate, outputLanguage, type Locale } from './i18n.j
 import type { Context } from '@deepseek-ai/cordis';
 import type {} from '@deepseek-ai/dsh-commands';
 import { createUserMessage } from '@deepseek-ai/dsh-llm';
+
+declare module '@deepseek-ai/dsh-llm' {
+  interface MessageSourceMap {
+    'michengai-code-review': { readonly kind: 'michengai-code-review' };
+  }
+}
+
+/** V4 拒绝共享的 `plugin` 来源；用户消息使用插件自己的 kind。 */
+const reviewRequestSource = { kind: 'michengai-code-review' } as const;
 import type { Agent } from '@deepseek-ai/dsh-agent';
 import type {} from '@deepseek-ai/dsh-subagent';
 import { selectTarget } from './selection.js';
@@ -40,12 +49,12 @@ export function apply(ctx: Context, config: Config = {}): void {
       return { kind: 'success', text: active.has(agent.id) ? t('审查或范围选择进行中。') : record?.state === 'running' ? t('审查中断：存在启动记录但没有完成报告，请重新运行。') : record?.state === 'finished' ? renderOutcome(record.result, readHostLocale(ctx)) : t('没有已保存的审查结果。') };
     } catch (error) { return { kind: 'error', text: `${t('审查记录读取失败：')}${String(error)}` }; }
   } });
-  ctx.commands.register({ name: 'review', description: t('代码审查：选择范围或输入自定义要求'), input: { hint: t('留空提交以选择范围；或输入完整的自定义审查要求') },
+  ctx.commands.register({ name: 'review', description: t('选择范围或输入自定义要求'), input: { hint: t('留空提交以选择范围；或输入完整的自定义审查要求') },
     async handler(invocation) {
       const { agent, rawInput } = invocation;
       agent.followup(createUserMessage({
         content: [{ type: 'text', text: `Perform a code review by calling code_review with input exactly ${JSON.stringify(rawInput.trim())}. Empty input opens native scope selection. The tool uses DSH native spawn with an independent reviewer. Do not modify code or substitute other review tools. Present the returned report verbatim without adding, removing, or rewriting findings. Report failures accurately. ${outputLanguage(readHostLocale(ctx))}` }],
-        source: { kind: 'plugin', plugin: '@michengai/dsh-code-review' },
+        source: reviewRequestSource,
       }));
       return { kind: 'success', text: t('已将审查请求提交到当前会话，将通过原生子 Agent 执行。') };
     } });

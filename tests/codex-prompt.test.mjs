@@ -31,6 +31,15 @@ test('接受 Codex 原生字段，不设置置信度过滤；不符合 Rust 字�
     assert.match(renderReport(result), /存在可操作的问题/);
   }
 });
+test('说明里的花括号不会挡住后面的报告，会话不保留那份 JSON', () => {
+  const value = report(1);
+  const raw = '本次未能执行 git。覆盖范围是 src/{i18n,client}.ts。\n```json\n' + JSON.stringify(value) + '\n```';
+  const parsed = parseReport(raw);
+  assert.equal(parsed.format, 'structured');
+  assert.equal(parsed.summary, '存在可操作的问题。');
+  assert.equal(parsed.findings[0].start, 1);
+  assert.doesNotMatch(renderReport(parsed), /```|overall_correctness|"findings"/);
+});
 test('Codex 回退顺序保留 JSON 包裹与普通文本，不额外校验 diff 行', () => {
   const value = report(1);
   value.findings[0].code_location.line_range = { start: 9999, end: 10000 };
@@ -47,10 +56,23 @@ test('已有旧版报告仍可显示，不伪造缺失的整体结论或置信�
   assert.doesNotMatch(text, /undefined|模型判断|模型置信度/);
 });
 
-test('上游 Rust 结构要求 priority 整数；不匹配时按原文回退', () => {
+test('缺优先级或模型自造字段时仍整理成可读发现，不把 JSON 交回会话', () => {
   for (const priority of [undefined, null]) {
-    const raw = JSON.stringify(report(priority));
-    assert.equal(parseReport(raw).format, 'text');
-    assert.equal(parseReport(raw).summary, raw);
+    const parsed = parseReport(JSON.stringify(report(priority)));
+    assert.equal(parsed.format, 'structured');
+    assert.equal(parsed.findings[0].priority, null);
+    assert.doesNotMatch(renderReport(parsed), /"findings"/);
   }
+  const loose = JSON.stringify({
+    findings: { title: '选择器命中两个元素', body: '常驻面板让定位器匹配到两个搜索框。', priority: 'P1', file: 'src/client/index.ts', line: '1312-1312' },
+    overall_correctness: 'patch is not correct',
+    overall_explanation: '既有浏览器用例被这次改动弄坏了。',
+  });
+  const parsed = parseReport(loose);
+  assert.equal(parsed.findings[0].priority, 1);
+  assert.equal(parsed.findings[0].path, 'src/client/index.ts');
+  assert.equal(parsed.findings[0].start, 1312);
+  assert.match(renderReport(parsed), /\[P1\] 选择器命中两个元素/);
+  assert.match(renderReport(parsed), /src\/client\/index\.ts:1312–1312/);
+  assert.doesNotMatch(renderReport(parsed), /overall_correctness|"findings"/);
 });
