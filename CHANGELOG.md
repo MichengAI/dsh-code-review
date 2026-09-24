@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.6 — 2026-09-25
+
+## 简体中文
+
+- 将 peer 与开发依赖对齐官方 DSH `0.1.7-rc.2`，只支持该宿主；已在该宿主上完成离线回归与安装包端到端验证。
+
+## English
+
+- Align peer and development dependencies with official DSH `0.1.7-rc.2` and support that host only; offline regression and packaged host integration were verified on it.
+
 ## 0.1.5 — 2026-09-24
 
 ## 简体中文
