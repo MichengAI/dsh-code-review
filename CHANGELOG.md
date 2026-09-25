@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.1.7 — 2026-09-25
+
+## 简体中文
+
+- 支持范围放宽为 DSH `0.1.7-rc.1` 起、`0.2.0` 之前的所有版本（含各 RC 与正式版），宿主再发新 RC 无需插件跟版；`0.2.0` 起需要重新验证。
+- 已在 `0.1.7-rc.1` 与 `0.1.7-rc.2` 两个宿主上分别完成隔离安装、peer 检查与打包后宿主测试。
+
+## English
+
+- Widen the supported range to DSH `0.1.7-rc.1` up to, but excluding, `0.2.0` — every RC and release on that line — so new host RCs no longer require a plugin release; `0.2.0` and later need revalidation.
+- Verified on both `0.1.7-rc.1` and `0.1.7-rc.2` with isolated installation, peer checks, and packaged host tests.
+
 ## 0.1.6 — 2026-09-25
 
 ## 简体中文

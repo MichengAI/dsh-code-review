@@ -7,7 +7,7 @@ function preferenceOf(section: unknown): unknown {
   return section && typeof section === 'object' ? (section as { preference?: unknown }).preference : undefined;
 }
 
-/** 0.1.7-rc.2 的设置服务没有命名空间 `get`；语言在 profile 条目 `locale` 的表单值里。若宿主仍提供 `get`，优先使用。 */
+/** `0.1.7` 起设置服务不再提供命名空间 `get`；语言在 profile 条目 `locale` 的表单值里。更早的宿主仍有 `get`，因此优先探测它。 */
 function readLocalePreference(settings: unknown): unknown {
   if (!settings || typeof settings !== 'object') return undefined;
   const api = settings as { get?: (ns: string) => unknown; describe?: () => unknown };
