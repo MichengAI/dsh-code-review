@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.1.8 — 2026-09-28
+
+## 简体中文
+
+- DSH peer 改为确切版本列表，覆盖 npm 上已发布的全部 `0.1` 与 `0.2` RC：`0.1.0-rc.2`、`0.1.0-rc.3`、`0.1.0-rc.6`、`0.1.0-rc.7`、`0.1.0-rc.8`、`0.1.1-rc.1`、`0.1.1-rc.2`、`0.1.2-rc.1`、`0.1.5-rc.1`、`0.1.5-rc.2`、`0.1.5-rc.3`、`0.1.7-rc.1`、`0.1.7-rc.2`、`0.2.0-rc.1`。不写版本范围，也不包含 alpha 或 `0.0.1` RC。
+- 开发依赖对齐当前宿主 `0.2.0-rc.1`。DSH peer 标为 optional，避免 npm 在多版本列表里解析到旧 RC。离线回归 51 项和隔离 profile 端到端 33 项已在 `dsh 0.2.0-rc.1` 上通过。
+- `0.1.7-rc.1` 与 `0.1.7-rc.2` 此前已做过隔离安装和宿主测试。其余列入的 RC 只保证能通过 peer 准入，尚未逐个验收。
+
+## English
+
+- Declare DSH peers as every published `0.1` and `0.2` release candidate: `0.1.0-rc.2`, `0.1.0-rc.3`, `0.1.0-rc.6`, `0.1.0-rc.7`, `0.1.0-rc.8`, `0.1.1-rc.1`, `0.1.1-rc.2`, `0.1.2-rc.1`, `0.1.5-rc.1`, `0.1.5-rc.2`, `0.1.5-rc.3`, `0.1.7-rc.1`, `0.1.7-rc.2`, and `0.2.0-rc.1`. Ranges, alphas, and `0.0.1` release candidates are excluded.
+- Pin development dependencies to the current host, `0.2.0-rc.1`. Mark DSH peers optional so npm does not resolve an older release candidate from the multi-version list. Offline regression (51) and isolated-profile end-to-end tests (33) passed on `dsh 0.2.0-rc.1`.
+- `0.1.7-rc.1` and `0.1.7-rc.2` already had isolated installation and host tests. The other listed release candidates are admitted by peers and have not been validated individually.
+
 ## 0.1.7 — 2026-09-25
 
 ## 简体中文

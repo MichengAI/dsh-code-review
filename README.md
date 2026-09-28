@@ -12,7 +12,7 @@
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
 [![DSH Plugin](https://img.shields.io/badge/DSH-Plugin-0f766e.svg)](https://github.com/MichengAI/dsh-code-review)
-[![DSH >=0.1.7-rc.1 <0.2.0](https://img.shields.io/badge/DSH-%3E%3D0.1.7--rc.1_%3C0.2.0-2563eb.svg)](https://github.com/deepseek-ai/deepseek-harness)
+[![DSH supported through 0.2.0-rc.1](https://img.shields.io/badge/DSH-up%20to%200.2.0--rc.1-2563eb.svg)](#host-compatibility)
 [![Node.js](https://img.shields.io/badge/Node.js-%E2%89%A522.19.0-339933.svg?logo=node.js&logoColor=white)](https://nodejs.org/)
 
 </div>
@@ -21,7 +21,7 @@ DSH Code Review is a community code review plugin for DeepSeek Harness, packaged
 
 ## Host compatibility
 
-The current version supports **DSH from `0.1.7-rc.1` up to, but excluding, `0.2.0`** — every `0.1.7` RC and release — and loads through `dsh.bundle.patch`. It requires the native `spawn` provider, the `userQuestions` service, a question answerer for your platform, and a model that supports tool calls.
+The current version supports every published DSH release candidate from `0.1.0-rc.2` through `0.2.0-rc.1`: `0.1.0-rc.2`, `0.1.0-rc.3`, `0.1.0-rc.6`, `0.1.0-rc.7`, `0.1.0-rc.8`, `0.1.1-rc.1`, `0.1.1-rc.2`, `0.1.2-rc.1`, `0.1.5-rc.1`, `0.1.5-rc.2`, `0.1.5-rc.3`, `0.1.7-rc.1`, `0.1.7-rc.2`, and `0.2.0-rc.1`. Alpha builds, `0.0.1` release candidates, and any version not in that list are not supported. Peers name those exact versions with `||`; they are not a semver range. It loads through `dsh.bundle.patch` and requires the native `spawn` provider, the `userQuestions` service, a question answerer for your platform, and a model that supports tool calls.
 
 Install the package from npm or build from source. Offline host and package integration checks have passed; review quality, language adherence, and interaction across platforms still need live validation.
 
