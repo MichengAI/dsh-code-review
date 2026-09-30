@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.10 — 2026-09-30
+
+## 简体中文
+
+- 斜杠菜单的标题、说明和输入提示跟随宿主语言，不再沿用注册表里的中文。
+
+## English
+
+- Slash-menu titles, descriptions, and input hints follow the host language instead of the Chinese registry strings.
+
 ## 0.1.9 — 2026-09-30
 
 ## 简体中文
