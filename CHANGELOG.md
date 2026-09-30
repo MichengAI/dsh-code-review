@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.1.9 — 2026-09-30
+
+## 简体中文
+
+- 将 DSH peer 的确切版本列表加入 `0.2.0-rc.2`。当前准入版本为 `0.1.2-rc.1`、`0.1.5-rc.1`、`0.1.5-rc.2`、`0.1.5-rc.3`、`0.1.7-rc.1`、`0.1.7-rc.2`、`0.2.0-rc.1`、`0.2.0-rc.2`。不写版本范围，也不包含 alpha、`0.0.1` RC，以及 `0.1.0` / `0.1.1` RC。
+- 开发依赖对齐当前宿主 `0.2.0-rc.2`。官方说明没有插件 API 破坏性变更；插件直接使用的类型除 `userQuestions` 新增可选的限时问答外没有变化，审查仍走原来的阻塞式 `ask`。
+- 离线回归 51 项和隔离 profile 端到端 33 项已在 `dsh 0.2.0-rc.2` 上通过。
+
+## English
+
+- Add `0.2.0-rc.2` to the exact DSH peer list. Admitted hosts are `0.1.2-rc.1`, `0.1.5-rc.1`, `0.1.5-rc.2`, `0.1.5-rc.3`, `0.1.7-rc.1`, `0.1.7-rc.2`, `0.2.0-rc.1`, and `0.2.0-rc.2`. Ranges, alphas, `0.0.1` release candidates, and `0.1.0` / `0.1.1` release candidates are excluded.
+- Pin development dependencies to the current host, `0.2.0-rc.2`. The official notes do not describe a plugin API break. Direct types used by this plugin are unchanged aside from optional timed questions on `userQuestions`; reviews still use the existing blocking `ask`.
+- Offline regression (51) and isolated-profile end-to-end tests (33) passed on `dsh 0.2.0-rc.2`.
+
 ## 0.1.8 — 2026-09-28
 
 ## 简体中文
