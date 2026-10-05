@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased / 未发布
+
+## 简体中文
+
+- 从 GitHub 安装时已包含编译后的运行文件，不必再手动构建。
+
+## English
+
+- Installing from GitHub now includes the compiled runtime, so no manual build is required.
+
 ## 0.1.10 — 2026-09-30
 
 ## 简体中文

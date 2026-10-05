@@ -133,7 +133,7 @@ npm run verify:package
 dsh plugin --profile web add .\michengai-dsh-code-review-0.1.3.tgz --ignore-scripts
 ```
 
-`check` 包含 TypeScript、提示词哈希、短任务与真实 AgentLoop 配合离线模型的回归，以及文档链接检查。`verify:package` 在隔离 profile 验证 bundle、peer 和安装包宿主链路。这些检查不替代在线模型验收。
+`check` 包含 TypeScript、提示词哈希、短任务与真实 AgentLoop 配合离线模型的回归，以及文档链接检查。`verify:package` 在隔离 profile 验证 bundle、peer 和安装包宿主链路。这些检查不替代在线模型验收。GitHub 与 npm 都包含可直接运行的 `lib`；改了源码后，提交前运行 `npm run build`。
 
 | 入口 | 职责 |
 | --- | --- |

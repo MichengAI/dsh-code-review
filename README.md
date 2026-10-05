@@ -133,7 +133,7 @@ npm run verify:package
 dsh plugin --profile web add .\michengai-dsh-code-review-0.1.3.tgz --ignore-scripts
 ```
 
-`check` covers TypeScript, prompt hashes, short tasks, real AgentLoop regression tests with offline models, and documentation links. `verify:package` checks bundle loading, peers, and installed-package host integration in an isolated profile. These checks do not replace live model validation.
+`check` covers TypeScript, prompt hashes, short tasks, real AgentLoop regression tests with offline models, and documentation links. `verify:package` checks bundle loading, peers, and installed-package host integration in an isolated profile. These checks do not replace live model validation. GitHub and npm both include a ready-to-run `lib`; after changing source, run `npm run build` before committing.
 
 | Entry | Responsibility |
 | --- | --- |
