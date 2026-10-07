@@ -6,17 +6,13 @@
 
 ## 简体中文
 
-- 审查执行与 Agency 专家对齐：使用原生 `spawn` 的角色组合，保留宿主系统提示、工具和权限委派。只禁用递归代码审查及专家召唤工具，不再额外禁用网页、图片和继续委派工具。
-- 移除完整系统提示替换、创建事件钩子、子会话审批覆盖与父会话审批转发。权限受限时说明证据和测试缺口并结束，不再指示提权重试，也不把子会话审批弹到父会话。
-- 交给会话的报告改为 DSH 可渲染的 GitHub Flavored Markdown：状态标题、发现小标题、带行号片段的本地文件链接和段落。
-- 离线回归 52 项、文档链接检查，以及隔离 profile 端到端 34 项已在 `dsh 0.2.0-rc.2` 上通过。
+- 审查报告改为 Markdown，直接显示状态、发现和带行号的文件链接。
+- 审查可以使用宿主的网页和看图工具。权限不够时说明缺口并结束，不再弹出审批，也不要求提权。
 
 ## English
 
-- Align review execution with Agency experts: use native `spawn` persona composition and preserve host system sections, tools, and delegated permissions. Deny only recursive code review and expert invocation tools; do not additionally deny web, image, or further-delegation tools.
-- Remove complete prompt replacement, creation hooks, child approval overrides, and parent approval forwarding. When access is limited, report evidence and test gaps and finish; do not instruct an escalation retry or surface child approval prompts on the parent session.
-- Render the session report as GitHub Flavored Markdown that DSH can display: a status heading, finding headings, local file links with line fragments, and paragraphs.
-- Offline regression (52), documentation link checks, and isolated-profile end-to-end tests (34) passed on `dsh 0.2.0-rc.2`.
+- Review reports are Markdown, showing the status, findings, and file links with line numbers.
+- Reviews can use the host's web and image tools. If access is limited, the report explains the gap and finishes, without an approval prompt or a request to raise permissions.
 
 ## 0.1.11 — 2026-10-06
 
