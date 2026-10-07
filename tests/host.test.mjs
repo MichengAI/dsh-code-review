@@ -30,8 +30,8 @@ test('宿主语言控制菜单与模型输出指令，切换后下一次生效�
   assert.match(first.result.text, /Code review · Completed/);
   assert.equal(s.questions[0].questions[0].options[1].label, 'Review uncommitted changes');
   assert.match(JSON.stringify(s.requests[0].messages), /Write user-facing review content in English/);
-  assert.match(JSON.stringify(s.requests[0].messages), /sandbox_permissions set to danger-full-access/);
-  assert.match(JSON.stringify(s.requests[0].messages), /approval prompt is shown on the parent conversation/);
+  assert.match(JSON.stringify(s.requests[0].messages), /Follow the host's delegated permission scope/);
+  assert.doesNotMatch(JSON.stringify(s.requests[0].messages), /approval prompt is shown on the parent conversation|sandbox_permissions set to danger-full-access/);
   const original = await readFile(new URL('../assets/codex/review/rubric.md', import.meta.url), 'utf8');
   assert.ok(JSON.stringify(s.requests[0]).includes(JSON.stringify(original).slice(1, -1)));
   await s.ctx.settings.update('locale', { preference: 'zh' });
@@ -137,7 +137,7 @@ async function setup(t, response = empty, opts = {}) {
     await ctx.plugin(MemorySettings).await();
   }
   new SessionStore(ctx); new AgentRegistry(ctx); new SessionProjectionRegistry(ctx); new LlmRuntime(ctx);
-  new SystemPrompt(ctx, { includeHarnessIdentity: false }); new ToolRuntime(ctx); new CommandRuntime(ctx); new AgentLoop(ctx, { agents: [], maxParallelToolCalls: { get: () => 10 } });
+  new SystemPrompt(ctx, { includeHarnessIdentity: false, personaPrefix: 'PARENT_PERSONA' }); new ToolRuntime(ctx); new CommandRuntime(ctx); new AgentLoop(ctx, { agents: [], maxParallelToolCalls: { get: () => 10 } });
   new SubagentRuntime(ctx, {}); new UserQuestionService(ctx); new ApprovalService(ctx, { policy: 'ask' });
   const questions = [];
   ctx.on('user-questions/request', async (request) => {
@@ -153,14 +153,16 @@ async function setup(t, response = empty, opts = {}) {
   ctx.tools.register(tool('dangerous_global'));
   for (const name of ['subagent', 'subagent_fork', 'summon_expert', 'web_search', 'view_image', 'read_image']) {
     if (opts.scopedSubagent && name === 'subagent') continue;
+    if (opts.noExperts && name === 'summon_expert') continue;
     ctx.tools.register(tool(name));
   }
   ctx.tools.register({ ...tool('native_git'), async execute(_args, exec) {
     executions++;
-    assert.equal(ctx.approval.overrideOf(exec.agent.session), 'ask');
+    assert.equal(ctx.approval.overrideOf(exec.agent.session), 'never');
     if (opts.escalate) {
       const outcome = await exec.agent.ctx.approval.request({ agent: exec.agent, toolName: 'pwsh', callId: 'escalate-test', reason: 'escalate sandbox to danger-full-access: test' });
-      assert.equal(outcome, 'allowed-once');
+      assert.equal(outcome, 'rejected');
+      return 'Sandbox escalation rejected; the command did not run.';
     }
     return execFileSync('git', ['diff', 'HEAD'], { cwd: exec.agent.session.header.cwd, encoding: 'utf8', windowsHide: true });
   } });
@@ -186,7 +188,8 @@ async function setup(t, response = empty, opts = {}) {
 
 test('空参数经原生问题选择，带文本不弹菜单也不解析选项', async t => {
   const s = await setup(t);
-  assert.equal((await s.run('/review')).result.kind, 'success');
+  const first = await s.run('/review');
+  assert.equal(first.result.kind, 'success', first.result.text);
   assert.equal(s.questions.length, 1);
   assert.equal(s.questions[0].questions[0].options.length, 4);
   assert.equal((await s.run('/review --base main')).result.kind, 'success');
@@ -222,7 +225,7 @@ test('斜杠命令唤醒主会话，经原生 spawn 返回工具结果及主会�
   validateStoredEvents(s.parent.session.header, JSON.parse(JSON.stringify(events)));
 });
 
-test('真实 AgentLoop 独立上下文、DSH 模型路由、报告重放与清理', async t => {
+test('真实 AgentLoop 独立历史、保留宿主提示和原生角色、报告重放与清理', async t => {
   const s = await setup(t);
   s.parent.followup(createUserMessage({ content: [{ type: 'text', text: 'PARENT_SECRET_HISTORY' }], source: { kind: 'user' } }));
   await s.parent.whenIdle();
@@ -231,7 +234,10 @@ test('真实 AgentLoop 独立上下文、DSH 模型路由、报告重放与清�
   const result = await s.run('/review');
   assert.equal(result.result.kind, 'success'); assert.match(result.result.text, /完成 · 零发现/);
   assert.equal(s.requests.length, 1); assert.ok(!JSON.stringify(s.requests).includes('PARENT_SECRET_HISTORY'));
-  assert.ok(!JSON.stringify(s.requests).includes('MAIN_SECRET_PROMPT'));
+  assert.ok(JSON.stringify(s.requests).includes('MAIN_SECRET_PROMPT'), '保留宿主系统提示，只有会话历史独立');
+  assert.ok(!JSON.stringify(s.requests).includes('PARENT_PERSONA'), '原生 persona 仅替换角色');
+  assert.match(JSON.stringify(s.requests), /permission scope was fixed/);
+  assert.match(JSON.stringify(s.requests), /Approval prompts are disabled/);
   const original = await readFile(new URL('../assets/codex/review/rubric.md', import.meta.url), 'utf8');
   assert.ok(JSON.stringify(s.requests).includes(JSON.stringify(original).slice(1, -1)), '模型实际请求必须包含完整上游原文');
   assert.equal(s.ctx.agents.list().length, 1);
@@ -246,7 +252,7 @@ test('有发现报告保留原生路径行号，不能丢失实际问题', async
   const result = await s.run('/review');
   assert.equal(result.result.kind, 'success'); assert.match(result.result.text, /完成 · 有发现/); assert.match(result.result.text, /a.ts:1–1/);
 });
-for (const tool of ['subagent', 'subagent_fork', 'summon_expert', 'web_search', 'view_image', 'read_image']) test(`审查子代理保留宿主工具 ${tool}`, async t => {
+for (const tool of ['subagent', 'subagent_fork', 'web_search', 'view_image', 'read_image']) test(`审查子代理保留宿主工具 ${tool}`, async t => {
   const s = await setup(t, empty, { tool });
   const result = await s.run('/review');
   assert.equal(result.result.kind, 'success', result.result.text);
@@ -254,9 +260,10 @@ for (const tool of ['subagent', 'subagent_fork', 'summon_expert', 'web_search', 
   assert.equal(s.ctx.agents.list().length, 1);
   assert.ok(s.requests[0].tools.some(item => item.name === tool));
   assert.ok(!s.requests[0].tools.some(item => item.name === 'code_review'));
+  assert.ok(!s.requests[0].tools.some(item => ['summon_expert', 'summon_experts', 'list_experts', 'list_expert_teams', 'get_expert_team', 'summon_expert_team'].includes(item.name)));
 });
 
-test('审查子代理使用宿主工具读取 Git diff，不额外禁用工具，父策略不变', async t => {
+test('审查子代理使用宿主工具读取 Git diff，父策略不变', async t => {
   const s = await setup(t, empty, { tool: 'native_git' });
   const result = await s.run('/review');
   assert.equal(result.result.kind, 'success', result.result.text);
@@ -266,8 +273,16 @@ test('审查子代理使用宿主工具读取 Git diff，不额外禁用工具�
   assert.equal(s.ctx.approval.overrideOf(s.parent.session), undefined);
 });
 
-test('审查子会话的审批转到父会话，父策略不变', async t => {
-  const s = await setup(t, empty, { orchestrate: true, tool: 'native_git', escalate: true });
+test('未安装专家插件时仍可委派，不把不存在的专家工具传给原生过滤器', async t => {
+  const s = await setup(t, empty, { noExperts: true });
+  assert.equal(s.ctx.tools.get('summon_expert'), undefined);
+  const result = await s.run('/review');
+  assert.equal(result.result.kind, 'success', result.result.text);
+  assert.ok(!s.requests[0].tools.some(tool => tool.name === 'code_review'));
+});
+
+test('审查与专家一样由宿主拒绝子会话提权，不触发父会话审批或等待', { timeout: 15000 }, async t => {
+  const s = await setup(t, '已检查源码；测试受沙箱限制未能执行，不能确认测试通过。', { orchestrate: true, tool: 'native_git', escalate: true });
   const forwarded = [];
   s.ctx.on('approval/request', function (request, next) {
     if (request.agent !== s.parent) return next();
@@ -276,10 +291,11 @@ test('审查子会话的审批转到父会话，父策略不变', async t => {
   }, true);
   await s.command('/review 检查审批');
   await s.parent.whenIdle();
-  assert.equal(forwarded.length, 1);
-  assert.equal(forwarded[0].toolName, 'pwsh');
+  assert.equal(forwarded.length, 0);
   assert.equal(s.ctx.approval.overrideOf(s.parent.session), undefined);
-  assert.ok(s.parent.session.snapshotEvents().some(event => event.type === 'approval/asked'));
+  assert.ok(!s.parent.session.snapshotEvents().some(event => event.type === 'approval/asked'));
+  assert.ok(s.parent.session.snapshotEvents().some(event => event.type === 'tool/result' && JSON.stringify(event.data).includes('完成')));
+  assert.ok(s.parent.session.snapshotEvents().some(event => event.type === 'tool/result' && JSON.stringify(event.data).includes('测试受沙箱限制')));
 });
 
 test('模型错误不伪装为零发现，纯文本报告按 Codex 回退展示', async t => {

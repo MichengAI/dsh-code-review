@@ -112,7 +112,9 @@ The rubric and short task templates follow the fixed source commit `a592c38c16cd
 
 ### Can a review change code?
 
-The review instructions request no fixes, but the tool layer is not universally read-only. The review subagent keeps the host tool set and only avoids starting another code review. A child approval request is asked again on the parent session, so the prompt appears in the conversation the user is watching. The parent session policy is unchanged.
+The review instructions request no fixes, but the tool layer is not universally read-only. Execution follows Agency experts: native `spawn` installs the reviewer persona while preserving the host's other system sections and tools. Only recursive code review and expert invocation tools are denied. The host fixes permissions at delegation time; the plugin neither overrides approval policy nor forwards child approval requests. The host rejects operations outside that scope, and the reviewer returns a report explaining evidence and test limitations.
+
+If Git fails during Windows sandbox preparation, or tests fail with `spawn EPERM`, the parent session must handle the host environment or permissions before starting another review. “Completed” means the Agent returned a report; it does not guarantee that every diff was inspected or tests passed. Read the report for those limitations.
 
 ### What if nothing appears after installation?
 

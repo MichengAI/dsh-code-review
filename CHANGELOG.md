@@ -2,6 +2,9 @@
 
 ## Unreleased / 未发布
 
+- 审查执行与 Agency 专家对齐：使用原生 `spawn` 的角色组合，保留宿主系统提示和权限委派，禁用递归审查及专家召唤工具。移除完整系统提示替换、创建事件钩子、子会话审批覆盖与父会话审批转发；权限受限时说明缺口并结束，不再指示提权重试。
+- Align review execution with Agency experts: use native `spawn` persona composition, preserve host system sections and delegated permissions, and deny recursive review and expert invocation tools. Remove complete prompt replacement, creation hooks, child approval overrides, parent approval forwarding, and escalation retry instructions. Report access limitations and finish within the delegated scope.
+
 ## 0.1.11 — 2026-10-06
 
 ## 简体中文

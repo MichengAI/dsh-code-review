@@ -38,7 +38,6 @@ const en = {
   '审查未完成。': 'Review did not complete.', '审查完成。': 'Review completed.',
   '会话没有有效 cwd。': 'The session has no valid cwd.',
   '需要独立上下文的原生 spawn provider。': 'A native spawn provider with an independent context is required.',
-  '原生审查 Agent 未完成配置。': 'The native review Agent was not configured.',
   '原生子 Agent 未完成：': 'The native subagent did not complete: ',
   '审查 Agent 未返回报告。': 'The review Agent returned no report.', 'Agent 清理失败：': 'Agent cleanup failed: ',
   '未选择有效审查范围。': 'No valid review scope was selected.', '审查选择已取消或未填写。': 'Review selection was cancelled or left empty.',
@@ -77,5 +76,5 @@ export function outputLanguage(locale: Locale): string {
   return `Write user-facing review content in ${language} as GitHub Flavored Markdown. The guidelines above decide which issues qualify, but ignore their JSON output schema.
 This review runs in DeepSeek Harness, which renders that Markdown in the session. Reply with the review itself: one to three sentences for the overall verdict, then each finding as a level-3 heading, a Markdown file link, and one paragraph. Start a heading with [P0] through [P3] when you assign a priority. Write a known location as [path:start–end](path#Lstart) or [path:start–end](path#Lstart-Lend).
 Do not output JSON, markdown fences, or field names such as findings, overall_correctness, overall_explanation, or code_location.
-If there are no findings, say so. If a shell or git command fails before it runs because the sandbox cannot be prepared, do not inspect the working tree instead of the diff and do not stop. Call that same read-only command once with sandbox_permissions set to danger-full-access and a justification in the user's language. The approval prompt is shown on the parent conversation. It must not modify product code or file permissions. Only if that approval is rejected or unavailable, say the diff cannot be inspected and do not claim the patch is correct.`;
+If there are no findings, say so. Follow the host's delegated permission scope. If a required operation is denied or unavailable, report the limitation and finish with the evidence you could obtain. For a change review, distinguish inspecting the diff from reading the current files; if the diff could not be inspected, do not claim the patch is correct. If tests could not run, say so.`;
 }

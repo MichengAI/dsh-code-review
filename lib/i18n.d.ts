@@ -21,7 +21,6 @@ declare const en: {
     readonly '\u5BA1\u67E5\u5B8C\u6210\u3002': "Review completed.";
     readonly '\u4F1A\u8BDD\u6CA1\u6709\u6709\u6548 cwd\u3002': "The session has no valid cwd.";
     readonly '\u9700\u8981\u72EC\u7ACB\u4E0A\u4E0B\u6587\u7684\u539F\u751F spawn provider\u3002': "A native spawn provider with an independent context is required.";
-    readonly '\u539F\u751F\u5BA1\u67E5 Agent \u672A\u5B8C\u6210\u914D\u7F6E\u3002': "The native review Agent was not configured.";
     readonly '\u539F\u751F\u5B50 Agent \u672A\u5B8C\u6210\uFF1A': "The native subagent did not complete: ";
     readonly '\u5BA1\u67E5 Agent \u672A\u8FD4\u56DE\u62A5\u544A\u3002': "The review Agent returned no report.";
     readonly 'Agent \u6E05\u7406\u5931\u8D25\uFF1A': "Agent cleanup failed: ";

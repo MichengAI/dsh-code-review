@@ -14,7 +14,5 @@ export interface Outcome {
     report?: Report;
     raw?: string;
 }
-/** 审查规范、输出语言，以及把子会话审批转到父会话。宿主把子代理钉成 never，审批框又只挂在发出请求的会话上。 */
-export declare function configureReviewer(agent: Agent, parent: Agent, locale?: Locale): void;
 /** 原生 spawn 独立历史；只发送短任务，Git 和代码检查由子 Agent 自行完成。 */
 export declare function runReview(ctx: Context, parent: Agent, target: Target, signal: AbortSignal, timeoutMs?: number, reviewModel?: string, locale?: Locale): Promise<Outcome>;
