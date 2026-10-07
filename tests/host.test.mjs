@@ -227,14 +227,17 @@ test('有发现报告保留原生路径行号，不能丢失实际问题', async
   const result = await s.run('/review');
   assert.equal(result.result.kind, 'success'); assert.match(result.result.text, /完成 · 有发现/); assert.match(result.result.text, /a.ts:1–1/);
 });
-for (const tool of ['subagent', 'subagent_fork', 'summon_expert', 'web_search', 'view_image', 'read_image']) test(`原生工具限制关闭 ${tool}`, async t => {
+for (const tool of ['subagent', 'subagent_fork', 'summon_expert', 'web_search', 'view_image', 'read_image']) test(`审查子代理保留宿主工具 ${tool}`, async t => {
   const s = await setup(t, empty, { tool });
-  await s.run('/review');
-  assert.equal(s.executions(), 0);
+  const result = await s.run('/review');
+  assert.equal(result.result.kind, 'success', result.result.text);
+  assert.equal(s.executions(), 1);
   assert.equal(s.ctx.agents.list().length, 1);
+  assert.ok(s.requests[0].tools.some(item => item.name === tool));
+  assert.ok(!s.requests[0].tools.some(item => item.name === 'code_review'));
 });
 
-test('审查 Agent 使用宿主工具自行读取 Git diff，never 审批且父策略不变', async t => {
+test('审查子代理使用宿主工具读取 Git diff，不额外禁用工具，父策略不变', async t => {
   const s = await setup(t, empty, { tool: 'native_git' });
   const result = await s.run('/review');
   assert.equal(result.result.kind, 'success', result.result.text);
@@ -411,7 +414,7 @@ test('自定义历史要求不会被工作区无变更短路，也不预读仓�
   assert.equal(s.requests[0].messages.filter(m => m.role === 'user')[0].content[0].text, instruction);
 });
 
-test('subagent 仅在父子 Agent 本地注册时仍可启动审查，局部委派不能执行', async t => {
+test('subagent 仅在父子 Agent 本地注册时仍可启动审查，局部委派可以执行', async t => {
   const s = await setup(t, empty, { scopedSubagent: true, tool: 'native_git' });
   assert.equal(s.ctx.tools.get('subagent'), undefined);
   assert.ok(s.ctx.tools.get('subagent', s.parent));
@@ -419,10 +422,10 @@ test('subagent 仅在父子 Agent 本地注册时仍可启动审查，局部委�
   assert.equal(result.result.kind, 'success', result.result.text);
   assert.equal(s.executions(), 1);
   assert.equal(s.ctx.agents.list().length, 1);
-  const denied = await setup(t, empty, { scopedSubagent: true, tool: 'subagent' });
-  assert.equal((await denied.run('/review')).result.kind, 'success');
-  assert.equal(denied.executions(), 0);
-  assert.match(JSON.stringify(denied.requests[1].messages), /审查模式不提供/);
+  const local = await setup(t, empty, { scopedSubagent: true, tool: 'subagent' });
+  assert.equal((await local.run('/review')).result.kind, 'success');
+  assert.equal(local.executions(), 1);
+  assert.doesNotMatch(JSON.stringify(local.requests), /审查模式不提供/);
 });
 
 test('命令目录提供中英文描述', async t => {

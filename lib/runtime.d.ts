@@ -14,7 +14,7 @@ export interface Outcome {
     report?: Report;
     raw?: string;
 }
-/** 仅设置原版审查规范及 never 审批；保留原生工具和运行上下文。 */
+/** 只设置审查规范和输出语言。工具与审批沿用宿主委派，不额外收紧。 */
 export declare function configureReviewer(agent: Agent, locale?: Locale): void;
 /** 原生 spawn 独立历史；只发送短任务，Git 和代码检查由子 Agent 自行完成。 */
 export declare function runReview(ctx: Context, parent: Agent, target: Target, signal: AbortSignal, timeoutMs?: number, reviewModel?: string, locale?: Locale): Promise<Outcome>;

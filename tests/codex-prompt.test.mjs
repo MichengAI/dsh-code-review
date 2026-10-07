@@ -72,7 +72,7 @@ test('缺优先级或模型自造字段时仍整理成可读发现，不把 JSON
   assert.equal(parsed.findings[0].priority, 1);
   assert.equal(parsed.findings[0].path, 'src/client/index.ts');
   assert.equal(parsed.findings[0].start, 1312);
-  assert.match(renderReport(parsed), /\[P1\] 选择器命中两个元素/);
-  assert.match(renderReport(parsed), /src\/client\/index\.ts:1312–1312/);
+  assert.match(renderReport(parsed), /### \[P1\] 选择器命中两个元素/);
+  assert.match(renderReport(parsed), /\[src\/client\/index\.ts:1312–1312\]\(src\/client\/index\.ts#L1312\)/);
   assert.doesNotMatch(renderReport(parsed), /overall_correctness|"findings"/);
 });

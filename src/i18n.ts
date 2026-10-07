@@ -36,7 +36,6 @@ const en = {
   '无变更': 'No changes', '完成 · 零发现': 'Completed · No findings', '完成 · 有发现': 'Completed · Findings', '完成': 'Completed',
   '部分覆盖': 'Partial coverage', '失败': 'Failed', '中断': 'Interrupted', '输出无效': 'Invalid output', '快照过期': 'Stale snapshot',
   '审查未完成。': 'Review did not complete.', '审查完成。': 'Review completed.',
-  '审查模式不提供网页、图片或继续委派能力。': 'Review mode does not provide web, image, or further delegation tools.',
   '会话没有有效 cwd。': 'The session has no valid cwd.',
   '需要独立上下文的原生 spawn provider。': 'A native spawn provider with an independent context is required.',
   '原生审查 Agent 未完成配置。': 'The native review Agent was not configured.',
@@ -75,8 +74,8 @@ export function translate(locale: Locale, key: keyof typeof en): string {
 /** 审查标准沿用 Codex rubric。会话里写给人看的报告，不输出 JSON。 */
 export function outputLanguage(locale: Locale): string {
   const language = locale === 'en' ? 'English' : 'Simplified Chinese';
-  return `Write user-facing review content in ${language}. The guidelines above decide which issues qualify, but ignore their JSON output schema.
-This review runs in DeepSeek Harness. Reply with the review itself: one to three sentences for the overall verdict, then each finding as a title, the file path and line range, and one paragraph. Use [P0] through [P3] at the start of a title when you assign a priority.
+  return `Write user-facing review content in ${language} as GitHub Flavored Markdown. The guidelines above decide which issues qualify, but ignore their JSON output schema.
+This review runs in DeepSeek Harness, which renders that Markdown in the session. Reply with the review itself: one to three sentences for the overall verdict, then each finding as a level-3 heading, a Markdown file link, and one paragraph. Start a heading with [P0] through [P3] when you assign a priority. Write a known location as [path:start–end](path#Lstart) or [path:start–end](path#Lstart-Lend).
 Do not output JSON, markdown fences, or field names such as findings, overall_correctness, overall_explanation, or code_location.
 If there are no findings, say so. If the diff cannot be inspected, say that and do not claim the patch is correct.`;
 }

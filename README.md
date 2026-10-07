@@ -102,7 +102,7 @@ All text after the command is treated as custom instructions, not CLI flags. `--
 
 Language follows the host's `locale.preference`: `en` / `en-*` selects English; other values default to Chinese within the current two-language support. On `0.1.7-rc.1` and later it is the `locale` profile entry returned by `settings.describe()`. Each review captures the locale at its start; the next review reads updated settings. Command catalog descriptions and input hints are resolved when the plugin loads and require a reload to update. Without a saved preference, or when the settings read fails, Chinese is used; the backend cannot read a language detected only in the browser.
 
-The latest report is saved atomically per conversation. Historical report bodies are not translated. JSON keys, enum values, code, and paths remain unchanged. Unfinished reviews do not resume automatically after shutdown. Status, cancellation, and report storage are DSH plugin features.
+The latest report is saved atomically per conversation. The session report uses GitHub Flavored Markdown that DSH renders: a status heading, finding headings, local file links with line fragments, and paragraphs. Historical report bodies are not translated. JSON keys, enum values, code, and paths remain unchanged. Unfinished reviews do not resume automatically after shutdown. Status, cancellation, and report storage are DSH plugin features.
 
 ## FAQ
 
@@ -112,7 +112,7 @@ The rubric and short task templates follow the fixed source commit `a592c38c16cd
 
 ### Can a review change code?
 
-The review instructions request no fixes, but the tool layer is not universally read-only. Execution depends on DSH permissions and its sandbox. The `never` approval policy rejects operations requiring approval. Corresponding web, image, and further-delegation tools are restricted; third-party aliases are outside the verified mapping.
+The review instructions request no fixes, but the tool layer is not universally read-only. The review subagent keeps the host tool set and only avoids starting another code review. Execution depends on DSH permissions and its sandbox. In-process delegation pins approval to `never`, so operations that require approval are rejected.
 
 ### What if nothing appears after installation?
 

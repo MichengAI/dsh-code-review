@@ -19,7 +19,6 @@ declare const en: {
     readonly 快照过期: "Stale snapshot";
     readonly '\u5BA1\u67E5\u672A\u5B8C\u6210\u3002': "Review did not complete.";
     readonly '\u5BA1\u67E5\u5B8C\u6210\u3002': "Review completed.";
-    readonly '\u5BA1\u67E5\u6A21\u5F0F\u4E0D\u63D0\u4F9B\u7F51\u9875\u3001\u56FE\u7247\u6216\u7EE7\u7EED\u59D4\u6D3E\u80FD\u529B\u3002': "Review mode does not provide web, image, or further delegation tools.";
     readonly '\u4F1A\u8BDD\u6CA1\u6709\u6709\u6548 cwd\u3002': "The session has no valid cwd.";
     readonly '\u9700\u8981\u72EC\u7ACB\u4E0A\u4E0B\u6587\u7684\u539F\u751F spawn provider\u3002': "A native spawn provider with an independent context is required.";
     readonly '\u539F\u751F\u5BA1\u67E5 Agent \u672A\u5B8C\u6210\u914D\u7F6E\u3002': "The native review Agent was not configured.";

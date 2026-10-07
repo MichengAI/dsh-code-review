@@ -24,7 +24,7 @@ export const inject = ['commands', 'subagents', 'agents', 'tools', 'systemPrompt
 const labels: Record<Outcome['status'], Parameters<typeof translate>[1]> = { 'no-changes': '无变更', 'completed-clean': '完成 · 零发现', 'completed-findings': '完成 · 有发现', 'completed-text': '完成', partial: '部分覆盖', failed: '失败', interrupted: '中断', 'invalid-output': '输出无效', stale: '快照过期' };
 export function renderOutcome(result: Outcome, locale: Locale = 'zh'): string {
   const t = (key: Parameters<typeof translate>[1]) => translate(locale, key);
-  return [`${t('代码审查')} · ${translate(locale, labels[result.status])}`, `${t('运行：')}${result.id}`, result.detail,
+  return [`## ${t('代码审查')} · ${translate(locale, labels[result.status])}`, `${t('运行：')}\`${result.id}\``, result.detail,
     result.fingerprint ? `${t('快照：')}${result.fingerprint}\n${t('基线：')}${result.base}\n${t('目标：')}${result.target}` : '', result.report ? renderReport(result.report, locale) : ''].filter(Boolean).join('\n\n');
 }
 
