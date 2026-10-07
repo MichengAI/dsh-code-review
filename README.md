@@ -112,7 +112,7 @@ The rubric and short task templates follow the fixed source commit `a592c38c16cd
 
 ### Can a review change code?
 
-The review instructions request no fixes, but the tool layer is not universally read-only. The review subagent keeps the host tool set and only avoids starting another code review. Execution depends on DSH permissions and its sandbox. In-process delegation pins approval to `never`, so operations that require approval are rejected.
+The review instructions request no fixes, but the tool layer is not universally read-only. The review subagent keeps the host tool set and only avoids starting another code review. A child approval request is asked again on the parent session, so the prompt appears in the conversation the user is watching. The parent session policy is unchanged.
 
 ### What if nothing appears after installation?
 

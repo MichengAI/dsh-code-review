@@ -4,6 +4,7 @@ import { AsyncLocalStorage } from 'node:async_hooks';
 import type { Context } from '@deepseek-ai/cordis';
 import type { Agent } from '@deepseek-ai/dsh-agent';
 import type { SubagentRun } from '@deepseek-ai/dsh-subagent';
+import { setApprovalPolicy, type ApprovalOutcome, type ApprovalRequest } from '@deepseek-ai/dsh-user-approval';
 import type {} from '@deepseek-ai/dsh-tools';
 import type {} from '@deepseek-ai/dsh-system-prompt';
 import { reviewPrompt, type Target } from './request.js';
@@ -14,10 +15,16 @@ export type Status = 'no-changes' | 'completed-clean' | 'completed-findings' | '
 export interface Outcome { id: string; status: Status; detail: string; fingerprint?: string; base?: string; target?: string; report?: Report; raw?: string }
 const creationScope = new AsyncLocalStorage<object>();
 
-/** 只设置审查规范和输出语言。工具与审批沿用宿主委派，不额外收紧。 */
-export function configureReviewer(agent: Agent, locale: Locale = readHostLocale(agent.ctx)): void {
+/** 审查规范、输出语言，以及把子会话审批转到父会话。宿主把子代理钉成 never，审批框又只挂在发出请求的会话上。 */
+export function configureReviewer(agent: Agent, parent: Agent, locale: Locale = readHostLocale(agent.ctx)): void {
   agent.ctx.systemPrompt.context({ name: 'michengai:review-language', order: 100, text: outputLanguage(locale) });
   agent.ctx.systemPrompt.section({ name: 'michengai:review', order: 0, complete: true, text: REVIEW_PROMPT });
+  setApprovalPolicy(agent.session, 'ask');
+  // 先于宿主转发执行，且不调用 next：否则审批会挂在子会话上，父会话看不到，审查会一直等。
+  agent.ctx.on('approval/request', (request: ApprovalRequest, next: () => Promise<ApprovalOutcome>) => {
+    if (request.agent !== agent) return next();
+    return parent.ctx.approval.request({ ...request, agent: parent }).catch((): ApprovalOutcome => 'unavailable');
+  }, { prepend: true });
 }
 
 /** 原生 spawn 独立历史；只发送短任务，Git 和代码检查由子 Agent 自行完成。 */
@@ -37,7 +44,7 @@ export async function runReview(ctx: Context, parent: Agent, target: Target, sig
     let configured = false;
     const stopSetup = ctx.on('agent/created', ({ agent }) => {
       if (creationScope.getStore() !== scope || agent.session.header.parentSession !== parent.id) return undefined;
-      configureReviewer(agent, locale);
+      configureReviewer(agent, parent, locale);
       configured = true;
       return undefined;
     });

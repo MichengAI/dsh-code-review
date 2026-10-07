@@ -30,6 +30,8 @@ test('宿主语言控制菜单与模型输出指令，切换后下一次生效�
   assert.match(first.result.text, /Code review · Completed/);
   assert.equal(s.questions[0].questions[0].options[1].label, 'Review uncommitted changes');
   assert.match(JSON.stringify(s.requests[0].messages), /Write user-facing review content in English/);
+  assert.match(JSON.stringify(s.requests[0].messages), /sandbox_permissions set to danger-full-access/);
+  assert.match(JSON.stringify(s.requests[0].messages), /approval prompt is shown on the parent conversation/);
   const original = await readFile(new URL('../assets/codex/review/rubric.md', import.meta.url), 'utf8');
   assert.ok(JSON.stringify(s.requests[0]).includes(JSON.stringify(original).slice(1, -1)));
   await s.ctx.settings.update('locale', { preference: 'zh' });
@@ -93,6 +95,15 @@ async function setup(t, response = empty, opts = {}) {
         }
         return;
       }
+      if (opts.escalate && !opts.escalated && !options.tools?.some(tool => tool.name === 'code_review')) {
+        opts.escalated = true;
+        const block = { type: 'tool-call', id: 'probe', name: 'native_git', arguments: '{}' };
+        yield { type: 'block-start', index: 0, blockType: 'tool-call' };
+        yield { type: 'tool-call-delta', index: 0, id: block.id, name: block.name, argumentsDelta: block.arguments };
+        yield { type: 'block-end', index: 0, block };
+        yield { type: 'finish', reason: { kind: 'tool-calls' } };
+        return;
+      }
       if (opts.before) await opts.before(options, requests.length);
       if (opts.error) throw new Error('offline model failure');
       if (opts.tool && requests.length === 1) {
@@ -144,7 +155,15 @@ async function setup(t, response = empty, opts = {}) {
     if (opts.scopedSubagent && name === 'subagent') continue;
     ctx.tools.register(tool(name));
   }
-  ctx.tools.register({ ...tool('native_git'), async execute(_args, exec) { executions++; assert.equal(ctx.approval.overrideOf(exec.agent.session), 'never'); return execFileSync('git', ['diff', 'HEAD'], { cwd: exec.agent.session.header.cwd, encoding: 'utf8', windowsHide: true }); } });
+  ctx.tools.register({ ...tool('native_git'), async execute(_args, exec) {
+    executions++;
+    assert.equal(ctx.approval.overrideOf(exec.agent.session), 'ask');
+    if (opts.escalate) {
+      const outcome = await exec.agent.ctx.approval.request({ agent: exec.agent, toolName: 'pwsh', callId: 'escalate-test', reason: 'escalate sandbox to danger-full-access: test' });
+      assert.equal(outcome, 'allowed-once');
+    }
+    return execFileSync('git', ['diff', 'HEAD'], { cwd: exec.agent.session.header.cwd, encoding: 'utf8', windowsHide: true });
+  } });
   ctx.on('agent/created', ({ agent }) => {
     if (opts.scopedSubagent) agent.ctx.tools.register(tool('subagent'));
     if (agent.session.header.parentSession === 'parent') {
@@ -245,6 +264,22 @@ test('审查子代理使用宿主工具读取 Git diff，不额外禁用工具�
   assert.doesNotMatch(JSON.stringify(s.requests[0].messages), /diff --git|repositoryRoot/);
   assert.match(JSON.stringify(s.requests[1].messages), /diff --git/);
   assert.equal(s.ctx.approval.overrideOf(s.parent.session), undefined);
+});
+
+test('审查子会话的审批转到父会话，父策略不变', async t => {
+  const s = await setup(t, empty, { orchestrate: true, tool: 'native_git', escalate: true });
+  const forwarded = [];
+  s.ctx.on('approval/request', function (request, next) {
+    if (request.agent !== s.parent) return next();
+    forwarded.push(request);
+    return 'allowed-once';
+  }, true);
+  await s.command('/review 检查审批');
+  await s.parent.whenIdle();
+  assert.equal(forwarded.length, 1);
+  assert.equal(forwarded[0].toolName, 'pwsh');
+  assert.equal(s.ctx.approval.overrideOf(s.parent.session), undefined);
+  assert.ok(s.parent.session.snapshotEvents().some(event => event.type === 'approval/asked'));
 });
 
 test('模型错误不伪装为零发现，纯文本报告按 Codex 回退展示', async t => {
