@@ -1,10 +1,16 @@
 # Changelog
 
-## 0.1.13 - 2026-10-12
+## Unreleased / 未发布
+
+## 0.1.13 — 2026-10-12
+
+## 简体中文
+
+- 支持 DSH `0.2.1-alpha.2`，放宽 Cordis 依赖为 ^4.0.1。
+
+## English
 
 - Support DSH `0.2.1-alpha.2` and allow Cordis ^4.0.1.
-
-## Unreleased / 未发布
 
 ## 0.1.12 — 2026-10-07
 
