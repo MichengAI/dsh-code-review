@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.13 - 2026-10-12
+
+- Support DSH `0.2.1-alpha.2` and allow Cordis ^4.0.1.
+
 ## Unreleased / 未发布
 
 ## 0.1.12 — 2026-10-07
