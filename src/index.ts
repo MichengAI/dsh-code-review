@@ -53,7 +53,7 @@ export function apply(ctx: Context, config: Config = {}): void {
     async handler(invocation) {
       const { agent, rawInput } = invocation;
       agent.followup(createUserMessage({
-        content: [{ type: 'text', text: `Perform a code review by calling code_review with input exactly ${JSON.stringify(rawInput.trim())}. Empty input opens native scope selection. The tool uses DSH native spawn with an independent reviewer. Do not modify code or substitute other review tools. Present the returned report verbatim without adding, removing, or rewriting findings. Report failures accurately. ${outputLanguage(readHostLocale(ctx))}` }],
+        content: [{ type: 'text', text: `Perform a code review by calling dsh_code_review with input exactly ${JSON.stringify(rawInput.trim())}. Empty input opens native scope selection. The tool uses DSH native spawn with an independent reviewer. Do not modify code or substitute other review tools. Present the returned report verbatim without adding, removing, or rewriting findings. Report failures accurately. ${outputLanguage(readHostLocale(ctx))}` }],
         source: reviewRequestSource,
       }));
       return { kind: 'success', text: t('已将审查请求提交到当前会话，将通过原生子 Agent 执行。') };
@@ -70,7 +70,7 @@ export function apply(ctx: Context, config: Config = {}): void {
       const target = await selectTarget(ctx, agent, input, combined, locale);
       combined.throwIfAborted();
       try {
-        await journal.write(agent.id, { version: 1, state: 'running', commandId: 'code_review' });
+        await journal.write(agent.id, { version: 1, state: 'running', commandId: 'dsh_code_review' });
         await ctx.sessions.flush(agent.session);
       } catch (error) { throw new Error(`${t('审查启动记录持久化失败：')}${String(error)}${t('；未调用子模型。')}`); }
       const result = await runReview(ctx, agent, target, combined, undefined, config.reviewModel, locale);
@@ -86,7 +86,7 @@ export function apply(ctx: Context, config: Config = {}): void {
   }
 
   ctx.tools.register({
-    name: 'code_review', description: '使用完整 Codex 规范，通过 DSH 原生 spawn 子 Agent 自行检查 Git 状态、差异与相关代码并返回报告。input 为空时通过原生问题选择范围；非空时整段作为自定义要求，不解析 CLI 选项。',
+    name: 'dsh_code_review', description: '使用完整 Codex 规范，通过 DSH 原生 spawn 子 Agent 自行检查 Git 状态、差异与相关代码并返回报告。input 为空时通过原生问题选择范围；非空时整段作为自定义要求，不解析 CLI 选项。',
     parameters: { type: 'object', properties: { input: { type: 'string', description: '空字符串打开范围选择；非空字符串是完整自定义审查要求，保留原文。' } }, required: ['input'], additionalProperties: false },
     output: { schema: { type: 'string' }, render: (_args, value) => [{ type: 'text', text: String(value) }] },
     execute(args, exec) {

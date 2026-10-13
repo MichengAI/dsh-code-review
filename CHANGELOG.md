@@ -2,6 +2,16 @@
 
 ## Unreleased / 未发布
 
+## 0.1.14 — 2026-10-13
+
+## 简体中文
+
+- 审查工具更名为 `dsh_code_review`，用户命令 `/review`、`/review-status` 和 `/review-cancel` 保持不变。
+
+## English
+
+- Rename the review tool to `dsh_code_review`; `/review`, `/review-status`, and `/review-cancel` remain unchanged.
+
 ## 0.1.13 — 2026-10-12
 
 ## 简体中文

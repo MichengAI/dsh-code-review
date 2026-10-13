@@ -78,10 +78,10 @@ async function setup(t, response = empty, opts = {}) {
   class Offline extends LlmAdapter {
     async *stream(options) {
       requests.push(options);
-      if (opts.orchestrate && options.tools?.some(tool => tool.name === 'code_review')) {
+      if (opts.orchestrate && options.tools?.some(tool => tool.name === 'dsh_code_review')) {
         const sawToolResult = options.messages.some(message => message.role === 'tool' || message.content?.some(block => block.type === 'tool-result'));
         if (!sawToolResult) {
-          const block = { type: 'tool-call', id: 'native-review', name: 'code_review', arguments: JSON.stringify({ input: opts.reviewInput ?? '' }) };
+          const block = { type: 'tool-call', id: 'native-review', name: 'dsh_code_review', arguments: JSON.stringify({ input: opts.reviewInput ?? '' }) };
           yield { type: 'block-start', index: 0, blockType: 'tool-call' };
           yield { type: 'tool-call-delta', index: 0, id: block.id, name: block.name, argumentsDelta: block.arguments };
           yield { type: 'block-end', index: 0, block };
@@ -95,7 +95,7 @@ async function setup(t, response = empty, opts = {}) {
         }
         return;
       }
-      if (opts.escalate && !opts.escalated && !options.tools?.some(tool => tool.name === 'code_review')) {
+      if (opts.escalate && !opts.escalated && !options.tools?.some(tool => tool.name === 'dsh_code_review')) {
         opts.escalated = true;
         const block = { type: 'tool-call', id: 'probe', name: 'native_git', arguments: '{}' };
         yield { type: 'block-start', index: 0, blockType: 'tool-call' };
@@ -181,10 +181,28 @@ async function setup(t, response = empty, opts = {}) {
     command: input => ctx.commands.execute(parent.agent, input, [], new AbortController().signal),
     run: async input => {
       if (['/review-status', '/review-cancel'].includes(input)) return ctx.commands.execute(parent.agent, input, [], new AbortController().signal);
-      const result = await ctx.tools.execute({ name: 'code_review', arguments: { input: input.slice('/review'.length).trim() }, agent: parent.agent, callId: 'review-test', signal: new AbortController().signal });
+      const result = await ctx.tools.execute({ name: 'dsh_code_review', arguments: { input: input.slice('/review'.length).trim() }, agent: parent.agent, callId: 'review-test', signal: new AbortController().signal });
       return { result: { kind: result.isError ? 'error' : 'success', text: result.content.filter(b => b.type === 'text').map(b => b.text).join('') } };
     } };
 }
+
+test('审查工具仅注册 dsh_code_review，不保留旧名别名', async t => {
+  const s = await setup(t);
+  assert.equal(s.ctx.tools.get('code_review', s.parent), undefined);
+  assert.ok(s.ctx.tools.get('dsh_code_review', s.parent));
+});
+
+test('新审查启动记录使用 dsh_code_review 标识', async t => {
+  const s = await setup(t);
+  let commandId;
+  s.ctx.on('session/flush', async () => {
+    const path = join(s.journalDirectory, createHash('sha256').update(s.parent.id).digest('hex') + '.json');
+    const record = JSON.parse(await readFile(path, 'utf8'));
+    if (record.state === 'running') commandId = record.commandId;
+  });
+  assert.equal((await s.run('/review 自定义要求')).result.kind, 'success');
+  assert.equal(commandId, 'dsh_code_review');
+});
 
 test('空参数经原生问题选择，带文本不弹菜单也不解析选项', async t => {
   const s = await setup(t);
@@ -212,11 +230,15 @@ test('斜杠命令唤醒主会话，经原生 spawn 返回工具结果及主会�
   await s.parent.whenIdle();
   const events = s.parent.session.snapshotEvents();
   assert.ok(events.some(event => event.type === 'user/message' && event.data.source.kind === 'michengai-code-review'));
-  assert.ok(events.some(event => event.type === 'tool/call' && event.data.name === 'code_review'));
+  assert.ok(events.some(event => event.type === 'tool/call' && event.data.name === 'dsh_code_review'));
   assert.ok(events.some(event => event.type === 'tool/result' && JSON.stringify(event.data).includes('完成 · 零发现')));
   assert.ok(events.some(event => event.type === 'assistant/message' && JSON.stringify(event.data).includes('主会话报告')));
   assert.ok(events.some(event => event.type === 'subagent/catalog'));
   assert.equal(starts.length, 1); assert.equal(ends.length, 1);
+  assert.match(JSON.stringify(s.requests[0].messages), /calling dsh_code_review with input exactly/);
+  assert.ok(s.requests[0].tools.some(tool => tool.name === 'dsh_code_review'));
+  assert.ok(!s.requests[0].tools.some(tool => tool.name === 'code_review'));
+  assert.ok(!s.requests[1].tools.some(tool => ['dsh_code_review', 'code_review'].includes(tool.name)));
   assert.ok(children[0].some(event => event.type === 'subagent/descriptor'));
   const childRequest = children[0].find(event => event.type === 'user/message');
   assert.equal(childRequest.data.content.find(block => block.type === 'text').text, instructions);
@@ -259,7 +281,7 @@ for (const tool of ['subagent', 'subagent_fork', 'web_search', 'view_image', 're
   assert.equal(s.executions(), 1);
   assert.equal(s.ctx.agents.list().length, 1);
   assert.ok(s.requests[0].tools.some(item => item.name === tool));
-  assert.ok(!s.requests[0].tools.some(item => item.name === 'code_review'));
+  assert.ok(!s.requests[0].tools.some(item => item.name === 'dsh_code_review'));
   assert.ok(!s.requests[0].tools.some(item => ['summon_expert', 'summon_experts', 'list_experts', 'list_expert_teams', 'get_expert_team', 'summon_expert_team'].includes(item.name)));
 });
 
@@ -278,7 +300,7 @@ test('未安装专家插件时仍可委派，不把不存在的专家工具传�
   assert.equal(s.ctx.tools.get('summon_expert'), undefined);
   const result = await s.run('/review');
   assert.equal(result.result.kind, 'success', result.result.text);
-  assert.ok(!s.requests[0].tools.some(tool => tool.name === 'code_review'));
+  assert.ok(!s.requests[0].tools.some(tool => tool.name === 'dsh_code_review'));
 });
 
 test('审查与专家一样由宿主拒绝子会话提权，不触发父会话审批或等待', { timeout: 15000 }, async t => {

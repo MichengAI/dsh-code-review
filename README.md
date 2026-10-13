@@ -118,7 +118,7 @@ If Git fails during Windows sandbox preparation, or tests fail with `spawn EPERM
 
 ### What if nothing appears after installation?
 
-Check that installation and runtime use the same profile, restart the DSH backend, and confirm `dsh --profile web --dump-config` includes the plugin. Empty `/review` requires a host question answerer, and the main model must support the `code_review` tool. Use `/review-status` to inspect the record; a request acknowledgement is not review completion.
+Check that installation and runtime use the same profile, restart the DSH backend, and confirm `dsh --profile web --dump-config` includes the plugin. Empty `/review` requires a host question answerer, and the main model must support the `dsh_code_review` tool. Use `/review-status` to inspect the record; a request acknowledgement is not review completion.
 
 ### Why might I still see another language?
 
