@@ -14,5 +14,9 @@ export interface Outcome {
     report?: Report;
     raw?: string;
 }
-/** 原生 spawn 独立历史；只发送短任务，Git 和代码检查由子 Agent 自行完成。 */
+/**
+ * 原生 spawn 独立历史；只发送短任务，Git 和代码检查由子 Agent 自行完成。
+ * DSH 0.2.1-alpha.3 起 `start`/`persona`/`toolFilter` 已移除：改走 `startActivation`，
+ * 并在子 Agent `agent/created` 时用 scoped persona 与 tools.restrict 恢复原审查角色与工具过滤。
+ */
 export declare function runReview(ctx: Context, parent: Agent, target: Target, signal: AbortSignal, timeoutMs?: number, reviewModel?: string, locale?: Locale): Promise<Outcome>;

@@ -138,7 +138,15 @@ async function setup(t, response = empty, opts = {}) {
   }
   new SessionStore(ctx); new AgentRegistry(ctx); new SessionProjectionRegistry(ctx); new LlmRuntime(ctx);
   new SystemPrompt(ctx, { includeHarnessIdentity: false, personaPrefix: 'PARENT_PERSONA' }); new ToolRuntime(ctx); new CommandRuntime(ctx); new AgentLoop(ctx, { agents: [], maxParallelToolCalls: { get: () => 10 } });
-  new SubagentRuntime(ctx, {}); new UserQuestionService(ctx); new ApprovalService(ctx, { policy: 'ask' });
+  // alpha.3：SubagentRuntime 依赖 workingDirectory（ensure/set）；夹具提供最小实现即可。
+  class MemoryWorkingDirectory extends Service {
+    constructor(ctx) { super(ctx, 'workingDirectory'); }
+    get(session) { return session.header.cwd; }
+    async ensure(agent) { return agent.session.header.cwd; }
+    async set(agent, path) { return path; }
+  }
+  new MemoryWorkingDirectory(ctx);
+  new SubagentRuntime(ctx, SubagentRuntime.Config({})); new UserQuestionService(ctx); new ApprovalService(ctx, { policy: 'ask' });
   const questions = [];
   ctx.on('user-questions/request', async (request) => {
     questions.push(request);
@@ -219,10 +227,15 @@ test('斜杠命令唤醒主会话，经原生 spawn 返回工具结果及主会�
   const reviewInput = instructions;
   const s = await setup(t, empty, { orchestrate: true, reviewInput });
   const starts = [], ends = [], children = [];
-  s.ctx.on('subagent/start', info => { starts.push(info); });
+  let liveChild;
+  s.ctx.on('subagent/start', info => {
+    starts.push(info);
+    liveChild = s.ctx.agents.get(info.id);
+  });
   s.ctx.on('subagent/end', info => {
     ends.push(info);
-    const child = s.ctx.agents.get(info.id);
+    // alpha.3：end 时子 Agent 可能已从 registry 卸下，保留 start 时的引用再快照。
+    const child = s.ctx.agents.get(info.id) ?? liveChild;
     if (child) children.push(child.session.snapshotEvents());
   });
   const accepted = await s.command(`/review ${reviewInput}`);

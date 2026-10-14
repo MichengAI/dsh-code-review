@@ -10,6 +10,10 @@ if (pinned.size !== 1) throw new Error(`开发依赖必须把官方 DSH 包钉�
 const expected = [...pinned][0];
 for (const [path, entry] of Object.entries(lock.packages)) {
   if (!path.startsWith('node_modules/@deepseek-ai/')) continue;
-  if (path.startsWith('node_modules/@deepseek-ai/dsh-') && entry.version !== expected) throw new Error(`DSH 依赖漂移：${path} 解析到 ${entry.version}，开发依赖声明 ${expected}`);
+  // 只校验 @deepseek-ai/dsh-* 包名本身；嵌套的 zod 等第三方不应被路径前缀误伤。
+  const name = path.split('/node_modules/').pop();
+  if (name.startsWith('@deepseek-ai/dsh-') && entry.version !== expected) {
+    throw new Error(`DSH 依赖漂移：${path} 解析到 ${entry.version}，开发依赖声明 ${expected}`);
+  }
   console.log(`${path.slice('node_modules/'.length)}@${entry.version}`);
 }

@@ -2,6 +2,20 @@
 
 ## Unreleased / 未发布
 
+## 0.1.15 — 2026-10-15
+
+## 简体中文
+
+- 支持 DSH `0.2.1-alpha.3`：所有 `@deepseek-ai/dsh*` peer 列表追加该版本；开发依赖对齐宿主 `0.2.1-alpha.3`（含 Cordis `4.0.5-alpha.2`、Schemastery `3.18.5-alpha.2`）。
+- 适配子 Agent 破坏性变更：`ctx.subagents.start` / 启动期 `persona` / `toolFilter` 已移除，改为 `startActivation`（`delivery: 'caller'`）；审查角色与委派工具过滤在子 Agent `agent/created` 时以 scoped persona 与 `tools.restrict` 恢复。
+- 命令、工具名与阻塞式 `ask` 选择路径不变。
+
+## English
+
+- Support DSH `0.2.1-alpha.3`: append that version to every `@deepseek-ai/dsh*` peer list and pin development dependencies to host `0.2.1-alpha.3` (including Cordis `4.0.5-alpha.2` and Schemastery `3.18.5-alpha.2`).
+- Adapt the subagent breaking change: `ctx.subagents.start` and start-time `persona` / `toolFilter` are gone; use `startActivation` with `delivery: 'caller'`, and restore the review persona plus delegated-tool denylist on the child's `agent/created` via a scoped persona section and `tools.restrict`.
+- Commands, tool names, and the blocking `ask` selection path are unchanged.
+
 ## 0.1.14 — 2026-10-13
 
 ## 简体中文
