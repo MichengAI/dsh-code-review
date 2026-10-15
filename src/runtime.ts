@@ -3,8 +3,7 @@ import { randomUUID } from 'node:crypto';
 import type { Context } from '@deepseek-ai/cordis';
 import type { Agent } from '@deepseek-ai/dsh-agent';
 import { SessionId } from '@deepseek-ai/dsh-session';
-import type { SubagentActivation, SubagentResult } from '@deepseek-ai/dsh-subagent';
-import { PERSONA_PREFIX_SECTION } from '@deepseek-ai/dsh-system-prompt';
+import type { SubagentActivation, SubagentResult, SubagentRun } from '@deepseek-ai/dsh-subagent';
 import type {} from '@deepseek-ai/dsh-tools';
 import { reviewPrompt, type Target } from './request.js';
 import { parseReport, REVIEW_PROMPT, type Report } from './report.js';
@@ -40,16 +39,26 @@ function awaitActivationResult(activation: SubagentActivation, signal: AbortSign
   });
 }
 
+/** 0.2.1-alpha.3 之前的启动请求。必须在服务对象上调用，不能拆出裸函数。 */
+interface LegacySubagents {
+  start(name: string, request: {
+    parent: Agent; label: string; signal: AbortSignal; persona: string;
+    agentOptions?: { model: string }; toolFilter: { deny: string[] };
+    prompt: Array<{ type: 'text'; text: string }>;
+  }): Promise<SubagentRun>;
+}
+
 /**
  * 原生 spawn 独立历史；只发送短任务，Git 和代码检查由子 Agent 自行完成。
- * DSH 0.2.1-alpha.3 起 `start`/`persona`/`toolFilter` 已移除：改走 `startActivation`，
- * 并在子 Agent `agent/created` 时用 scoped persona 与 tools.restrict 恢复原审查角色与工具过滤。
+ * 有 `startActivation` 时走 0.2.1-alpha.3：角色与工具过滤在子 Agent `agent/created` 时恢复。
+ * 没有该方法时原样回退到 `start` 加启动期 `persona` / `toolFilter`。
  */
 export async function runReview(ctx: Context, parent: Agent, target: Target, signal: AbortSignal, timeoutMs?: number, reviewModel?: string, locale: Locale = readHostLocale(ctx)): Promise<Outcome> {
   const t = (key: Parameters<typeof translate>[1]) => translate(locale, key);
   const id = randomUUID();
   const combined = timeoutMs === undefined ? signal : AbortSignal.any([signal, AbortSignal.timeout(timeoutMs)]);
   let activation: SubagentActivation | undefined;
+  let legacyRun: SubagentRun | undefined;
   let outcome: Outcome = { id, status: 'failed', detail: t('审查未完成。') };
   let abortedEarly = false;
   try {
@@ -58,36 +67,52 @@ export async function runReview(ctx: Context, parent: Agent, target: Target, sig
     const prompt = await reviewPrompt(target, cwd, combined);
     const provider = ctx.subagents.getProvider('spawn');
     if (!provider || provider.inheritsParentContext) throw new Error(t('需要独立上下文的原生 spawn provider。'));
-    const childId = SessionId(randomUUID());
     const persona = `${REVIEW_PROMPT}\n\n${outputLanguage(locale)}`;
     const deny = delegatedTools.filter(name => ctx.tools.get(name, parent) !== undefined);
-    const stop = ctx.on('agent/created', ({ agent }) => {
-      if (agent.id !== childId) return undefined;
-      agent.ctx.systemPrompt.section({
-        name: PERSONA_PREFIX_SECTION,
-        order: agent.ctx.systemPrompt.getSectionOrder('DEPLOYMENT_PERSONA_PREFIX'),
-        text: persona,
+    const subagents = ctx.subagents as typeof ctx.subagents & Partial<LegacySubagents>;
+    let result: SubagentResult;
+    if (typeof subagents.startActivation === 'function') {
+      const childId = SessionId(randomUUID());
+      // 0.1.2-rc.1 没有这个导出；静态导入会让整个插件在旧宿主上加载失败。
+      const { PERSONA_PREFIX_SECTION } = await import('@deepseek-ai/dsh-system-prompt');
+      const stop = ctx.on('agent/created', ({ agent }) => {
+        if (agent.id !== childId) return undefined;
+        agent.ctx.systemPrompt.section({
+          name: PERSONA_PREFIX_SECTION,
+          order: agent.ctx.systemPrompt.getSectionOrder('DEPLOYMENT_PERSONA_PREFIX'),
+          text: persona,
+        });
+        if (deny.length) agent.ctx.tools.restrict({ deny });
+        return undefined;
       });
-      if (deny.length) agent.ctx.tools.restrict({ deny });
-      return undefined;
-    });
-    try {
-      activation = await ctx.subagents.startActivation({
-        provider: 'spawn',
-        label: t('代码审查'),
-        childId,
-        request: {
-          parent,
-          prompt: [{ type: 'text', text: prompt }],
-          ...(reviewModel ? { agentOptions: { model: reviewModel } } : {}),
-        },
-        signal: combined,
-        delivery: 'caller',
+      try {
+        activation = await subagents.startActivation({
+          provider: 'spawn',
+          label: t('代码审查'),
+          childId,
+          request: {
+            parent,
+            prompt: [{ type: 'text', text: prompt }],
+            ...(reviewModel ? { agentOptions: { model: reviewModel } } : {}),
+          },
+          signal: combined,
+          delivery: 'caller',
+        });
+      } finally {
+        stop();
+      }
+      result = await awaitActivationResult(activation, combined);
+    } else {
+      const capabilities = provider.capabilities as { persona?: boolean; toolFilter?: boolean };
+      if (!capabilities.persona || !capabilities.toolFilter || typeof subagents.start !== 'function') throw new Error(t('需要独立上下文的原生 spawn provider。'));
+      legacyRun = await subagents.start('spawn', {
+        parent, label: t('代码审查'), signal: combined, persona,
+        ...(reviewModel ? { agentOptions: { model: reviewModel } } : {}),
+        toolFilter: { deny },
+        prompt: [{ type: 'text', text: prompt }],
       });
-    } finally {
-      stop();
+      result = await legacyRun.result;
     }
-    const result = await awaitActivationResult(activation, combined);
     combined.throwIfAborted();
     if (result.stopReason !== 'completed') throw new Error(`${t('原生子 Agent 未完成：')}${result.stopReason}${result.diagnostic ? ` ${result.diagnostic}` : ''}`);
     const raw = result.output.filter(b => b.type === 'text').map(b => b.text).join('');
@@ -99,19 +124,20 @@ export async function runReview(ctx: Context, parent: Agent, target: Target, sig
     abortedEarly = combined.aborted;
     outcome = { ...outcome, status: combined.aborted ? 'interrupted' : 'failed', detail: error instanceof Error ? error.message : String(error) };
   } finally {
-    if (activation) {
+    const handle = activation ?? legacyRun;
+    if (handle) {
       try {
-        if (abortedEarly) {
+        if (activation && abortedEarly) {
           // 中断时 dispose 可能等 LLM；限时等待以便夹具看到无残留，超时则放行。
           await Promise.race([
-            activation.dispose(),
+            handle.dispose(),
             new Promise<void>(resolve => setTimeout(resolve, 2000)),
           ]);
         } else {
-          await activation.dispose();
+          await handle.dispose();
         }
       } catch (error) {
-        if (!abortedEarly) outcome = { ...outcome, status: 'failed', detail: `${t('Agent 清理失败：')}${String(error)}` };
+        if (!activation || !abortedEarly) outcome = { ...outcome, status: 'failed', detail: `${t('Agent 清理失败：')}${String(error)}` };
       }
     }
   }

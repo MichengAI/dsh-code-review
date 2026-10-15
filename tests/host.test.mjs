@@ -514,6 +514,42 @@ test('subagent 仅在父子 Agent 本地注册时仍可启动审查，局部委�
   assert.doesNotMatch(JSON.stringify(local.requests), /审查模式不提供/);
 });
 
+test('没有 startActivation 的宿主仍用 start 完成审查，并带上角色与工具过滤', async () => {
+  const starts = [];
+  let disposed = false;
+  const report = JSON.stringify({ findings: [], overall_correctness: 'patch is correct', overall_explanation: '未发现有证据的新增缺陷', overall_confidence_score: 0.8 });
+  const parent = { id: 'parent', session: { header: { cwd: 'D:/review-old-host' } } };
+  const ctx = {
+    get() { return undefined; },
+    on() { return () => {}; },
+    tools: { get(name) { return name === 'dsh_code_review' || name === 'summon_expert' ? { name } : undefined; } },
+    subagents: {
+      getProvider(name) {
+        assert.equal(name, 'spawn');
+        return { inheritsParentContext: false, capabilities: { persona: true, toolFilter: true } };
+      },
+      async start(name, request) {
+        starts.push({ name, request });
+        return {
+          result: Promise.resolve({ stopReason: 'completed', output: [{ type: 'text', text: report }] }),
+          async dispose() { disposed = true; },
+        };
+      },
+    },
+  };
+  const outcome = await runReview(ctx, parent, { mode: 'custom', instructions: '检查边界' }, new AbortController().signal, undefined, 'legacy-model');
+  assert.equal(outcome.status, 'completed-clean', outcome.detail);
+  assert.equal(starts.length, 1);
+  assert.equal(starts[0].name, 'spawn');
+  assert.equal(starts[0].request.label, '代码审查');
+  assert.equal(starts[0].request.parent, parent);
+  assert.equal(starts[0].request.prompt[0].text, '检查边界');
+  assert.equal(starts[0].request.agentOptions.model, 'legacy-model');
+  assert.match(starts[0].request.persona, /Write user-facing review content in Simplified Chinese/);
+  assert.deepEqual(starts[0].request.toolFilter.deny, ['dsh_code_review', 'summon_expert']);
+  assert.equal(disposed, true);
+});
+
 test('命令目录提供中英文描述', async t => {
   const zh = await setup(t);
   assert.deepEqual(Object.fromEntries(zh.ctx.commands.list(zh.parent).map(item => [item.name, item.description])), {

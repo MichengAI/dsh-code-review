@@ -2,6 +2,16 @@
 
 ## Unreleased / 未发布
 
+## 0.1.16 — 2026-10-15
+
+## 简体中文
+
+- 在仍受支持的旧版 DSH 上，代码审查可以再次启动，不再因为宿主接口差异而失败。
+
+## English
+
+- Code review starts again on supported older DSH versions instead of failing on a host interface difference.
+
 ## 0.1.15 — 2026-10-15
 
 ## 简体中文
