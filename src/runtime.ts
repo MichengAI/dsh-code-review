@@ -4,6 +4,7 @@ import type { Context } from '@deepseek-ai/cordis';
 import type { Agent } from '@deepseek-ai/dsh-agent';
 import { SessionId } from '@deepseek-ai/dsh-session';
 import type { SubagentActivation, SubagentResult, SubagentRun } from '@deepseek-ai/dsh-subagent';
+import { PERSONA_PREFIX_SECTION } from '@deepseek-ai/dsh-system-prompt';
 import type {} from '@deepseek-ai/dsh-tools';
 import { reviewPrompt, type Target } from './request.js';
 import { parseReport, REVIEW_PROMPT, type Report } from './report.js';
@@ -39,7 +40,7 @@ function awaitActivationResult(activation: SubagentActivation, signal: AbortSign
   });
 }
 
-/** 0.2.1-alpha.3 之前的启动请求。必须在服务对象上调用，不能拆出裸函数。 */
+/** 0.2.1-rc.1 之前的启动请求（如 0.2.0-rc.1 / 0.2.0-rc.2）。必须在服务对象上调用，不能拆出裸函数。 */
 interface LegacySubagents {
   start(name: string, request: {
     parent: Agent; label: string; signal: AbortSignal; persona: string;
@@ -50,8 +51,8 @@ interface LegacySubagents {
 
 /**
  * 原生 spawn 独立历史；只发送短任务，Git 和代码检查由子 Agent 自行完成。
- * 有 `startActivation` 时走 0.2.1-alpha.3：角色与工具过滤在子 Agent `agent/created` 时恢复。
- * 没有该方法时原样回退到 `start` 加启动期 `persona` / `toolFilter`。
+ * 有 `startActivation` 时走 0.2.1-rc.1：角色与工具过滤在子 Agent `agent/created` 时恢复。
+ * 0.2.0-rc 等没有该方法时回退到 `start` 加启动期 `persona` / `toolFilter`。
  */
 export async function runReview(ctx: Context, parent: Agent, target: Target, signal: AbortSignal, timeoutMs?: number, reviewModel?: string, locale: Locale = readHostLocale(ctx)): Promise<Outcome> {
   const t = (key: Parameters<typeof translate>[1]) => translate(locale, key);
@@ -73,8 +74,6 @@ export async function runReview(ctx: Context, parent: Agent, target: Target, sig
     let result: SubagentResult;
     if (typeof subagents.startActivation === 'function') {
       const childId = SessionId(randomUUID());
-      // 0.1.2-rc.1 没有这个导出；静态导入会让整个插件在旧宿主上加载失败。
-      const { PERSONA_PREFIX_SECTION } = await import('@deepseek-ai/dsh-system-prompt');
       const stop = ctx.on('agent/created', ({ agent }) => {
         if (agent.id !== childId) return undefined;
         agent.ctx.systemPrompt.section({

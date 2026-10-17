@@ -2,7 +2,7 @@ import * as primitives from '@deepseek-ai/dsh-client-ui-primitives';
 
 type Icon = (props: { size?: number }) => unknown;
 
-/** 0.1.7 用 Regular；0.1.6 仍导出带尺寸的旧名。菜单自己传入 size。 */
+/** 使用宿主提供的 Regular 图标。菜单自己传入 size。 */
 function slashIcon(...names: string[]): Icon | undefined {
   const bag = primitives as Record<string, unknown>;
   for (const name of names) {

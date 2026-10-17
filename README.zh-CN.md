@@ -12,7 +12,7 @@
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
 [![DSH Plugin](https://img.shields.io/badge/DSH-Plugin-0f766e.svg)](https://github.com/MichengAI/dsh-code-review)
-[![DSH 支持至 0.2.1-alpha.3](https://img.shields.io/badge/DSH-%E6%94%AF%E6%8C%81%E8%87%B3%200.2.1--alpha.3-2563eb.svg)](#宿主兼容性)
+[![DSH 支持至 0.2.1-rc.1](https://img.shields.io/badge/DSH-%E6%94%AF%E6%8C%81%E8%87%B3%200.2.1--rc.1-2563eb.svg)](#宿主兼容性)
 [![Node.js](https://img.shields.io/badge/Node.js-%E2%89%A522.19.0-339933.svg?logo=node.js&logoColor=white)](https://nodejs.org/)
 
 </div>
@@ -21,7 +21,7 @@ DSH Code Review 是 DeepSeek Harness 的社区代码审查插件，包名 `@mich
 
 ## 宿主兼容性
 
-当前版本支持这些确切的 DSH RC：`0.1.2-rc.1`、`0.1.5-rc.1`、`0.1.5-rc.2`、`0.1.5-rc.3`、`0.1.7-rc.1`、`0.1.7-rc.2`、`0.2.0-rc.1`、`0.2.0-rc.2`、`0.2.1-alpha.2`、`0.2.1-alpha.3`。历史旧版 alpha（0.1.6/0.1.7）、`0.0.1` 的 RC，以及未列出的版本不支持。peer 按这些确切版本用 `||` 列出，不写版本范围。通过 `dsh.bundle.patch` 加载。需要原生 `spawn` provider、`userQuestions` 服务、当前平台的问题回答器，以及支持工具调用的模型。
+当前版本支持这些确切的 DSH RC：`0.2.0-rc.1`、`0.2.0-rc.2`、`0.2.1-rc.1`。历史旧版 alpha、`0.1.x` 发行版、`0.0.1` 的 RC，以及未列出的版本不支持。peer 按这些确切版本用 `||` 列出，不写版本范围。通过 `dsh.bundle.patch` 加载。需要原生 `spawn` provider、`userQuestions` 服务、当前平台的问题回答器，以及支持工具调用的模型。
 
 可从 npm 安装，也可从源码构建。已验证离线宿主与安装包链路；真实模型的审查质量、语言遵循和不同平台的交互仍需实际验收。
 
@@ -100,7 +100,7 @@ dsh --profile web --dump-config
 | `reviewModel` | 同一模型提供方下的审查模型名称；省略时继承当前模型配置 |
 | `reportDirectory` | 报告存放的绝对路径；默认 `$DSH_HOME/code-review`，未设置 DSH_HOME 时为 `~/.dsh/code-review` |
 
-语言复用宿主 `locale.preference`：`en` / `en-*` 使用英文，其余按当前中英文支持范围默认中文。`0.1.7-rc.1` 及之后读取 `settings.describe()` 返回的 `locale` 配置条目。每轮开始固定语言，下轮读取新设置；命令目录描述和输入提示在插件加载时确定，更新它们需重新加载插件。未保存偏好或读取失败时默认中文，后端无法获取仅由浏览器自动检测的语言。
+语言复用宿主 `locale.preference`：`en` / `en-*` 使用英文，其余按当前中英文支持范围默认中文。读取 `settings.describe()` 返回的 `locale` 配置条目。每轮开始固定语言，下轮读取新设置；命令目录描述和输入提示在插件加载时确定，更新它们需重新加载插件。未保存偏好或读取失败时默认中文，后端无法获取仅由浏览器自动检测的语言。
 
 每个会话原子保存最近一份报告。交给会话的报告使用 DSH 可渲染的 GitHub Flavored Markdown：状态标题、发现小标题、带行号片段的本地文件链接和段落。历史报告正文不自动翻译；JSON 字段、枚举、代码和路径保持原样。宿主退出后不会自动续跑未完成审查。状态、取消和报告存储是 DSH 插件提供的能力。
 

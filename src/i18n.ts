@@ -7,13 +7,10 @@ function preferenceOf(section: unknown): unknown {
   return section && typeof section === 'object' ? (section as { preference?: unknown }).preference : undefined;
 }
 
-/** `0.1.7` 起设置服务不再提供命名空间 `get`；语言在 profile 条目 `locale` 的表单值里。更早的宿主仍有 `get`，因此优先探测它。 */
+/** `0.2.0` 起语言在 profile 条目 `locale` 的表单值里，通过 `settings.describe()` 读取。 */
 function readLocalePreference(settings: unknown): unknown {
   if (!settings || typeof settings !== 'object') return undefined;
-  const api = settings as { get?: (ns: string) => unknown; describe?: () => unknown };
-  if (typeof api.get === 'function') {
-    try { return preferenceOf(api.get('locale')); } catch { /* 新宿主已移除命名空间读取。 */ }
-  }
+  const api = settings as { describe?: () => unknown };
   if (typeof api.describe !== 'function') return undefined;
   try {
     const forms = api.describe();

@@ -62,7 +62,7 @@ test('斜杠菜单为审查命令补官方图标和中文标题，不覆盖已�
   dispose();
 });
 
-test('0.1.7 的 Regular 图标在旧尺寸名缺失时仍显示', async () => {
+test('Regular 图标在旧尺寸名缺失时仍显示', async () => {
   const review = () => null;
   const status = () => null;
   const cancel = () => null;

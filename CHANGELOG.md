@@ -2,6 +2,20 @@
 
 ## Unreleased / 未发布
 
+## 1.0.0 — 2026-10-17
+
+## 简体中文
+
+- 版本号升级至 1.0.0，支持版本矩阵聚焦 DSH 0.2.0 及后续正式 RC 版本（`0.2.0-rc.1`、`0.2.0-rc.2`、`0.2.1-rc.1`）。
+- 移除已废弃的 0.1.x 和中间 alpha 版本声明，清理老版本兼容分支（包括早期动态导入和过时的语言偏好探测）。
+- 开发依赖对齐官方最新 DSH `0.2.1-rc.1`（含 Cordis `4.0.5` 与 Schemastery `3.18.5`）。
+
+## English
+
+- Bump version to 1.0.0 and focus the supported host matrix on DSH 0.2.0 and later release candidates (`0.2.0-rc.1`, `0.2.0-rc.2`, `0.2.1-rc.1`).
+- Drop legacy 0.1.x peers and intermediate alpha declarations; remove outdated compatibility fallbacks.
+- Align development dependencies with official DSH `0.2.1-rc.1` (including Cordis `4.0.5` and Schemastery `3.18.5`).
+
 ## 0.1.16 — 2026-10-15
 
 ## 简体中文

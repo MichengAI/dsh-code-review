@@ -16,7 +16,7 @@ export interface Outcome {
 }
 /**
  * 原生 spawn 独立历史；只发送短任务，Git 和代码检查由子 Agent 自行完成。
- * 有 `startActivation` 时走 0.2.1-alpha.3：角色与工具过滤在子 Agent `agent/created` 时恢复。
- * 没有该方法时原样回退到 `start` 加启动期 `persona` / `toolFilter`。
+ * 有 `startActivation` 时走 0.2.1-rc.1：角色与工具过滤在子 Agent `agent/created` 时恢复。
+ * 0.2.0-rc 等没有该方法时回退到 `start` 加启动期 `persona` / `toolFilter`。
  */
 export declare function runReview(ctx: Context, parent: Agent, target: Target, signal: AbortSignal, timeoutMs?: number, reviewModel?: string, locale?: Locale): Promise<Outcome>;

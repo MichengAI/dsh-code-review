@@ -12,7 +12,7 @@
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
 [![DSH Plugin](https://img.shields.io/badge/DSH-Plugin-0f766e.svg)](https://github.com/MichengAI/dsh-code-review)
-[![DSH supported through 0.2.1-alpha.3](https://img.shields.io/badge/DSH-up%20to%200.2.1--alpha.3-2563eb.svg)](#host-compatibility)
+[![DSH supported through 0.2.1-rc.1](https://img.shields.io/badge/DSH-up%20to%200.2.1--rc.1-2563eb.svg)](#host-compatibility)
 [![Node.js](https://img.shields.io/badge/Node.js-%E2%89%A522.19.0-339933.svg?logo=node.js&logoColor=white)](https://nodejs.org/)
 
 </div>
@@ -21,7 +21,7 @@ DSH Code Review is a community code review plugin for DeepSeek Harness, packaged
 
 ## Host compatibility
 
-The current version supports these exact DSH release candidates: `0.1.2-rc.1`, `0.1.5-rc.1`, `0.1.5-rc.2`, `0.1.5-rc.3`, `0.1.7-rc.1`, `0.1.7-rc.2`, `0.2.0-rc.1`, `0.2.0-rc.2`, `0.2.1-alpha.2`, and `0.2.1-alpha.3`. Legacy alpha builds (0.1.6/0.1.7), `0.0.1` release candidates, and any version not in that list are not supported. Peers name those exact versions with `||`; they are not a semver range. It loads through `dsh.bundle.patch` and requires the native `spawn` provider, the `userQuestions` service, a question answerer for your platform, and a model that supports tool calls.
+The current version supports these exact DSH release candidates: `0.2.0-rc.1`, `0.2.0-rc.2`, and `0.2.1-rc.1`. Legacy alpha builds, `0.1.x` releases, `0.0.1` release candidates, and any version not in that list are not supported. Peers name those exact versions with `||`; they are not a semver range. It loads through `dsh.bundle.patch` and requires the native `spawn` provider, the `userQuestions` service, a question answerer for your platform, and a model that supports tool calls.
 
 Install the package from npm or build from source. Offline host and package integration checks have passed; review quality, language adherence, and interaction across platforms still need live validation.
 
@@ -100,7 +100,7 @@ All text after the command is treated as custom instructions, not CLI flags. `--
 | `reviewModel` | Review model within the same provider; otherwise inherits the current model configuration |
 | `reportDirectory` | Absolute report directory; defaults to `$DSH_HOME/code-review`, or `~/.dsh/code-review` when DSH_HOME is unset |
 
-Language follows the host's `locale.preference`: `en` / `en-*` selects English; other values default to Chinese within the current two-language support. On `0.1.7-rc.1` and later it is the `locale` profile entry returned by `settings.describe()`. Each review captures the locale at its start; the next review reads updated settings. Command catalog descriptions and input hints are resolved when the plugin loads and require a reload to update. Without a saved preference, or when the settings read fails, Chinese is used; the backend cannot read a language detected only in the browser.
+Language follows the host's `locale.preference`: `en` / `en-*` selects English; other values default to Chinese within the current two-language support. It reads the `locale` profile entry returned by `settings.describe()`. Each review captures the locale at its start; the next review reads updated settings. Command catalog descriptions and input hints are resolved when the plugin loads and require a reload to update. Without a saved preference, or when the settings read fails, Chinese is used; the backend cannot read a language detected only in the browser.
 
 The latest report is saved atomically per conversation. The session report uses GitHub Flavored Markdown that DSH renders: a status heading, finding headings, local file links with line fragments, and paragraphs. Historical report bodies are not translated. JSON keys, enum values, code, and paths remain unchanged. Unfinished reviews do not resume automatically after shutdown. Status, cancellation, and report storage are DSH plugin features.
 
