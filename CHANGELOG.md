@@ -2,6 +2,16 @@
 
 ## Unreleased / 未发布
 
+## 1.0.2 — 2026-10-24
+
+## 简体中文
+
+- 支持最新官方 DSH `0.2.1-rc.3`：将 peer 支持版本矩阵扩展至 `0.2.1-rc.3`。
+
+## English
+
+- Support latest official DSH `0.2.1-rc.3`: extend the peer matrix to include `0.2.1-rc.3`.
+
 ## 1.0.1 — 2026-10-17
 
 ## 简体中文
