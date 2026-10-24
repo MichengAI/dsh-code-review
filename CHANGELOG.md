@@ -2,6 +2,20 @@
 
 ## Unreleased / 未发布
 
+## 1.0.3 — 2026-10-24
+
+## 简体中文
+
+- 宿主准入机制全面升级：声明 `engines.dsh: ">=0.2.0-rc.1 <0.3.0-0"`，全面开放对 DeepSeek Harness 整个 `0.2.x` 系列的支持（包含已支持的 `0.2.0-rc.1` 起及后续全部 alpha/rc/正式版），非破坏性宿主升级无需再重复发版。
+- 解除 peerDependencies 逐版本锁定：所有 `@deepseek-ai/dsh-*` peer 依赖统一放宽至 `0.2.x` 代际范围。
+- 升级编译期开发依赖：将全部 `@deepseek-ai/dsh-*` 开发依赖对齐升级至最新 `0.2.1-rc.3`。
+
+## English
+
+- Upgrade host admission policy: Declare `engines.dsh: ">=0.2.0-rc.1 <0.3.0-0"` to support the entire DeepSeek Harness `0.2.x` line (including `0.2.0-rc.1` onwards, future alphas, RCs, and stable releases) without requiring routine plugin version bumps.
+- Decouple peerDependencies locks: Broaden all `@deepseek-ai/dsh-*` peer dependencies to the `0.2.x` generation range.
+- Upgrade build-time development dependencies: Synchronize all `@deepseek-ai/dsh-*` devDependencies to latest `0.2.1-rc.3`.
+
 ## 1.0.2 — 2026-10-24
 
 ## 简体中文
