@@ -33,7 +33,7 @@
     "LICENSE",
     "NOTICE",
     "CHANGELOG.md",
-    "assets/icon.webp"
+    "assets/icon.svg"
   ],
   "dsh": {
     "bundle": {
@@ -136,5 +136,5 @@
     "@deepseek-ai/cordis": "4.0.5",
     "@deepseek-ai/schemastery": "3.18.5"
   },
-  "icon": "assets/icon.webp"
+  "icon": "assets/icon.svg"
 }
