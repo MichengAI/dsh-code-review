@@ -2,6 +2,16 @@
 
 ## Unreleased / 未发布
 
+## 1.0.4 — 2026-10-27
+
+## 简体中文
+
+- 升级插件图标：采用透明矢量 SVG 图标（`assets/icon.svg`），增强在不同宿主主题与高分辨率屏幕下的显示清晰度。
+
+## English
+
+- Upgrade plugin icon: Adopt transparent vector SVG icon (`assets/icon.svg`) to enhance display clarity across various host themes and high-DPI screens.
+
 ## 1.0.3 — 2026-10-24
 
 ## 简体中文
