@@ -358,6 +358,7 @@ test('取消和超时等待 Agent 收敛，无残留', async t => {
   } });
   const timed = await runReview(slow.ctx, slow.parent, { mode: 'worktree' }, new AbortController().signal, 10);
   assert.equal(timed.status, 'interrupted');
+  assert.equal(timed.detail, '操作超时。');
 });
 
 test('结构化取消原因格式化为可读文本，不返回 [object Object]', async t => {
@@ -391,8 +392,7 @@ test('hook 取消原因携带具体原因文本', async t => {
   const s = await setup(t, empty, { before: async () => { controller.abort({ kind: 'hook', reason: '安全策略限制' }); } });
   const result = await runReview(s.ctx, s.parent, { mode: 'worktree' }, controller.signal);
   assert.equal(result.status, 'interrupted');
-  assert.match(result.detail, /操作已中止/);
-  assert.match(result.detail, /安全策略限制/);
+  assert.equal(result.detail, '操作已中止：安全策略限制');
 });
 
 test('审查中断与失败时抛出带有稳定 code 的 HarnessError', async t => {

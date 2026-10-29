@@ -35,7 +35,7 @@ function formatAbortReason(reason: unknown, locale: Locale = 'zh'): string {
       if (obj.kind === 'disposed') return t('会话已销毁。');
       if (obj.kind === 'hook') {
         const detail = typeof obj.reason === 'string' && obj.reason.trim() ? (locale === 'en' ? `: ${obj.reason.trim()}` : `：${obj.reason.trim()}`) : '';
-        return `${locale === 'en' ? 'Operation aborted' : '操作已中止'}${detail}${detail ? '' : (locale === 'en' ? '.' : '。')}`;
+        return `${t('操作已中止')}${detail}${detail ? '' : t('。')}`;
       }
       return `${t('操作已中止。')} (${obj.kind})`;
     }
@@ -157,7 +157,8 @@ export async function runReview(ctx: Context, parent: Agent, target: Target, sig
     let detail = combined.aborted
       ? formatAbortReason(combined.reason, locale)
       : (error instanceof Error ? error.message : formatAbortReason(error, locale));
-    if (combined.aborted && error instanceof Error && error.name !== 'AbortError' && error.message && error.message !== detail) {
+    const isDomAbort = error instanceof Error && (error.name === 'AbortError' || error.name === 'TimeoutError' || (typeof DOMException !== 'undefined' && error instanceof DOMException));
+    if (combined.aborted && error instanceof Error && !isDomAbort && error.message && error.message !== detail) {
       detail = `${detail} (${error.message})`;
     }
     outcome = { ...outcome, status: combined.aborted ? 'interrupted' : 'failed', detail };

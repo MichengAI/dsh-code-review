@@ -50,6 +50,8 @@ declare const en: {
     readonly '\u7528\u6237\u5DF2\u53D6\u6D88\u64CD\u4F5C\u3002': "Operation cancelled by user.";
     readonly '\u7236\u7EA7\u4EFB\u52A1\u5DF2\u53D6\u6D88\u3002': "Cancelled by parent task.";
     readonly '\u64CD\u4F5C\u5DF2\u4E2D\u6B62\u3002': "Operation aborted.";
+    readonly 操作已中止: "Operation aborted";
+    readonly '\u3002': ".";
     readonly '\u4F1A\u8BDD\u5DF2\u9500\u6BC1\u3002': "Session disposed.";
     readonly '\u64CD\u4F5C\u8D85\u65F6\u3002': "Operation timed out.";
     readonly 选择范围或输入自定义要求: "Select a scope or enter custom instructions";
