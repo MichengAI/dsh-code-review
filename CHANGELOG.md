@@ -2,6 +2,16 @@
 
 ## Unreleased / 未发布
 
+## 简体中文
+
+- 修复取消与中断场景下暴露 `[object Object]` 或英文的问题，支持结构化取消原因与 `/review-cancel` 的完整本地化。
+- 修复大语言模型在审查中断或失败时自主决策重试、导致同轮无弹窗死等的问题；工具抛出带稳定识别码的 `HarnessError`。
+
+## English
+
+- Fix `[object Object]` and untranslated English details during review cancellation/interruption, with full localization support for structured cancel reasons and `/review-cancel`.
+- Prevent models from autonomously retrying `dsh_code_review` upon interruption or failure, which caused silent deadlocks in turns without prompt windows; emit structured `HarnessError` codes.
+
 ## 1.0.4 — 2026-10-27
 
 ## 简体中文

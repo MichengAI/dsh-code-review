@@ -1,7 +1,7 @@
 import { readHostLocale, translate, outputLanguage, type Locale } from './i18n.js';
 import type { Context } from '@deepseek-ai/cordis';
 import type {} from '@deepseek-ai/dsh-commands';
-import { createUserMessage } from '@deepseek-ai/dsh-llm';
+import { HarnessError, createUserMessage } from '@deepseek-ai/dsh-llm';
 
 declare module '@deepseek-ai/dsh-llm' {
   interface MessageSourceMap {
@@ -80,13 +80,16 @@ export function apply(ctx: Context, config: Config = {}): void {
         durable = await ctx.sessions.flush(agent.session);
       } catch (error) { throw new Error(`${renderOutcome(result, locale)}\n\n${t('报告持久化失败：')}${String(error)}${t('；不能确认重启后可恢复。')}`); }
       const text = renderOutcome(result, locale) + (durable ? '' : '\n\n' + t('宿主未配置会话持久化后端；结构化报告已独立保存。'));
-      if (['failed', 'interrupted', 'invalid-output', 'stale'].includes(result.status)) throw new Error(text);
+      if (['failed', 'interrupted', 'invalid-output', 'stale'].includes(result.status)) {
+        const code = result.status === 'interrupted' ? 'REVIEW_INTERRUPTED' : 'REVIEW_FAILED';
+        throw new HarnessError(text, code);
+      }
       return text;
     } finally { active.delete(agent.id); }
   }
 
   ctx.tools.register({
-    name: 'dsh_code_review', description: '使用完整 Codex 规范，通过 DSH 原生 spawn 子 Agent 自行检查 Git 状态、差异与相关代码并返回报告。input 为空时通过原生问题选择范围；非空时整段作为自定义要求，不解析 CLI 选项。',
+    name: 'dsh_code_review', description: '使用完整 Codex 规范，通过 DSH 原生 spawn 子 Agent 自行检查 Git 状态、差异与相关代码并返回报告。一次性终态工具，执行失败或中断时直接向用户呈现结果，禁止在同一轮次中自动重试。input 为空时通过原生问题选择范围；非空时整段作为自定义要求，不解析 CLI 选项。',
     parameters: { type: 'object', properties: { input: { type: 'string', description: '空字符串打开范围选择；非空字符串是完整自定义审查要求，保留原文。' } }, required: ['input'], additionalProperties: false },
     output: { schema: { type: 'string' }, render: (_args, value) => [{ type: 'text', text: String(value) }] },
     execute(args, exec) {

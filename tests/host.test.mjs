@@ -369,6 +369,40 @@ test('结构化取消原因格式化为可读文本，不返回 [object Object]'
   assert.match(result.detail, /用户已取消操作/);
 });
 
+test('无参 abort（如 /review-cancel）在中文环境下输出中文中止说明', async t => {
+  const controller = new AbortController();
+  const s = await setup(t, empty, { before: async () => { controller.abort(); } });
+  const result = await runReview(s.ctx, s.parent, { mode: 'worktree' }, controller.signal);
+  assert.equal(result.status, 'interrupted');
+  assert.match(result.detail, /操作已中止/);
+  assert.doesNotMatch(result.detail, /This operation was aborted/);
+});
+
+test('英文环境下取消原因输出英文本地化文本', async t => {
+  const controller = new AbortController();
+  const s = await setup(t, empty, { locale: 'en', before: async () => { controller.abort({ kind: 'user' }); } });
+  const result = await runReview(s.ctx, s.parent, { mode: 'worktree' }, controller.signal, undefined, undefined, 'en');
+  assert.equal(result.status, 'interrupted');
+  assert.match(result.detail, /Operation cancelled by user/);
+});
+
+test('hook 取消原因携带具体原因文本', async t => {
+  const controller = new AbortController();
+  const s = await setup(t, empty, { before: async () => { controller.abort({ kind: 'hook', reason: '安全策略限制' }); } });
+  const result = await runReview(s.ctx, s.parent, { mode: 'worktree' }, controller.signal);
+  assert.equal(result.status, 'interrupted');
+  assert.match(result.detail, /操作已中止/);
+  assert.match(result.detail, /安全策略限制/);
+});
+
+test('审查中断与失败时抛出带有稳定 code 的 HarnessError', async t => {
+  const controller = new AbortController();
+  const s = await setup(t, empty, { before: async () => { controller.abort(); } });
+  const result = await s.ctx.tools.execute({ name: 'dsh_code_review', arguments: { input: '' }, agent: s.parent, callId: 'err-test', signal: controller.signal });
+  assert.equal(result.isError, true);
+  assert.equal(result.error?.info?.code, 'REVIEW_INTERRUPTED');
+});
+
 test('/review 提示词严格禁止在失败或中断时自主重试调用工具', async t => {
   const s = await setup(t, empty, { orchestrate: true, reviewInput: '检查边界' });
   await s.command('/review 检查边界');
