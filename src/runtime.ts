@@ -15,7 +15,7 @@ export interface Outcome { id: string; status: Status; detail: string; fingerpri
 // 与 Agency 专家一致：角色由 provider 组合，禁止递归召唤专家，权限由宿主委派。
 const delegatedTools = ['dsh_code_review', 'summon_expert', 'summon_experts', 'list_experts', 'list_expert_teams', 'get_expert_team', 'summon_expert_team'];
 
-export function formatAbortReason(reason: unknown, locale: Locale = 'zh'): string {
+function formatAbortReason(reason: unknown, locale: Locale = 'zh'): string {
   const t = (key: Parameters<typeof translate>[1]) => translate(locale, key);
   if (reason instanceof Error) {
     if (reason.name === 'AbortError' || reason.message === 'This operation was aborted') return t('操作已中止。');
@@ -33,10 +33,9 @@ export function formatAbortReason(reason: unknown, locale: Locale = 'zh'): strin
       if (obj.kind === 'user') return t('用户已取消操作。');
       if (obj.kind === 'parent') return t('父级任务已取消。');
       if (obj.kind === 'disposed') return t('会话已销毁。');
-      if (obj.kind === 'timeout') return t('操作超时。');
       if (obj.kind === 'hook') {
-        const detail = typeof obj.reason === 'string' && obj.reason.trim() ? `: ${obj.reason.trim()}` : '';
-        return `${t('操作已中止。')}${detail}`;
+        const detail = typeof obj.reason === 'string' && obj.reason.trim() ? (locale === 'en' ? `: ${obj.reason.trim()}` : `：${obj.reason.trim()}`) : '';
+        return `${locale === 'en' ? 'Operation aborted' : '操作已中止'}${detail}${detail ? '' : (locale === 'en' ? '.' : '。')}`;
       }
       return `${t('操作已中止。')} (${obj.kind})`;
     }
@@ -155,9 +154,12 @@ export async function runReview(ctx: Context, parent: Agent, target: Target, sig
       detail: t('审查完成。'), report };
   } catch (error) {
     abortedEarly = combined.aborted;
-    const detail = combined.aborted
-      ? formatAbortReason(combined.reason ?? error, locale)
+    let detail = combined.aborted
+      ? formatAbortReason(combined.reason, locale)
       : (error instanceof Error ? error.message : formatAbortReason(error, locale));
+    if (combined.aborted && error instanceof Error && error.name !== 'AbortError' && error.message && error.message !== detail) {
+      detail = `${detail} (${error.message})`;
+    }
     outcome = { ...outcome, status: combined.aborted ? 'interrupted' : 'failed', detail };
   } finally {
     const handle = activation ?? legacyRun;

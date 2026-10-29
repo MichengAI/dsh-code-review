@@ -14,7 +14,6 @@ export interface Outcome {
     report?: Report;
     raw?: string;
 }
-export declare function formatAbortReason(reason: unknown, locale?: Locale): string;
 /**
  * 原生 spawn 独立历史；只发送短任务，Git 和代码检查由子 Agent 自行完成。
  * 有 `startActivation` 时走 0.2.1-rc.1：角色与工具过滤在子 Agent `agent/created` 时恢复。
