@@ -47,6 +47,11 @@ declare const en: {
     readonly '\u5BA1\u67E5\u4E2D\u65AD\uFF1A\u5B58\u5728\u542F\u52A8\u8BB0\u5F55\u4F46\u6CA1\u6709\u5B8C\u6210\u62A5\u544A\uFF0C\u8BF7\u91CD\u65B0\u8FD0\u884C\u3002': "Review interrupted: a start record exists without a completed report. Please run it again.";
     readonly '\u6CA1\u6709\u5DF2\u4FDD\u5B58\u7684\u5BA1\u67E5\u7ED3\u679C\u3002': "No saved review result.";
     readonly '\u5BA1\u67E5\u8BB0\u5F55\u8BFB\u53D6\u5931\u8D25\uFF1A': "Failed to read the review record: ";
+    readonly '\u7528\u6237\u5DF2\u53D6\u6D88\u64CD\u4F5C\u3002': "Operation cancelled by user.";
+    readonly '\u7236\u7EA7\u4EFB\u52A1\u5DF2\u53D6\u6D88\u3002': "Cancelled by parent task.";
+    readonly '\u64CD\u4F5C\u5DF2\u4E2D\u6B62\u3002': "Operation aborted.";
+    readonly '\u4F1A\u8BDD\u5DF2\u9500\u6BC1\u3002': "Session disposed.";
+    readonly '\u64CD\u4F5C\u8D85\u65F6\u3002': "Operation timed out.";
     readonly 选择范围或输入自定义要求: "Select a scope or enter custom instructions";
     readonly '\u7559\u7A7A\u63D0\u4EA4\u4EE5\u9009\u62E9\u8303\u56F4\uFF1B\u6216\u8F93\u5165\u5B8C\u6574\u7684\u81EA\u5B9A\u4E49\u5BA1\u67E5\u8981\u6C42': "Submit empty to select a scope, or enter complete custom review instructions";
     readonly '\u5DF2\u5C06\u5BA1\u67E5\u8BF7\u6C42\u63D0\u4EA4\u5230\u5F53\u524D\u4F1A\u8BDD\uFF0C\u5C06\u901A\u8FC7\u539F\u751F\u5B50 Agent \u6267\u884C\u3002': "Review requested in the current session; a native subagent will perform it.";

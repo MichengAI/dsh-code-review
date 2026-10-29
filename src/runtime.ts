@@ -15,22 +15,44 @@ export interface Outcome { id: string; status: Status; detail: string; fingerpri
 // 与 Agency 专家一致：角色由 provider 组合，禁止递归召唤专家，权限由宿主委派。
 const delegatedTools = ['dsh_code_review', 'summon_expert', 'summon_experts', 'list_experts', 'list_expert_teams', 'get_expert_team', 'summon_expert_team'];
 
-function abortError(signal: AbortSignal): Error {
+function formatAbortReason(reason: unknown, locale: Locale = 'zh'): string {
+  const t = (key: Parameters<typeof translate>[1]) => translate(locale, key);
+  if (reason instanceof Error) return reason.message;
+  if (typeof reason === 'string' && reason.trim()) return reason.trim();
+  if (typeof reason === 'object' && reason !== null) {
+    const obj = reason as Record<string, unknown>;
+    if (typeof obj.message === 'string' && obj.message.trim()) return obj.message.trim();
+    if (typeof obj.kind === 'string') {
+      if (obj.kind === 'user') return t('用户已取消操作。');
+      if (obj.kind === 'parent') return t('父级任务已取消。');
+      if (obj.kind === 'disposed') return t('会话已销毁。');
+      if (obj.kind === 'timeout') return t('操作超时。');
+      return `${t('操作已中止。')} (${obj.kind})`;
+    }
+    try {
+      const json = JSON.stringify(obj);
+      if (json && json !== '{}') return json;
+    } catch {}
+  }
+  return t('操作已中止。');
+}
+
+function abortError(signal: AbortSignal, locale: Locale = 'zh'): Error {
   const reason = signal.reason;
   if (reason instanceof Error) return reason;
-  return Object.assign(new Error(reason === undefined ? 'This operation was aborted' : String(reason)), { name: 'AbortError' });
+  return Object.assign(new Error(formatAbortReason(reason, locale)), { name: 'AbortError' });
 }
 
 /** 等待 activation 结果；调用方 abort 时立即失败并 fire-and-forget dispose，避免与未协作的 LLM stream 死锁。 */
-function awaitActivationResult(activation: SubagentActivation, signal: AbortSignal): Promise<SubagentResult> {
+function awaitActivationResult(activation: SubagentActivation, signal: AbortSignal, locale: Locale = 'zh'): Promise<SubagentResult> {
   if (signal.aborted) {
     void activation.dispose();
-    return Promise.reject(abortError(signal));
+    return Promise.reject(abortError(signal, locale));
   }
   return new Promise<SubagentResult>((resolve, reject) => {
     const onAbort = () => {
       void activation.dispose();
-      reject(abortError(signal));
+      reject(abortError(signal, locale));
     };
     signal.addEventListener('abort', onAbort, { once: true });
     activation.result.then(
@@ -100,7 +122,7 @@ export async function runReview(ctx: Context, parent: Agent, target: Target, sig
       } finally {
         stop();
       }
-      result = await awaitActivationResult(activation, combined);
+      result = await awaitActivationResult(activation, combined, locale);
     } else {
       const capabilities = provider.capabilities as { persona?: boolean; toolFilter?: boolean };
       if (!capabilities.persona || !capabilities.toolFilter || typeof subagents.start !== 'function') throw new Error(t('需要独立上下文的原生 spawn provider。'));
@@ -121,7 +143,10 @@ export async function runReview(ctx: Context, parent: Agent, target: Target, sig
       detail: t('审查完成。'), report };
   } catch (error) {
     abortedEarly = combined.aborted;
-    outcome = { ...outcome, status: combined.aborted ? 'interrupted' : 'failed', detail: error instanceof Error ? error.message : String(error) };
+    const detail = error instanceof Error
+      ? (error.message === '[object Object]' ? formatAbortReason(combined.reason, locale) : error.message)
+      : formatAbortReason(error, locale);
+    outcome = { ...outcome, status: combined.aborted ? 'interrupted' : 'failed', detail };
   } finally {
     const handle = activation ?? legacyRun;
     if (handle) {

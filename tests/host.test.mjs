@@ -359,6 +359,22 @@ test('取消和超时等待 Agent 收敛，无残留', async t => {
   const timed = await runReview(slow.ctx, slow.parent, { mode: 'worktree' }, new AbortController().signal, 10);
   assert.equal(timed.status, 'interrupted');
 });
+
+test('结构化取消原因格式化为可读文本，不返回 [object Object]', async t => {
+  const controller = new AbortController();
+  const s = await setup(t, empty, { before: async () => { controller.abort({ kind: 'user' }); } });
+  const result = await runReview(s.ctx, s.parent, { mode: 'worktree' }, controller.signal);
+  assert.equal(result.status, 'interrupted');
+  assert.doesNotMatch(result.detail, /\[object Object\]/);
+  assert.match(result.detail, /用户已取消操作/);
+});
+
+test('/review 提示词严格禁止在失败或中断时自主重试调用工具', async t => {
+  const s = await setup(t, empty, { orchestrate: true, reviewInput: '检查边界' });
+  await s.command('/review 检查边界');
+  await s.parent.whenIdle();
+  assert.match(JSON.stringify(s.requests[0].messages), /NEVER retry or call dsh_code_review again/);
+});
 test('持久化后端失败明确返回错误', async t => {
   const s = await setup(t);
   s.ctx.on('session/flush', () => { throw new Error('disk full fixture'); });
