@@ -2,6 +2,16 @@
 
 ## Unreleased / 未发布
 
+## 1.0.6 — 2026-11-03
+
+## 简体中文
+
+- 扩展宿主兼容支持：全面验证 DSH 最新预发布版本 `0.2.2-alpha.3` 与全系 RC（覆盖至 `0.2.1-rc.5`），确保代码审查子代理与命令流程平稳运行。
+
+## English
+
+- Extend host compatibility support: verified compatibility across DSH latest prerelease `0.2.2-alpha.3` and all RCs up to `0.2.1-rc.5`, ensuring seamless review subagent execution.
+
 ## 1.0.5 — 2026-10-29
 
 ## 简体中文
