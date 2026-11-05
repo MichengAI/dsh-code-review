@@ -1,75 +1,75 @@
 <p align="center">
-  <img src="assets/branding/dsh-code-review-banner.png" alt="DSH Code Review" width="100%">
+  <img src="assets/branding/dsh-code-review-banner-zh-CN.png" alt="DSH Code Review" width="100%">
 </p>
 
 <div align="center">
 
 # DSH Code Review
 
-**Start a review in your conversation. Let an independent agent inspect the code and bring back findings.**
+**在当前会话发起审查，让独立 Agent 检查代码并带回报告**
 
-[简体中文](README.zh-CN.md) · [Developer docs](docs/00-交接入口/00-阅读导航.md) · [Changelog](CHANGELOG.md) · [Apache-2.0](LICENSE)
+[English](README.en.md) · [开发文档](docs/00-交接入口/00-阅读导航.md) · [更新日志](CHANGELOG.md) · [Apache-2.0](LICENSE)
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
 [![DSH Plugin](https://img.shields.io/badge/DSH-Plugin-0f766e.svg)](https://github.com/MichengAI/dsh-code-review)
-[![DSH supported through 0.2.2-rc.1](https://img.shields.io/badge/DSH-up%20to%200.2.2--rc.1-2563eb.svg)](#host-compatibility)
+[![DSH 支持至 0.2.2-rc.1](https://img.shields.io/badge/DSH-%E6%94%AF%E6%8C%81%E8%87%B3%200.2.2--rc.1-2563eb.svg)](#宿主兼容性)
 [![Node.js](https://img.shields.io/badge/Node.js-%E2%89%A522.19.0-339933.svg?logo=node.js&logoColor=white)](https://nodejs.org/)
 
 </div>
 
-DSH Code Review is a community code review plugin for DeepSeek Harness, packaged as `@michengai/dsh-code-review`. Enter `/review`, choose a scope or describe your request, and a native independent subagent inspects Git, source files, callers, and tests before returning a report to the main conversation. No Codex installation is required.
+DSH Code Review 是 DeepSeek Harness 的社区代码审查插件，包名 `@michengai/dsh-code-review`。在当前会话输入 `/review`，选择范围或写下要求，原生独立子 Agent 会自行检查 Git、源码、调用方和测试，再把报告返回主会话。无需安装 Codex。
 
-## Host compatibility
+## 宿主兼容性
 
-Host compatibility: Full DeepSeek Harness `0.2.x` line (`>=0.2.0-rc.1 <0.3.0-0`), verified with `0.2.0-rc.1`, `0.2.0-rc.2`, `0.2.1-rc.1`–`0.2.1-rc.5`, and `0.2.2-rc.1`, and forwards-compatible with subsequent `0.2.x` RC releases without requiring routine plugin version bumps. Legacy versions and breaking changes in the `0.3.0` generation are rejected by the version gate. It loads through `dsh.bundle.patch` and requires the native `spawn` provider, the `userQuestions` service, a question answerer for your platform, and a model that supports tool calls.
+宿主支持范围：DeepSeek Harness `0.2.x` 全系列（`>=0.2.0-rc.1 <0.3.0-0`），已验证兼容 `0.2.0-rc.1`、`0.2.0-rc.2`、`0.2.1-rc.1`～`0.2.1-rc.5`、`0.2.2-rc.1`，并自动支持后续全部 0.2.x RC 版本，同代宿主升级无需重复等待发版。早期版本与 `0.3.0` 代际破坏性更新由版本门拦截。通过 `dsh.bundle.patch` 加载。需要原生 `spawn` provider、`userQuestions` 服务、当前平台的问题回答器，以及支持工具调用的模型。
 
-Install the package from npm or build from source. Offline host and package integration checks have passed; review quality, language adherence, and interaction across platforms still need live validation.
+可从 npm 安装，也可从源码构建。已验证离线宿主与安装包链路；真实模型的审查质量、语言遵循和不同平台的交互仍需实际验收。
 
-## What you can do
+## 你可以做什么
 
-- **Choose a scope**: compare against a base branch, review uncommitted changes, select a commit, or provide custom instructions.
-- **Let the reviewer gather evidence**: an independent context reads Git, relevant code, and tests without receiving a preloaded repository snapshot.
-- **Read results in the main conversation**: receive prioritized findings with file paths and line numbers. Plain-text model responses are preserved.
-- **Use English or Chinese reports**: a separate language context follows the host preference while preserving the original English Codex rubric.
-- **Check status or cancel**: recover the latest report or cancel scope selection and an active review.
+- **选择审查范围**：对比基准分支、检查未提交更改、选择一次提交，或输入自定义要求。
+- **让审查 Agent 自行取证**：独立上下文读取 Git、相关代码和测试，不提前注入全仓代码快照。
+- **在主会话查看结果**：接收带优先级、文件路径和行号的发现；模型返回普通文本时保留原文。
+- **使用中英文报告**：通过独立语言上下文跟随宿主语言偏好，保留 Codex 英文规范原文。
+- **查看状态或取消**：恢复最近一份报告，或取消范围选择和进行中的审查。
 
-## Prerequisites
+## 环境要求
 
-- A working DeepSeek Harness installation with `dsh` available in PowerShell.
-- Node.js ≥ `22.19.0`, npm, and Git. Node.js must also meet your installed DSH version's requirements.
-- Examples use the `web` profile; replace it with the profile running DSH.
+- 已安装 DeepSeek Harness，PowerShell 中可运行 `dsh`。
+- Node.js ≥ `22.19.0`、npm 和 Git；Node.js 同时应满足所安装 DSH 的要求。
+- 示例使用 `web` profile，请替换为实际运行 DSH 的 profile。
 
-## DSH product ecosystem
+## DSH 产品生态
 
-For a desktop workbench, download [DSH Codex Desktop](https://github.com/MichengAI/dsh-codex-desktop/releases). Existing [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) installations can add plugins as needed by following each project's README. Below are 11 first-party plugins; consult the corresponding desktop release notes and bundled catalog for what that version includes.
+想使用桌面工作台，可下载 [DSH Codex Desktop](https://github.com/MichengAI/dsh-codex-desktop/releases)；已有 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 环境，可按各项目 README 按需安装。以下列出 11 个自研插件；桌面端实际随附范围以对应版本的发行说明和内置清单为准。
 
-| Plugin | What you can do |
+| 插件 | 你可以用它做什么 |
 | --- | --- |
-| [Codex UI](https://github.com/MichengAI/dsh-codex-ui) | Organize projects and conversations, search tasks, and navigate chat turns |
-| [Agency Agents](https://github.com/MichengAI/dsh-agency-agents) | Choose and summon specialists for your task |
-| [Skills Manager](https://github.com/MichengAI/dsh-skills-manager) | Find, enable, create, and import local skills |
-| [Archive Manager](https://github.com/MichengAI/dsh-archive-manager) | Search, restore, or clean up archived conversations |
-| [IM Connect](https://github.com/MichengAI/dsh-im-connect) | Send tasks and receive replies through messaging platforms |
-| [Automation](https://github.com/MichengAI/dsh-automation) | Schedule tasks and review each run |
-| [BTW](https://github.com/MichengAI/dsh-btw) | Ask side questions without interrupting the main task |
-| [Simplify](https://github.com/MichengAI/dsh-simplify) | Use `/simplify` to improve code within your Git changes |
-| [PUA](https://github.com/MichengAI/dsh-pua) | Guide the Agent to try new approaches after failures, investigate causes, and verify results before completion |
-| [Code Review](https://github.com/MichengAI/dsh-code-review) | Use `/review` to request an independent Agent code review and receive the report in the current conversation |
-| [Codex Pet](https://github.com/MichengAI/dsh-codex-pet) | View conversation notifications and respond to tool approvals and questions through a desktop pet |
+| [Codex UI](https://github.com/MichengAI/dsh-codex-ui) | 整理项目与会话、搜索任务、跳转对话轮次 |
+| [Agency Agents](https://github.com/MichengAI/dsh-agency-agents) | 按任务选择并召唤专业角色 |
+| [Skills Manager](https://github.com/MichengAI/dsh-skills-manager) | 统一查找、启停、创建和导入本机技能 |
+| [Archive Manager](https://github.com/MichengAI/dsh-archive-manager) | 搜索、恢复或清理已归档会话 |
+| [IM Connect](https://github.com/MichengAI/dsh-im-connect) | 从消息平台下任务、收回复 |
+| [Automation](https://github.com/MichengAI/dsh-automation) | 按计划执行任务，查看每次运行的结果 |
+| [BTW](https://github.com/MichengAI/dsh-btw) | 在当前上下文中临时旁问，不打断主任务 |
+| [Simplify](https://github.com/MichengAI/dsh-simplify) | 用 `/simplify` 整理 Git 改动范围内的代码 |
+| [PUA](https://github.com/MichengAI/dsh-pua) | 引导 Agent 在失败时换方法、查原因，并在完成前验证结果 |
+| [Code Review](https://github.com/MichengAI/dsh-code-review) | 用 `/review` 发起独立 Agent 代码审查，在当前会话接收报告 |
+| [Codex Pet](https://github.com/MichengAI/dsh-codex-pet) | 通过桌面宠物查看会话提醒、处理工具审批和问题回答 |
 
-## Installation
+## 安装
 
-### Ask an agent to install it (recommended)
+### 让 Agent 安装（推荐）
 
-Send this prompt to an agent with local terminal access:
+将以下要求发送给能访问本地终端的 Agent：
 
 ```text
-Install the DSH plugin @michengai/dsh-code-review into my local web profile: run dsh plugin --profile web add @michengai/dsh-code-review@latest --registry=https://registry.npmjs.org/, then dsh --profile web --dump-config. Confirm the plugin is loaded and explain how to restart DSH and use /review. Stop and report the cause if any step fails.
+请安装 DSH 插件 @michengai/dsh-code-review 到本机 web profile：执行 dsh plugin --profile web add @michengai/dsh-code-review@latest --registry=https://registry.npmjs.org/，再运行 dsh --profile web --dump-config，确认插件已加载，并说明如何重启 DSH 和使用 /review。任一步失败请停止并报告原因。
 ```
 
-### Install manually
+### 手动安装
 
-Run these commands:
+执行以下命令：
 
 ```powershell
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
@@ -78,53 +78,53 @@ dsh plugin --profile web add @michengai/dsh-code-review@latest --registry=https:
 dsh --profile web --dump-config
 ```
 
-Continue only after each step succeeds. Restart the DSH backend you actually use, then enter `/review`. This is a native plugin, not a `SKILL.md` bundle; do not copy `lib` manually.
+各步成功后再执行下一步。重启实际运行的 DSH 后端，再输入 `/review`。这是原生插件，无需手工复制 `lib`，也不是 `SKILL.md` 技能包。
 
-## Usage
+## 使用
 
-| Goal | Input |
+| 目标 | 输入 |
 | --- | --- |
-| Open scope selection | `/review` |
-| Set a custom focus | `/review Check the previous commit for authorization regressions` |
-| View progress or the latest report | `/review-status` |
-| Cancel selection or an active review | `/review-cancel` |
+| 打开范围选择 | `/review` |
+| 自定义审查重点 | `/review 检查上一提交的权限回归` |
+| 查看进度或最近报告 | `/review-status` |
+| 取消选择或正在运行的审查 | `/review-cancel` |
 
-Empty input offers four options: base branch, uncommitted changes, a commit, and custom instructions. Uncommitted scope includes staged, unstaged, and untracked files. The base menu lists local branches; the commit menu lists the latest 100 commits. Other refs can be entered as free text.
+空输入提供四项：对比基准分支、审查未提交更改、审查某次提交、自定义要求。未提交范围包括暂存、未暂存和未跟踪文件。基准菜单列出本地分支；提交菜单列出最近 100 条提交，也可自由输入其他引用。
 
-All text after the command is treated as custom instructions, not CLI flags. `--base main`, `.`, and `status` are passed as ordinary text. The subagent determines and retrieves the context it needs. “Review the entire project” is passed verbatim, but does not mean the program has verified complete file-by-file coverage.
+命令后面的整段文本都是自定义要求，不解析 CLI 参数。`--base main`、`.`、`status` 均按普通文字传递。审查范围和所需上下文由子 Agent 自行判断和获取；“审查全项目”会原样传递，但不代表程序已验证逐文件完整覆盖。
 
-## Configuration and reports
+## 配置与报告
 
-| Optional setting | Behavior |
+| 可选配置 | 行为 |
 | --- | --- |
-| `reviewModel` | Review model within the same provider; otherwise inherits the current model configuration |
-| `reportDirectory` | Absolute report directory; defaults to `$DSH_HOME/code-review`, or `~/.dsh/code-review` when DSH_HOME is unset |
+| `reviewModel` | 同一模型提供方下的审查模型名称；省略时继承当前模型配置 |
+| `reportDirectory` | 报告存放的绝对路径；默认 `$DSH_HOME/code-review`，未设置 DSH_HOME 时为 `~/.dsh/code-review` |
 
-Language follows the host's `locale.preference`: `en` / `en-*` selects English; other values default to Chinese within the current two-language support. It reads the `locale` profile entry returned by `settings.describe()`. Each review captures the locale at its start; the next review reads updated settings. Command catalog descriptions and input hints are resolved when the plugin loads and require a reload to update. Without a saved preference, or when the settings read fails, Chinese is used; the backend cannot read a language detected only in the browser.
+语言复用宿主 `locale.preference`：`en` / `en-*` 使用英文，其余按当前中英文支持范围默认中文。读取 `settings.describe()` 返回的 `locale` 配置条目。每轮开始固定语言，下轮读取新设置；命令目录描述和输入提示在插件加载时确定，更新它们需重新加载插件。未保存偏好或读取失败时默认中文，后端无法获取仅由浏览器自动检测的语言。
 
-The latest report is saved atomically per conversation. The session report uses GitHub Flavored Markdown that DSH renders: a status heading, finding headings, local file links with line fragments, and paragraphs. Historical report bodies are not translated. JSON keys, enum values, code, and paths remain unchanged. Unfinished reviews do not resume automatically after shutdown. Status, cancellation, and report storage are DSH plugin features.
+每个会话原子保存最近一份报告。交给会话的报告使用 DSH 可渲染的 GitHub Flavored Markdown：状态标题、发现小标题、带行号片段的本地文件链接和段落。历史报告正文不自动翻译；JSON 字段、枚举、代码和路径保持原样。宿主退出后不会自动续跑未完成审查。状态、取消和报告存储是 DSH 插件提供的能力。
 
-## FAQ
+## 常见问题
 
-### Is this identical to Codex?
+### 与 Codex 完全一样吗？
 
-The rubric and short task templates follow the fixed source commit `a592c38c16cdd7623dacc9168926ebccedfb67d3`. Questions, tools, permissions, and event presentation use native DSH capabilities. This is not a pixel-perfect Codex Desktop clone, and different models may produce different findings.
+审查规范和短任务模板对照固定源码提交 `a592c38c16cdd7623dacc9168926ebccedfb67d3`。问题界面、工具、权限和事件展示使用 DSH 原生能力，不是 Codex Desktop 的像素复刻；不同模型不保证相同发现。
 
-### Can a review change code?
+### 审查会修改代码吗？
 
-The review instructions request no fixes, but the tool layer is not universally read-only. Execution follows Agency experts: native `spawn` installs the reviewer persona while preserving the host's other system sections and tools. Only recursive code review and expert invocation tools are denied. The host fixes permissions at delegation time; the plugin neither overrides approval policy nor forwards child approval requests. The host rejects operations outside that scope, and the reviewer returns a report explaining evidence and test limitations.
+审查要求不生成修复，但工具层并非强制全部只读。执行方式与 Agency 专家一致：通过原生 `spawn` 注入审查角色，保留宿主其余系统提示和工具，只禁用递归代码审查及专家召唤工具。权限由宿主在委派时确定，插件不改写审批策略，也不转发子会话审批。受权限限制的操作会由宿主拒绝，审查 Agent 说明证据和测试缺口后返回报告。
 
-If Git fails during Windows sandbox preparation, or tests fail with `spawn EPERM`, the parent session must handle the host environment or permissions before starting another review. “Completed” means the Agent returned a report; it does not guarantee that every diff was inspected or tests passed. Read the report for those limitations.
+若 Git 命令报 Windows 沙箱准备失败，或测试报 `spawn EPERM`，需要由主会话处理宿主环境或权限，再重新发起审查。报告中的“完成”表示 Agent 已返回，不保证取得全部 diff 或成功运行测试；具体限制以报告正文为准。
 
-### What if nothing appears after installation?
+### 安装后没有输出怎么办？
 
-Check that installation and runtime use the same profile, restart the DSH backend, and confirm `dsh --profile web --dump-config` includes the plugin. Empty `/review` requires a host question answerer, and the main model must support the `dsh_code_review` tool. Use `/review-status` to inspect the record; a request acknowledgement is not review completion.
+确认安装和运行使用同一 profile，重启 DSH 后端，再检查 `dsh --profile web --dump-config` 是否包含插件。空 `/review` 需要宿主问题回答器，主模型也必须支持 `dsh_code_review` 工具调用。可用 `/review-status` 查看记录；不要把“已提交请求”当成审查完成。
 
-### Why might I still see another language?
+### 中文界面为什么仍可能看到英文？
 
-Explicitly select Chinese or English in host settings. Model language is controlled by instructions and cannot be guaranteed. Raw external-tool errors, code, and historical reports are not automatically translated.
+请在宿主明确选择中文或英文。模型输出由语言指令约束，无法保证始终遵守；外部工具的原始错误、代码和历史报告不会自动翻译。
 
-## Development and contributing
+## 开发与贡献
 
 ```powershell
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
@@ -135,21 +135,21 @@ npm run verify:package
 dsh plugin --profile web add .\michengai-dsh-code-review-0.1.3.tgz --ignore-scripts
 ```
 
-`check` covers TypeScript, prompt hashes, short tasks, real AgentLoop regression tests with offline models, and documentation links. `verify:package` checks bundle loading, peers, and installed-package host integration in an isolated profile. These checks do not replace live model validation. GitHub and npm both include a ready-to-run `lib`; after changing source, run `npm run build` before committing.
+`check` 包含 TypeScript、提示词哈希、短任务与真实 AgentLoop 配合离线模型的回归，以及文档链接检查。`verify:package` 在隔离 profile 验证 bundle、peer 和安装包宿主链路。这些检查不替代在线模型验收。GitHub 与 npm 都包含可直接运行的 `lib`；改了源码后，提交前运行 `npm run build`。
 
-| Entry | Responsibility |
+| 入口 | 职责 |
 | --- | --- |
-| [src/index.ts](src/index.ts) | Commands, main-session tool, and report delivery |
-| [src/selection.ts](src/selection.ts) | Native scope selection |
-| [src/runtime.ts](src/runtime.ts) | Independent reviewer and tool restrictions |
-| [src/request.ts](src/request.ts) | Codex short tasks and base-ref resolution |
-| [src/i18n.ts](src/i18n.ts) | Host locale and output language context |
-| [src/report.ts](src/report.ts) | Full JSON, extracted JSON, then plain-text fallback |
+| [src/index.ts](src/index.ts) | 命令、主会话工具与报告返回 |
+| [src/selection.ts](src/selection.ts) | 原生范围选择 |
+| [src/runtime.ts](src/runtime.ts) | 独立审查 Agent 与工具约束 |
+| [src/request.ts](src/request.ts) | Codex 短任务和基准引用解析 |
+| [src/i18n.ts](src/i18n.ts) | 宿主语言与输出语言上下文 |
+| [src/report.ts](src/report.ts) | JSON、截取 JSON、纯文本顺序回退 |
 
-See the [developer navigation](docs/00-交接入口/00-阅读导航.md) for implementation history. To roll back, reinstall a previously retained local package and restart DSH. Conversations and reports are not deleted.
+完整交接记录见[阅读导航](docs/00-交接入口/00-阅读导航.md)。回退可重新安装先前保留的本地包并重启 DSH，不删除会话或报告。
 
-## Sources and license
+## 来源与许可证
 
-Licensed under [Apache License 2.0](LICENSE). See the original Codex [rubric](assets/codex/review/rubric.md), [source.json](assets/codex/review/source.json), and [NOTICE](NOTICE).
+基于 [Apache License 2.0](LICENSE) 发布。Codex 原文与来源信息见 [rubric](assets/codex/review/rubric.md)、[source.json](assets/codex/review/source.json) 和 [NOTICE](NOTICE)。
 
-Upstream source: [task templates](https://github.com/openai/codex/blob/a592c38c16cdd7623dacc9168926ebccedfb67d3/codex-rs/prompts/src/review_request.rs) · [review execution](https://github.com/openai/codex/blob/a592c38c16cdd7623dacc9168926ebccedfb67d3/codex-rs/core/src/tasks/review.rs) · [scope selection](https://github.com/openai/codex/blob/a592c38c16cdd7623dacc9168926ebccedfb67d3/codex-rs/tui/src/chatwidget/review_popups.rs) · [base branch resolution](https://github.com/openai/codex/blob/a592c38c16cdd7623dacc9168926ebccedfb67d3/codex-rs/git-utils/src/branch.rs).
+上游源码：[任务模板](https://github.com/openai/codex/blob/a592c38c16cdd7623dacc9168926ebccedfb67d3/codex-rs/prompts/src/review_request.rs) · [审查执行](https://github.com/openai/codex/blob/a592c38c16cdd7623dacc9168926ebccedfb67d3/codex-rs/core/src/tasks/review.rs) · [范围选择](https://github.com/openai/codex/blob/a592c38c16cdd7623dacc9168926ebccedfb67d3/codex-rs/tui/src/chatwidget/review_popups.rs) · [基准分支解析](https://github.com/openai/codex/blob/a592c38c16cdd7623dacc9168926ebccedfb67d3/codex-rs/git-utils/src/branch.rs)。

@@ -10,7 +10,7 @@ async function scan(directory) {
   }
   return result;
 }
-const files = [resolve('README.md'), resolve('README.zh-CN.md'), ...await scan('docs')];
+const files = [resolve('README.md'), resolve('README.zh-CN.md'), resolve('README.en.md'), ...await scan('docs')];
 let links = 0;
 for (const file of files) {
   const text = await readFile(file, 'utf8');

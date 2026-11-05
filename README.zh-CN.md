@@ -8,7 +8,7 @@
 
 **在当前会话发起审查，让独立 Agent 检查代码并带回报告**
 
-[English](README.md) · [开发文档](docs/00-交接入口/00-阅读导航.md) · [更新日志](CHANGELOG.md) · [Apache-2.0](LICENSE)
+[English](README.en.md) · [开发文档](docs/00-交接入口/00-阅读导航.md) · [更新日志](CHANGELOG.md) · [Apache-2.0](LICENSE)
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
 [![DSH Plugin](https://img.shields.io/badge/DSH-Plugin-0f766e.svg)](https://github.com/MichengAI/dsh-code-review)
