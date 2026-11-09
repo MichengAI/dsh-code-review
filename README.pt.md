@@ -100,11 +100,31 @@ O envio vazio disponibiliza quatro opções: comparar com branch base, verificar
 | `reviewModel` | Modelo de revisão no mesmo provedor; herda a configuração atual caso omitido |
 | `reportDirectory` | Diretório absoluto de salvamento; padrão `$DSH_HOME/code-review` ou `~/.dsh/code-review` |
 
-O idioma segue `locale.preference` do host: compatível com todos os 8 idiomas oficiais (`zh` / `en` / `ja` / `es` / `fr` / `de` / `ru` / `pt`).
+O idioma segue `locale.preference` do host: compatível com todos os 8 idiomas oficiais (`zh` / `en` / `ja` / `es` / `fr` / `de` / `ru` / `pt`). Lê a entrada de configuração `locale` retornada por `settings.describe()`. O idioma é fixado no início de cada rodada; os textos dos menus na interface entram em vigor imediatamente após a troca de idioma, enquanto as descrições de comandos registradas pelo servidor são fixadas na inicialização do plugin. Na ausência de preferência salva, o chinês é usado por padrão.
 
-O relatório mais recente de cada sessão é gravado atomicamente em GitHub Flavored Markdown.
+O relatório mais recente de cada sessão é gravado atomicamente em GitHub Flavored Markdown renderizável no DSH. O texto de relatórios históricos não é traduzido automaticamente. O encerramento do host não retoma automaticamente revisões não concluídas.
 
-## Desenvolvimento
+## Perguntas frequentes
+
+### É estritamente idêntico ao Codex?
+
+A especificação de revisão e os modelos de tarefas curtas correspondem ao commit de código-fonte fixado `a592c38c16cdd7623dacc9168926ebccedfb67d3`. A interface de diálogo, ferramentas, permissões e eventos utilizam recursos nativos do DSH; não é uma cópia pixel a pixel do Codex Desktop. Modelos diferentes podem produzir apontamentos distintos.
+
+### A revisão modifica o código-fonte?
+
+As instruções de revisão não solicitam a geração de correções, embora a camada de ferramentas não seja universalmente restrita a somente leitura. A execução segue o padrão do Agency: o `spawn` nativo injeta o papel de revisor mantendo as demais instruções de sistema e ferramentas do host, bloqueando apenas revisões recursivas e ferramentas de convocação de especialistas. As permissões são determinadas pelo host na delegação; o plugin não substitui políticas de aprovação nem encaminha solicitações de aprovação do subagente. Operações fora do escopo são rejeitadas pelo host.
+
+Se o Git falhar na preparação do ambiente de segurança do Windows ou os testes retornarem `spawn EPERM`, a sessão principal deverá resolver o ambiente ou as permissões antes de reiniciar a revisão. O status "Concluído" indica que o agente retornou um relatório; não garante que todos os diffs foram inspecionados ou que os testes passaram. As limitações são detalhadas no texto do relatório.
+
+### O que fazer se não houver saída após a instalação?
+
+Certifique-se de que a instalação e a execução utilizem o mesmo perfil, reinicie o backend do DSH e verifique se `dsh --profile web --dump-config` inclui o plugin. O `/review` sem argumentos requer o respondedor de perguntas do host, e o modelo principal precisa suportar a chamada da ferramenta `dsh_code_review`. Use `/review-status` para inspecionar os registros; a confirmação de recebimento da solicitação não representa a conclusão da revisão.
+
+### Por que outro idioma ainda pode aparecer?
+
+Selecione explicitamente o idioma de destino nas configurações do host. O idioma de saída do modelo é orientado por instruções de sistema, mas não pode ser garantido de forma absoluta. Erros brutos de ferramentas externas, trechos de código e relatórios históricos não são traduzidos automaticamente.
+
+## Desenvolvimento e contribuição
 
 ```powershell
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
@@ -114,6 +134,19 @@ npm run check
 npm run verify:package
 dsh plugin --profile web add .\michengai-dsh-code-review-0.1.3.tgz --ignore-scripts
 ```
+
+O comando `check` cobre TypeScript, hashes de prompts, tarefas, testes de regressão no AgentLoop offline e validação de links da documentação. `verify:package` valida o carregamento do pacote e a integração com o host. Execute `npm run build` antes de realizar commits.
+
+| Ponto de entrada | Responsabilidade |
+| --- | --- |
+| [src/index.ts](src/index.ts) | Comandos, ferramenta da sessão principal e entrega do relatório |
+| [src/selection.ts](src/selection.ts) | Seleção nativa de escopo |
+| [src/runtime.ts](src/runtime.ts) | Subagente independente de revisão e restrições de ferramentas |
+| [src/request.ts](src/request.ts) | Tarefas concisas do Codex e resolução de referências base |
+| [src/i18n.ts](src/i18n.ts) | Idioma do host e contexto de idioma de saída |
+| [src/report.ts](src/report.ts) | Fallback sequencial: JSON completo, JSON parcial e texto simples |
+
+O histórico completo de desenvolvimento está disponível no [Guia de leitura](docs/00-交接入口/00-阅读导航.md). Para reverter, reinstale o pacote local anterior e reinicie o DSH. Sessões e relatórios não são excluídos.
 
 ## Fontes e licença
 

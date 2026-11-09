@@ -102,7 +102,7 @@ Tout texte suivant la commande est interprété comme instruction personnalisée
 | `reviewModel` | Nom du modèle de revue au sein du même fournisseur ; hérite de la configuration du modèle actif si omis |
 | `reportDirectory` | Répertoire absolu d'enregistrement des rapports ; `$DSH_HOME/code-review` par défaut, ou `~/.dsh/code-review` si non défini |
 
-La langue respecte la préférence `locale.preference` de l'hôte : prise en charge des 8 langues officielles (`zh` / `en` / `ja` / `es` / `fr` / `de` / `ru` / `pt`). Lit la configuration `locale` renvoyée par `settings.describe()`. La langue est figée au début de chaque session de revue. Sans préférence enregistrée ou en cas d'échec de lecture, le chinois est utilisé par défaut.
+La langue respecte la préférence `locale.preference` de l'hôte : prise en charge des 8 langues officielles (`zh` / `en` / `ja` / `es` / `fr` / `de` / `ru` / `pt`). Lit la configuration `locale` renvoyée par `settings.describe()`. La langue est figée au début de chaque session de revue ; les textes du menu de commandes sont mis à jour immédiatement lors du changement de langue, tandis que les descriptions enregistrées sur le serveur sont fixées au chargement du plugin. Sans préférence enregistrée ou en cas d'échec de lecture, le chinois est utilisé par défaut.
 
 Le rapport le plus récent de chaque session est sauvegardé de manière atomique au format GitHub Flavored Markdown exploitable par DSH. Les rapports archivés ne sont pas traduits rétroactivement.
 
@@ -114,7 +114,9 @@ La grille d'évaluation et les modèles de tâches courtes sont alignés sur le 
 
 ### La revue modifie-t-elle le code source ?
 
-Les instructions de revue ne génèrent pas de correctifs directs, bien que la couche d'outils ne soit pas universellement bridée en lecture seule. L'exécution repose sur le mécanisme natif `spawn` avec injection du profil de réviseur, en conservant les outils de l'hôte tout en interdisant la récursion et les outils d'invocation d'experts.
+Les instructions de revue ne génèrent pas de correctifs directs, bien que la couche d'outils ne soit pas universellement bridée en lecture seule. L'exécution repose sur le mécanisme natif `spawn` avec injection du profil de réviseur, en conservant les outils et instructions de l'hôte tout en interdisant la récursion et les outils d'invocation d'experts. Les autorisations sont fixées par l'hôte lors de la délégation ; le plugin ne modifie pas les politiques d'approbation et ne transmet pas les demandes d'approbation du sous-agent. Les opérations hors périmètre sont rejetées par l'hôte, et le réviseur renvoie un rapport précisant les limites des preuves et des tests.
+
+Si Git échoue lors de la préparation du bac à sable Windows ou si les tests renvoient `spawn EPERM`, la session parente doit traiter l'environnement de l'hôte ou les autorisations avant de relancer une revue. La mention « Terminé » indique que l'agent a renvoyé un rapport ; elle ne garantit pas que chaque diff a été inspecté ou que les tests ont réussi. Consultez le rapport pour connaître ces limitations.
 
 ### Que faire en l'absence de réponse après installation ?
 
@@ -122,7 +124,7 @@ Vérifiez que l'installation et l'exécution utilisent le même profil, redémar
 
 ### Pourquoi une autre langue peut-elle apparaître ?
 
-Sélectionnez explicitement votre langue dans les paramètres de l'hôte. La langue générée par le modèle dépend des consignes fournies et ne peut être garantie à 100 %. Les erreurs brutes des outils externes et le code source ne sont pas traduits.
+Sélectionnez explicitement la langue cible dans les paramètres de l'hôte. La langue générée par le modèle dépend des consignes fournies et ne peut être garantie à 100 %. Les erreurs brutes des outils externes et le code source ne sont pas traduits.
 
 ## Développement et contribution
 

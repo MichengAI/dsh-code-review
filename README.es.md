@@ -102,7 +102,7 @@ Todo el texto que sigue al comando se considera una instrucción personalizada y
 | `reviewModel` | Nombre del modelo de revisión bajo el mismo proveedor; por defecto hereda la configuración del modelo actual |
 | `reportDirectory` | Ruta absoluta para almacenar informes; por defecto `$DSH_HOME/code-review`, o `~/.dsh/code-review` si DSH_HOME no está definido |
 
-El idioma sigue la preferencia del host `locale.preference`: compatible con los 8 idiomas oficiales (`zh` / `en` / `ja` / `es` / `fr` / `de` / `ru` / `pt`). Lee la entrada de configuración `locale` devuelta por `settings.describe()`. El idioma se fija al inicio de cada ronda y se leen nuevas configuraciones en la siguiente. La descripción y sugerencias de comandos se resuelven al cargar el plugin y requieren recargar para actualizarse. Si no hay preferencia guardada o falla la lectura, se utiliza chino por defecto; el backend no puede obtener idiomas detectados únicamente por el navegador.
+El idioma sigue la preferencia del host `locale.preference`: compatible con los 8 idiomas oficiales (`zh` / `en` / `ja` / `es` / `fr` / `de` / `ru` / `pt`). Lee la entrada de configuración `locale` devuelta por `settings.describe()`. El idioma se fija al inicio de cada ronda y se leen nuevas configuraciones en la siguiente. Los textos de los menús en la interfaz entran en vigor inmediatamente al cambiar el idioma, mientras que las descripciones de comandos registradas por el servidor se fijan al cargar el plugin. Si no hay preferencia guardada o falla la lectura, se utiliza chino por defecto; el backend no puede obtener idiomas detectados únicamente por el navegador.
 
 Se guarda atómicamente el informe más reciente de cada sesión. El informe devuelto a la sesión utiliza GitHub Flavored Markdown renderizable por DSH: encabezado de estado, títulos de hallazgos, enlaces a archivos locales con número de línea y párrafos. El texto de informes históricos no se traduce automáticamente; claves JSON, enumeraciones, código y rutas se conservan sin cambios. No se reanudan automáticamente revisiones pendientes tras cerrar el host.
 
@@ -124,7 +124,7 @@ Asegúrese de que la instalación y la ejecución utilicen el mismo perfil, rein
 
 ### ¿Por qué podría ver otro idioma en la interfaz?
 
-Seleccione explícitamente su idioma preferido en la configuración del host. La salida del modelo se orienta mediante instrucciones de idioma pero no se puede garantizar de forma absoluta. Los errores directos de herramientas externas, fragmentos de código y reportes históricos no se traducen de forma retroactiva.
+Seleccione explícitamente el idioma de destino en la configuración del host. La salida del modelo se orienta mediante instrucciones de idioma pero no se puede garantizar de forma absoluta. Los errores directos de herramientas externas, fragmentos de código y reportes históricos no se traducen de forma retroactiva.
 
 ## Desarrollo y contribución
 

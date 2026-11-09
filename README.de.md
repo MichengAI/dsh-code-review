@@ -102,7 +102,7 @@ Der gesamte Text nach dem Befehl wird als Anweisung übernommen und nicht als CL
 | `reviewModel` | Name des Review-Modells beim selben Anbieter; erbt standardmäßig die aktive Modellkonfiguration |
 | `reportDirectory` | Absoluter Speicherpfad der Berichte; Standard `$DSH_HOME/code-review`, bzw. `~/.dsh/code-review` |
 
-Die Sprache richtet sich nach `locale.preference` des Hosts: Unterstützt alle 8 offiziellen Sprachen (`zh` / `en` / `ja` / `es` / `fr` / `de` / `ru` / `pt`). Liest den Konfigurationseintrag `locale` aus `settings.describe()`. Bei fehlender Einstellung wird Chinesisch als Fallback genutzt.
+Die Sprache richtet sich nach `locale.preference` des Hosts: Unterstützt alle 8 offiziellen Sprachen (`zh` / `en` / `ja` / `es` / `fr` / `de` / `ru` / `pt`). Liest den Konfigurationseintrag `locale` aus `settings.describe()`. Die Menütexte der Benutzeroberfläche werden bei einem Sprachwechsel sofort aktualisiert, während serverseitig registrierte Befehlsbeschreibungen beim Laden des Plugins festgelegt werden. Bei fehlender Einstellung wird Chinesisch als Fallback genutzt.
 
 Der jüngste Bericht jeder Sitzung wird atomar als GitHub Flavored Markdown gespeichert.
 
@@ -114,7 +114,9 @@ Das Schema und die Task-Vorlagen entsprechen dem Quellcode-Commit `a592c38c16cdd
 
 ### Verändert das Review den Quellcode?
 
-Die Review-Anweisungen fordern keine Code-Modifikationen an. Die Ausführung erfolgt über natives `spawn` mit Review-Persona, wobei rekursive Reviews und Experten-Tools gesperrt sind.
+Die Review-Anweisungen fordern keine Code-Modifikationen an, wenngleich die Tool-Ebene nicht universell schreibgeschützt ist. Die Ausführung folgt dem Agency-Muster: Natives `spawn` injiziert die Review-Persona unter Beibehaltung der übrigen System-Prompts und Tools des Hosts; lediglich rekursive Code-Reviews und Experten-Tools sind gesperrt. Berechtigungen werden vom Host bei der Delegation festgelegt; das Plugin überschreibt keine Richtlinien und leitet keine Genehmigungsanfragen von Sub-Agenten weiter. Vorgänge außerhalb der Berechtigungen werden vom Host abgelehnt.
+
+Wenn Git bei der Vorbereitung der Windows-Sandbox fehlschlägt oder Tests mit `spawn EPERM` scheitern, muss die übergeordnete Sitzung die Host-Umgebung oder Berechtigungen anpassen, bevor ein neuer Review gestartet wird. „Abgeschlossen“ bedeutet, dass der Agent einen Bericht zurückgegeben hat; es garantiert nicht, dass jedes Diff geprüft wurde oder Tests bestanden wurden. Die genauen Einschränkungen sind dem Berichtstext zu entnehmen.
 
 ### Was tun, wenn nach der Installation keine Ausgabe erscheint?
 
@@ -122,7 +124,7 @@ Stellen Sie sicher, dass Installation und Ausführung dasselbe Profil nutzen, st
 
 ### Warum sehe ich gelegentlich eine andere Sprache?
 
-Wählen Sie Ihre bevorzugte Sprache explizit in den Host-Einstellungen. Die Modellausgabe wird instruiert, kann jedoch nicht absolut garantiert werden. Rohe Fehlermeldungen externer Tools werden nicht übersetzt.
+Wählen Sie die Zielsprache explizit in den Host-Einstellungen. Die Modellausgabe wird instruiert, kann jedoch nicht absolut garantiert werden. Rohe Fehlermeldungen externer Tools werden nicht übersetzt.
 
 ## Entwicklung und Mitwirken
 

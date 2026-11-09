@@ -1,4 +1,5 @@
 import * as primitives from '@deepseek-ai/dsh-client-ui-primitives';
+import { resolveHostLocale } from './i18n.js';
 
 type Icon = (props: { size?: number }) => unknown;
 
@@ -53,19 +54,10 @@ const FACES = {
 
 type Lookup = { get?: (name: string) => unknown };
 
-/** 按宿主 locale.snapshot.active 解析语言，未匹配时默认中文。 */
+/** 按宿主 locale.snapshot.active 解析语言，未选择时默认中文，未知语言回退 en。 */
 function resolveClientLocale(ctx: Lookup): string {
   const locale = ctx.get?.('locale') as { snapshot?: { active?: unknown } } | undefined;
-  const active = typeof locale?.snapshot?.active === 'string' ? locale.snapshot.active.trim().toLowerCase() : '';
-  if (active.startsWith('zh')) return 'zh';
-  if (active.startsWith('en')) return 'en';
-  if (active.startsWith('ja')) return 'ja';
-  if (active.startsWith('es')) return 'es';
-  if (active.startsWith('fr')) return 'fr';
-  if (active.startsWith('de')) return 'de';
-  if (active.startsWith('ru')) return 'ru';
-  if (active.startsWith('pt')) return 'pt';
-  return 'zh';
+  return resolveHostLocale(locale?.snapshot?.active);
 }
 
 function decorateSlashFaces(commandUi: unknown, ctx: Lookup): () => void {

@@ -53,4 +53,12 @@ test('全量覆盖 8 种官方语言的解析、词条翻译与提示词指令',
     assert.equal(translate(lang, '代码审查'), expectedLabels[lang]);
     assert.match(outputLanguage(lang), new RegExp(`Write user-facing review content in ${expectedNames[lang]} as GitHub Flavored Markdown`));
   }
+
+  // 验证未知非支持语言回退 en 与宿主对齐，空/无效值默认 zh
+  assert.equal(resolveHostLocale('it-IT'), 'en');
+  assert.equal(resolveHostLocale('ko-KR'), 'en');
+  assert.equal(resolveHostLocale(''), 'zh');
+  assert.equal(resolveHostLocale('   '), 'zh');
+  assert.equal(resolveHostLocale(null), 'zh');
+  assert.equal(resolveHostLocale(undefined), 'zh');
 });

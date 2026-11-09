@@ -102,7 +102,7 @@ All text after the command is treated as custom instructions, not CLI flags. `--
 | `reviewModel` | Review model within the same provider; otherwise inherits the current model configuration |
 | `reportDirectory` | Absolute report directory; defaults to `$DSH_HOME/code-review`, or `~/.dsh/code-review` when DSH_HOME is unset |
 
-Language follows the host's `locale.preference`: supports all 8 official host languages (`zh` / `en` / `ja` / `es` / `fr` / `de` / `ru` / `pt`). It reads the `locale` profile entry returned by `settings.describe()`. Each review captures the locale at its start; the next review reads updated settings. Command catalog descriptions and input hints are resolved when the plugin loads and require a reload to update. Without a saved preference, or when the settings read fails, Chinese is used; the backend cannot read a language detected only in the browser.
+Language follows the host's `locale.preference`: supports all 8 official host languages (`zh` / `en` / `ja` / `es` / `fr` / `de` / `ru` / `pt`). It reads the `locale` profile entry returned by `settings.describe()`. Each review captures the locale at its start; the next review reads updated settings. Slash menu labels update immediately upon language changes; command catalog descriptions registered on the server are resolved when the plugin loads. Without a saved preference, or when the settings read fails, Chinese is used; the backend cannot read a language detected only in the browser.
 
 The latest report is saved atomically per conversation. The session report uses GitHub Flavored Markdown that DSH renders: a status heading, finding headings, local file links with line fragments, and paragraphs. Historical report bodies are not translated. JSON keys, enum values, code, and paths remain unchanged. Unfinished reviews do not resume automatically after shutdown. Status, cancellation, and report storage are DSH plugin features.
 
@@ -124,7 +124,7 @@ Check that installation and runtime use the same profile, restart the DSH backen
 
 ### Why might I still see another language?
 
-Explicitly select Chinese or English in host settings. Model language is controlled by instructions and cannot be guaranteed. Raw external-tool errors, code, and historical reports are not automatically translated.
+Explicitly select your target language in host settings. Model language is controlled by instructions and cannot be guaranteed. Raw external-tool errors, code, and historical reports are not automatically translated.
 
 ## Development and contributing
 

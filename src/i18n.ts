@@ -20,9 +20,9 @@ function readLocalePreference(settings: unknown): unknown {
   } catch { return undefined; }
 }
 
-/** 将任意语言偏好收拢为 8 种官方支持语言，未匹配或空偏好回退中文。 */
+/** 将任意语言偏好收拢为 8 种官方支持语言；未指定/空偏好默认 zh，未知非支持语言（如 it-IT）回退 en 与宿主对齐。 */
 export function resolveHostLocale(preference: unknown): Locale {
-  if (typeof preference !== 'string') return 'zh';
+  if (typeof preference !== 'string' || !preference.trim()) return 'zh';
   const tag = preference.trim().toLowerCase();
   if (tag.startsWith('zh')) return 'zh';
   if (tag.startsWith('en')) return 'en';
@@ -32,7 +32,7 @@ export function resolveHostLocale(preference: unknown): Locale {
   if (tag.startsWith('de')) return 'de';
   if (tag.startsWith('ru')) return 'ru';
   if (tag.startsWith('pt')) return 'pt';
-  return 'zh';
+  return 'en';
 }
 
 /** 沿用宿主 `locale.preference`；未保存偏好时后端无法获知浏览器语言。读取失败时保持中文，避免插件无法加载。 */
