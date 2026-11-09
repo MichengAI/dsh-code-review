@@ -102,7 +102,7 @@ Der gesamte Text nach dem Befehl wird als Anweisung übernommen und nicht als CL
 | `reviewModel` | Name des Review-Modells beim selben Anbieter; erbt standardmäßig die aktive Modellkonfiguration |
 | `reportDirectory` | Absoluter Speicherpfad der Berichte; Standard `$DSH_HOME/code-review`, bzw. `~/.dsh/code-review` |
 
-Die Sprache richtet sich nach `locale.preference` des Hosts: Unterstützt alle 8 offiziellen Sprachen (`zh` / `en` / `ja` / `es` / `fr` / `de` / `ru` / `pt`). Liest den Konfigurationseintrag `locale` aus `settings.describe()`. Die Menütexte der Benutzeroberfläche werden bei einem Sprachwechsel sofort aktualisiert, während serverseitig registrierte Befehlsbeschreibungen beim Laden des Plugins festgelegt werden. Bei fehlender Einstellung wird Chinesisch als Fallback genutzt.
+Die Sprache richtet sich nach `locale.preference` des Hosts: Unterstützt alle 8 offiziellen Sprachen (`zh` / `en` / `ja` / `es` / `fr` / `de` / `ru` / `pt`). Liest den Konfigurationseintrag `locale` aus `settings.describe()`. Die Menütexte der Benutzeroberfläche werden bei einem Sprachwechsel sofort aktualisiert, während serverseitig registrierte Befehlsbeschreibungen beim Laden des Plugins festgelegt werden. Bei fehlender Einstellung wird Chinesisch als Fallback genutzt; in Umgebungen mit nicht offiziellen Sprachen fallen Oberfläche und Berichte auf Englisch zurück (analog zum Host).
 
 Der jüngste Bericht jeder Sitzung wird atomar als GitHub Flavored Markdown gespeichert.
 
@@ -147,6 +147,8 @@ dsh plugin --profile web add .\michengai-dsh-code-review-0.1.3.tgz --ignore-scri
 | [src/request.ts](src/request.ts) | Codex-Tasks und Basis-Ref-Auflösung |
 | [src/i18n.ts](src/i18n.ts) | Host-Sprache und Ausgabe-Sprachkontext |
 | [src/report.ts](src/report.ts) | Sequenzieller Fallback: Voll-JSON, Teil-JSON und Klartext |
+
+Vollständige Entwicklungs- und Übergabeaufzeichnungen finden Sie in der [Entwickler-Navigation](docs/00-交接入口/00-阅读导航.md). Für ein Rollback installieren Sie ein zuvor gesichertes lokales Paket erneut und starten DSH neu. Sitzungen und Berichte werden dabei nicht gelöscht.
 
 ## Quellen und Lizenz
 

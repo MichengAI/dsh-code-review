@@ -119,15 +119,51 @@ test('英文宿主语言使用英文斜杠标题', async () => {
 
 test('多语言宿主环境表驱动全量覆盖 8 门语言及未知语言回退', async () => {
   const expectations = {
-    'zh-CN': { label: '审查', desc: '选择范围或输入自定义要求', hint: '留空提交以选择范围；或输入完整的自定义审查要求', status: '审查状态', cancel: '取消审查' },
-    'en-US': { label: 'Review', desc: 'Select a scope or enter custom instructions', hint: 'Submit empty to select a scope, or enter complete custom review instructions', status: 'Review status', cancel: 'Cancel review' },
-    'ja-JP': { label: 'レビュー', desc: '範囲を選択するかカスタム指示を入力', hint: '空のまま送信して範囲を選択、または詳細なカスタムレビュー指示を入力', status: 'レビュー状態', cancel: 'レビュー中止' },
-    'es-ES': { label: 'Revisión', desc: 'Seleccione un alcance o ingrese instrucciones personalizadas', hint: 'Envíe vacío para seleccionar un alcance, o ingrese instrucciones completas', status: 'Estado de revisión', cancel: 'Cancelar revisión' },
-    'fr-FR': { label: 'Revue', desc: 'Sélectionnez un périmètre ou entrez des instructions personnalisées', hint: 'Soumettez vide pour sélectionner un périmètre, ou entrez des instructions complètes', status: 'État de la revue', cancel: 'Annuler la revue' },
-    'de-DE': { label: 'Review', desc: 'Bereich auswählen oder benutzerdefinierte Anweisungen eingeben', hint: 'Leer absenden für Bereichsauswahl, oder vollständige Anweisungen eingeben', status: 'Review-Status', cancel: 'Review abbrechen' },
-    'ru-RU': { label: 'Анализ', desc: 'Выберите диапазон или введите пользовательские инструкции', hint: 'Отправьте пустым для выбора диапазона или введите полные инструкции', status: 'Статус анализа', cancel: 'Отмена анализа' },
-    'pt-BR': { label: 'Revisão', desc: 'Selecione um escopo ou insira instruções personalizadas', hint: 'Envie vazio para selecionar um escopo ou insira instruções completas', status: 'Status da revisão', cancel: 'Cancelar revisão' },
-    'it-IT': { label: 'Review', desc: 'Select a scope or enter custom instructions', hint: 'Submit empty to select a scope, or enter complete custom review instructions', status: 'Review status', cancel: 'Cancel review' },
+    'zh-CN': {
+      label: '审查', desc: '选择范围或输入自定义要求', hint: '留空提交以选择范围；或输入完整的自定义审查要求',
+      status: '审查状态', statusDesc: '查看最近代码审查报告',
+      cancel: '取消审查', cancelDesc: '取消当前代码审查',
+    },
+    'en-US': {
+      label: 'Review', desc: 'Select a scope or enter custom instructions', hint: 'Submit empty to select a scope, or enter complete custom review instructions',
+      status: 'Review status', statusDesc: 'Show the latest code review report',
+      cancel: 'Cancel review', cancelDesc: 'Cancel the current code review',
+    },
+    'ja-JP': {
+      label: 'レビュー', desc: '範囲を選択するかカスタム指示を入力', hint: '空のまま送信して範囲を選択、または詳細なカスタムレビュー指示を入力',
+      status: 'レビュー状態', statusDesc: '最近のコードレビューレポートを表示',
+      cancel: 'レビュー中止', cancelDesc: '現在のコードレビューをキャンセル',
+    },
+    'es-ES': {
+      label: 'Revisión', desc: 'Seleccione un alcance o ingrese instrucciones personalizadas', hint: 'Envíe vacío para seleccionar un alcance, o ingrese instrucciones completas',
+      status: 'Estado de revisión', statusDesc: 'Mostrar el informe de revisión más reciente',
+      cancel: 'Cancelar revisión', cancelDesc: 'Cancelar la revisión de código actual',
+    },
+    'fr-FR': {
+      label: 'Revue', desc: 'Sélectionnez un périmètre ou entrez des instructions personnalisées', hint: 'Soumettez vide pour sélectionner un périmètre, ou entrez des instructions complètes',
+      status: 'État de la revue', statusDesc: 'Afficher le dernier rapport de revue',
+      cancel: 'Annuler la revue', cancelDesc: 'Annuler la revue de code actuelle',
+    },
+    'de-DE': {
+      label: 'Review', desc: 'Bereich auswählen oder benutzerdefinierte Anweisungen eingeben', hint: 'Leer absenden für Bereichsauswahl, oder vollständige Anweisungen eingeben',
+      status: 'Review-Status', statusDesc: 'Neuesten Code-Review-Bericht anzeigen',
+      cancel: 'Review abbrechen', cancelDesc: 'Aktuelles Code-Review abbrechen',
+    },
+    'ru-RU': {
+      label: 'Анализ', desc: 'Выберите диапазон или введите пользовательские инструкции', hint: 'Отправьте пустым для выбора диапазона или введите полные инструкции',
+      status: 'Статус анализа', statusDesc: 'Показать последний отчет об анализе кода',
+      cancel: 'Отмена анализа', cancelDesc: 'Отменить текущий анализ кода',
+    },
+    'pt-BR': {
+      label: 'Revisão', desc: 'Selecione um escopo ou insira instruções personalizadas', hint: 'Envie vazio para selecionar um escopo ou insira instruções completas',
+      status: 'Status da revisão', statusDesc: 'Mostrar o relatório de revisão mais recente',
+      cancel: 'Cancelar revisão', cancelDesc: 'Cancelar a revisão de código atual',
+    },
+    'it-IT': {
+      label: 'Review', desc: 'Select a scope or enter custom instructions', hint: 'Submit empty to select a scope, or enter complete custom review instructions',
+      status: 'Review status', statusDesc: 'Show the latest code review report',
+      cancel: 'Cancel review', cancelDesc: 'Cancel the current code review',
+    },
   };
 
   for (const [activeLocale, exp] of Object.entries(expectations)) {
@@ -149,6 +185,10 @@ test('多语言宿主环境表驱动全量覆盖 8 门语言及未知语言回�
     assert.equal(rows[0].description, exp.desc, `Locale ${activeLocale} description mismatch`);
     assert.equal(rows[0].hint, exp.hint, `Locale ${activeLocale} hint mismatch`);
     assert.equal(rows[1].label, exp.status, `Locale ${activeLocale} status label mismatch`);
+    assert.equal(rows[1].description, exp.statusDesc, `Locale ${activeLocale} status description mismatch`);
+    assert.equal(rows[1].hint, undefined, `Locale ${activeLocale} status hint should be undefined`);
     assert.equal(rows[2].label, exp.cancel, `Locale ${activeLocale} cancel label mismatch`);
+    assert.equal(rows[2].description, exp.cancelDesc, `Locale ${activeLocale} cancel description mismatch`);
+    assert.equal(rows[2].hint, undefined, `Locale ${activeLocale} cancel hint should be undefined`);
   }
 });
