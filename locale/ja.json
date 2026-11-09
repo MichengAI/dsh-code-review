@@ -1,0 +1,7 @@
+{
+  "meta": {
+    "title": "Code Review",
+    "description": "Codex スタイルのコードレビュー。独立したサブ Agent を使用し、多言語レポートを返します。",
+    "detail": "README.ja.md"
+  }
+}

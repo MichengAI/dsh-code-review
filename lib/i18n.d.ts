@@ -1,5 +1,7 @@
 import type { Context } from '@deepseek-ai/cordis';
-export type Locale = 'zh' | 'en';
+export type Locale = 'zh' | 'en' | 'ja' | 'es' | 'fr' | 'de' | 'ru' | 'pt';
+/** 将任意语言偏好收拢为 8 种官方支持语言，未匹配或空偏好回退中文。 */
+export declare function resolveHostLocale(preference: unknown): Locale;
 /** 沿用宿主 `locale.preference`；未保存偏好时后端无法获知浏览器语言。读取失败时保持中文，避免插件无法加载。 */
 export declare function readHostLocale(ctx: Context): Locale;
 declare const en: {
@@ -71,7 +73,8 @@ declare const en: {
     readonly '\u8BC1\u636E\uFF1A': "Evidence: ";
     readonly '\u672A\u8986\u76D6\uFF1A': "Not covered: ";
 };
-export declare function translate(locale: Locale, key: keyof typeof en): string;
+export type MessageKey = keyof typeof en;
+export declare function translate(locale: Locale, key: MessageKey): string;
 /** 审查标准沿用 Codex rubric。会话里写给人看的报告，不输出 JSON。 */
 export declare function outputLanguage(locale: Locale): string;
 export {};

@@ -116,3 +116,27 @@ test('英文宿主语言使用英文斜杠标题', async () => {
   assert.equal(rows[3].description, '压缩');
   assert.equal(rows[3].label, undefined);
 });
+
+test('多语言宿主环境使用对应的斜杠标题与提示', async () => {
+  const client = loadClient();
+  const commandUi = {
+    candidates: async () => ([
+      { name: 'review', description: '选择范围或输入自定义要求', hint: '留空提交以选择范围；或输入完整的自定义审查要求', label: '审查' },
+      { name: 'review-status', description: '查看最近代码审查报告' },
+      { name: 'review-cancel', description: '取消当前代码审查' },
+    ]),
+  };
+  client.apply({
+    inject: (_deps, callback) => callback({
+      get: name => name === 'commandUi' ? commandUi : name === 'locale' ? { snapshot: { active: 'ja-JP' } } : undefined,
+    }),
+  });
+  const rows = await commandUi.candidates();
+  assert.equal(rows[0].label, 'レビュー');
+  assert.equal(rows[0].description, '範囲を選択するかカスタム指示を入力');
+  assert.equal(rows[0].hint, '空のまま送信して範囲を選択、または詳細なカスタムレビュー指示を入力');
+  assert.equal(rows[1].label, 'レビュー状態');
+  assert.equal(rows[1].description, '最近のコードレビューレポートを表示');
+  assert.equal(rows[2].label, 'レビュー中止');
+  assert.equal(rows[2].description, '現在のコードレビューをキャンセル');
+});

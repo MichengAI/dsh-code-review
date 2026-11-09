@@ -1,6 +1,7 @@
 {
   "meta": {
     "title": "Code Review",
-    "description": "Codex-style code review with independent agents, flexible scope, and bilingual reports."
+    "description": "Codex-style code review with independent agents, flexible scope, and bilingual reports.",
+    "detail": "README.en.md"
   }
 }

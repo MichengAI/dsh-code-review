@@ -1,6 +1,7 @@
 {
   "meta": {
     "title": "Code Review",
-    "description": "Codex 风格代码审查，使用独立子 Agent，并返回中英文报告。"
+    "description": "Codex 风格代码审查，使用独立子 Agent，并返回中英文报告。",
+    "detail": "README.zh-CN.md"
   }
 }

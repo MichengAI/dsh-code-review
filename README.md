@@ -8,7 +8,9 @@
 
 **在当前会话发起审查，让独立 Agent 检查代码并带回报告**
 
-[English](README.en.md) · [开发文档](docs/00-交接入口/00-阅读导航.md) · [更新日志](CHANGELOG.md) · [Apache-2.0](LICENSE)
+[简体中文](README.zh-CN.md) · [English](README.en.md) · [日本語](README.ja.md) · [Español](README.es.md) · [Français](README.fr.md) · [Deutsch](README.de.md) · [Русский](README.ru.md) · [Português](README.pt.md)
+
+[开发文档](docs/00-交接入口/00-阅读导航.md) · [更新日志](CHANGELOG.md) · [Apache-2.0](LICENSE)
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
 [![DSH Plugin](https://img.shields.io/badge/DSH-Plugin-0f766e.svg)](https://github.com/MichengAI/dsh-code-review)
@@ -30,7 +32,7 @@ DSH Code Review 是 DeepSeek Harness 的社区代码审查插件，包名 `@mich
 - **选择审查范围**：对比基准分支、检查未提交更改、选择一次提交，或输入自定义要求。
 - **让审查 Agent 自行取证**：独立上下文读取 Git、相关代码和测试，不提前注入全仓代码快照。
 - **在主会话查看结果**：接收带优先级、文件路径和行号的发现；模型返回普通文本时保留原文。
-- **使用中英文报告**：通过独立语言上下文跟随宿主语言偏好，保留 Codex 英文规范原文。
+- **使用多语言报告**：通过独立语言上下文跟随宿主语言偏好（支持 8 种官方语言），保留 Codex 英文规范原文。
 - **查看状态或取消**：恢复最近一份报告，或取消范围选择和进行中的审查。
 
 ## 环境要求
@@ -100,7 +102,7 @@ dsh --profile web --dump-config
 | `reviewModel` | 同一模型提供方下的审查模型名称；省略时继承当前模型配置 |
 | `reportDirectory` | 报告存放的绝对路径；默认 `$DSH_HOME/code-review`，未设置 DSH_HOME 时为 `~/.dsh/code-review` |
 
-语言复用宿主 `locale.preference`：`en` / `en-*` 使用英文，其余按当前中英文支持范围默认中文。读取 `settings.describe()` 返回的 `locale` 配置条目。每轮开始固定语言，下轮读取新设置；命令目录描述和输入提示在插件加载时确定，更新它们需重新加载插件。未保存偏好或读取失败时默认中文，后端无法获取仅由浏览器自动检测的语言。
+语言复用宿主 `locale.preference`：支持全部 8 种官方语言（`zh` / `en` / `ja` / `es` / `fr` / `de` / `ru` / `pt`）。读取 `settings.describe()` 返回的 `locale` 配置条目。每轮开始固定语言，下轮读取新设置；命令目录描述和输入提示在插件加载时确定，更新它们需重新加载插件。未保存偏好或读取失败时默认中文，后端无法获取仅由浏览器自动检测的语言。
 
 每个会话原子保存最近一份报告。交给会话的报告使用 DSH 可渲染的 GitHub Flavored Markdown：状态标题、发现小标题、带行号片段的本地文件链接和段落。历史报告正文不自动翻译；JSON 字段、枚举、代码和路径保持原样。宿主退出后不会自动续跑未完成审查。状态、取消和报告存储是 DSH 插件提供的能力。
 

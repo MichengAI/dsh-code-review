@@ -8,7 +8,9 @@
 
 **Start a review in your conversation. Let an independent agent inspect the code and bring back findings.**
 
-[简体中文](README.md) · [Developer docs](docs/00-交接入口/00-阅读导航.md) · [Changelog](CHANGELOG.md) · [Apache-2.0](LICENSE)
+[简体中文](README.zh-CN.md) · [English](README.en.md) · [日本語](README.ja.md) · [Español](README.es.md) · [Français](README.fr.md) · [Deutsch](README.de.md) · [Русский](README.ru.md) · [Português](README.pt.md)
+
+[Developer docs](docs/00-交接入口/00-阅读导航.md) · [Changelog](CHANGELOG.md) · [Apache-2.0](LICENSE)
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
 [![DSH Plugin](https://img.shields.io/badge/DSH-Plugin-0f766e.svg)](https://github.com/MichengAI/dsh-code-review)
@@ -30,7 +32,7 @@ Install the package from npm or build from source. Offline host and package inte
 - **Choose a scope**: compare against a base branch, review uncommitted changes, select a commit, or provide custom instructions.
 - **Let the reviewer gather evidence**: an independent context reads Git, relevant code, and tests without receiving a preloaded repository snapshot.
 - **Read results in the main conversation**: receive prioritized findings with file paths and line numbers. Plain-text model responses are preserved.
-- **Use English or Chinese reports**: a separate language context follows the host preference while preserving the original English Codex rubric.
+- **Use multilingual reports**: a separate language context follows the host preference across all 8 official languages while preserving the original English Codex rubric.
 - **Check status or cancel**: recover the latest report or cancel scope selection and an active review.
 
 ## Prerequisites
@@ -100,7 +102,7 @@ All text after the command is treated as custom instructions, not CLI flags. `--
 | `reviewModel` | Review model within the same provider; otherwise inherits the current model configuration |
 | `reportDirectory` | Absolute report directory; defaults to `$DSH_HOME/code-review`, or `~/.dsh/code-review` when DSH_HOME is unset |
 
-Language follows the host's `locale.preference`: `en` / `en-*` selects English; other values default to Chinese within the current two-language support. It reads the `locale` profile entry returned by `settings.describe()`. Each review captures the locale at its start; the next review reads updated settings. Command catalog descriptions and input hints are resolved when the plugin loads and require a reload to update. Without a saved preference, or when the settings read fails, Chinese is used; the backend cannot read a language detected only in the browser.
+Language follows the host's `locale.preference`: supports all 8 official host languages (`zh` / `en` / `ja` / `es` / `fr` / `de` / `ru` / `pt`). It reads the `locale` profile entry returned by `settings.describe()`. Each review captures the locale at its start; the next review reads updated settings. Command catalog descriptions and input hints are resolved when the plugin loads and require a reload to update. Without a saved preference, or when the settings read fails, Chinese is used; the backend cannot read a language detected only in the browser.
 
 The latest report is saved atomically per conversation. The session report uses GitHub Flavored Markdown that DSH renders: a status heading, finding headings, local file links with line fragments, and paragraphs. Historical report bodies are not translated. JSON keys, enum values, code, and paths remain unchanged. Unfinished reviews do not resume automatically after shutdown. Status, cancellation, and report storage are DSH plugin features.
 
