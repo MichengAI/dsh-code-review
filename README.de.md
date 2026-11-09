@@ -102,7 +102,7 @@ Der gesamte Text nach dem Befehl wird als Anweisung übernommen und nicht als CL
 | `reviewModel` | Name des Review-Modells beim selben Anbieter; erbt standardmäßig die aktive Modellkonfiguration |
 | `reportDirectory` | Absoluter Speicherpfad der Berichte; Standard `$DSH_HOME/code-review`, bzw. `~/.dsh/code-review` |
 
-Die Sprache richtet sich nach `locale.preference` des Hosts: Unterstützt alle 8 offiziellen Sprachen (`zh` / `en` / `ja` / `es` / `fr` / `de` / `ru` / `pt`). Liest den Konfigurationseintrag `locale` aus `settings.describe()`. Die Menütexte der Benutzeroberfläche werden bei einem Sprachwechsel sofort aktualisiert, während serverseitig registrierte Befehlsbeschreibungen beim Laden des Plugins festgelegt werden. Bei fehlender Einstellung wird Chinesisch als Fallback genutzt; in Umgebungen mit nicht offiziellen Sprachen fallen Oberfläche und Berichte auf Englisch zurück (analog zum Host).
+Die Sprache richtet sich nach `locale.preference` des Hosts: Unterstützt alle 8 offiziellen Sprachen (`zh` / `en` / `ja` / `es` / `fr` / `de` / `ru` / `pt`). Liest den Konfigurationseintrag `locale` aus `settings.describe()`. Die Menütexte der Benutzeroberfläche werden bei einem Sprachwechsel sofort aktualisiert, während serverseitig registrierte Befehlsbeschreibungen beim Laden des Plugins festgelegt werden. Wird eine nicht unterstützte inoffizielle Sprache explizit gewählt, fallen Oberfläche und Berichte auf Englisch zurück (analog zum Host); ohne gespeicherte Einstellung nutzt das Backend standardmäßig Chinesisch, während das Menü die vom Frontend erkannte Sprache anzeigt.
 
 Der jüngste Bericht jeder Sitzung wird atomar als GitHub Flavored Markdown gespeichert.
 

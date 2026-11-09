@@ -45,7 +45,7 @@ export function apply(ctx: Context, config: Config = {}): void {
   } });
   ctx.commands.register({ name: 'review-status', description: t('查看最近代码审查报告'), async handler({ agent }) {
     try {
-      const record = await journal.read(agent.id);
+      const record = await journal.read(agent.id, readHostLocale(ctx));
       return { kind: 'success', text: active.has(agent.id) ? t('审查或范围选择进行中。') : record?.state === 'running' ? t('审查中断：存在启动记录但没有完成报告，请重新运行。') : record?.state === 'finished' ? renderOutcome(record.result, readHostLocale(ctx)) : t('没有已保存的审查结果。') };
     } catch (error) { return { kind: 'error', text: `${t('审查记录读取失败：')}${String(error)}` }; }
   } });
@@ -89,8 +89,8 @@ export function apply(ctx: Context, config: Config = {}): void {
   }
 
   ctx.tools.register({
-    name: 'dsh_code_review', description: '使用完整 Codex 规范，通过 DSH 原生 spawn 子 Agent 自行检查 Git 状态、差异与相关代码并返回报告。一次性终态工具，执行失败或中断时直接向用户呈现结果，禁止在同一轮次中自动重试。input 为空时通过原生问题选择范围；非空时整段作为自定义要求，不解析 CLI 选项。',
-    parameters: { type: 'object', properties: { input: { type: 'string', description: '空字符串打开范围选择；非空字符串是完整自定义审查要求，保留原文。' } }, required: ['input'], additionalProperties: false },
+    name: 'dsh_code_review', description: t('使用完整 Codex 规范，通过 DSH 原生 spawn 子 Agent 自行检查 Git 状态、差异与相关代码并返回报告。一次性终态工具，执行失败或中断时直接向用户呈现结果，禁止在同一轮次中自动重试。input 为空时通过原生问题选择范围；非空时整段作为自定义要求，不解析 CLI 选项。'),
+    parameters: { type: 'object', properties: { input: { type: 'string', description: t('空字符串打开范围选择；非空字符串是完整自定义审查要求，保留原文。') } }, required: ['input'], additionalProperties: false },
     output: { schema: { type: 'string' }, render: (_args, value) => [{ type: 'text', text: String(value) }] },
     execute(args, exec) {
       if (!exec.agent) throw new Error(t('代码审查必须从当前会话调用。'));

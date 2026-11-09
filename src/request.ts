@@ -1,5 +1,6 @@
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
+import { translate, type Locale } from './i18n.js';
 
 const exec = promisify(execFile);
 export type Target = { mode: 'worktree' } | { mode: 'base'; ref: string } | { mode: 'commit'; ref: string; title?: string } | { mode: 'custom'; instructions: string };
@@ -13,19 +14,19 @@ export async function git(cwd: string, args: string[], signal?: AbortSignal): Pr
   return stdout;
 }
 
-export function parseTarget(input: string): Target {
+export function parseTarget(input: string, locale: Locale = 'zh'): Target {
   const instructions = input.trim();
-  if (!instructions) throw new Error('自定义审查要求不能为空。');
+  if (!instructions) throw new Error(translate(locale, '自定义审查要求不能为空。'));
   return { mode: 'custom', instructions };
 }
 
 /** 对齐固定版本 codex-rs/prompts/src/review_request.rs 的短任务文本。 */
-export async function reviewPrompt(target: Target, cwd: string, signal?: AbortSignal): Promise<string> {
+export async function reviewPrompt(target: Target, cwd: string, signal?: AbortSignal, locale: Locale = 'zh'): Promise<string> {
   signal?.throwIfAborted();
   switch (target.mode) {
     case 'worktree': return 'Review the current code changes (staged, unstaged, and untracked files) and provide prioritized findings.';
     case 'custom': {
-      if (!target.instructions.trim()) throw new Error('自定义审查要求不能为空。');
+      if (!target.instructions.trim()) throw new Error(translate(locale, '自定义审查要求不能为空。'));
       return target.instructions.trim();
     }
     case 'commit': return target.title

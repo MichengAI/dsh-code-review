@@ -1,4 +1,5 @@
 import type { Outcome } from './runtime.js';
+import { type Locale } from './i18n.js';
 export type Record = {
     version: 1;
     state: 'running';
@@ -13,6 +14,6 @@ export declare class Journal {
     readonly directory: string;
     constructor(directory: string);
     private path;
-    read(session: string): Promise<Record | undefined>;
+    read(session: string, locale?: Locale): Promise<Record | undefined>;
     write(session: string, record: Record): Promise<void>;
 }

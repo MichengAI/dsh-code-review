@@ -33,9 +33,9 @@ function textOf(value: unknown): string {
 }
 
 /** Codex 正文字段优先；模型常用的 file/line、单个对象和 P1 也收成同一份报告。 */
-function decode(raw: string): Report {
+function decode(raw: string, locale: Locale = 'zh'): Report {
   const value = JSON.parse(raw);
-  if (!value || typeof value !== 'object') throw new Error('报告格式不匹配。');
+  if (!value || typeof value !== 'object') throw new Error(translate(locale, '报告格式不匹配。'));
   const record = value as Record<string, unknown>;
   const findings = findingList(record.findings).flatMap((item): Finding[] => {
     if (!item || typeof item !== 'object') return [];
@@ -49,7 +49,7 @@ function decode(raw: string): Report {
     return [{ title, body, priority: priorityOf(finding.priority), path, start: lines?.start ?? 0, end: lines?.end ?? 0, ...(confidence === undefined ? {} : { confidenceScore: confidence }) }];
   });
   const summary = textOf(record.overall_explanation);
-  if (!summary && !findings.length) throw new Error('报告格式不匹配。');
+  if (!summary && !findings.length) throw new Error(translate(locale, '报告格式不匹配。'));
   const confidence = record.overall_confidence_score;
   return { findings, summary, limitations: [], format: 'structured',
     ...(typeof record.overall_correctness === 'string' ? { overallCorrectness: record.overall_correctness } : {}),
@@ -79,7 +79,7 @@ function objectAt(raw: string, start: number): string | undefined {
 }
 
 /** 审查标准仍是 Codex JSON。会话只使用解析后的结论和发现，说明中的花括号不能挡住后面的报告。 */
-export function parseReport(raw: string): Report {
+export function parseReport(raw: string, locale: Locale = 'zh'): Report {
   const candidates: string[] = [];
   for (let i = 0; i < raw.length; i++) {
     const slice = objectAt(raw, i);
@@ -90,7 +90,7 @@ export function parseReport(raw: string): Report {
   for (let i = candidates.length - 1; i >= 0; i--) {
     const candidate = candidates[i];
     if (candidate === undefined) continue;
-    try { return decode(candidate); } catch { /* 字段类型不符时继续找下一份。 */ }
+    try { return decode(candidate, locale); } catch { /* 字段类型不符时继续找下一份。 */ }
   }
   return { findings: [], summary: raw, limitations: [], format: 'text' };
 }

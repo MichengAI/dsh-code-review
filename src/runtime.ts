@@ -98,7 +98,7 @@ export async function runReview(ctx: Context, parent: Agent, target: Target, sig
   try {
     const cwd = parent.session.header.cwd;
     if (!cwd) throw new Error(t('会话没有有效 cwd。'));
-    const prompt = await reviewPrompt(target, cwd, combined);
+    const prompt = await reviewPrompt(target, cwd, combined, locale);
     const provider = ctx.subagents.getProvider('spawn');
     if (!provider || provider.inheritsParentContext) throw new Error(t('需要独立上下文的原生 spawn provider。'));
     const persona = `${REVIEW_PROMPT}\n\n${outputLanguage(locale)}`;
@@ -149,7 +149,7 @@ export async function runReview(ctx: Context, parent: Agent, target: Target, sig
     if (result.stopReason !== 'completed') throw new Error(`${t('原生子 Agent 未完成：')}${result.stopReason}${result.diagnostic ? ` ${result.diagnostic}` : ''}`);
     const raw = result.output.filter(b => b.type === 'text').map(b => b.text).join('');
     if (!raw.trim()) throw new Error(t('审查 Agent 未返回报告。'));
-    const report = parseReport(raw);
+    const report = parseReport(raw, locale);
     outcome = { id, status: report.format === 'text' ? 'completed-text' : report.findings.length ? 'completed-findings' : 'completed-clean',
       detail: t('审查完成。'), report };
   } catch (error) {
