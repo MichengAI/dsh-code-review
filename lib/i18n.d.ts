@@ -78,6 +78,7 @@ declare const en: {
     readonly '\u5BA1\u67E5\u8BB0\u5F55\u635F\u574F\u3002': "Review record is corrupted.";
     readonly '\u62A5\u544A\u683C\u5F0F\u4E0D\u5339\u914D\u3002': "Report format does not match.";
     readonly '\u81EA\u5B9A\u4E49\u5BA1\u67E5\u8981\u6C42\u4E0D\u80FD\u4E3A\u7A7A\u3002': "Custom review instructions cannot be empty.";
+    readonly 报告写入及临时文件清理失败: "Report write and temporary file cleanup failed";
 };
 export type MessageKey = keyof typeof en;
 export declare function translate(locale: Locale, key: MessageKey): string;

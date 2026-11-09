@@ -15,5 +15,5 @@ export declare class Journal {
     constructor(directory: string);
     private path;
     read(session: string, locale?: Locale): Promise<Record | undefined>;
-    write(session: string, record: Record): Promise<void>;
+    write(session: string, record: Record, locale?: Locale): Promise<void>;
 }

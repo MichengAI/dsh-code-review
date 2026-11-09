@@ -18,14 +18,14 @@ export class Journal {
     if (record.state === 'finished' && (!record.result || typeof record.result.id !== 'string' || typeof record.result.detail !== 'string')) throw new Error(translate(locale, '审查记录损坏。'));
     return record;
   }
-  async write(session: string, record: Record): Promise<void> {
+  async write(session: string, record: Record, locale: Locale = 'zh'): Promise<void> {
     await mkdir(this.directory, { recursive: true });
     const destination = this.path(session), temp = destination + '.' + randomUUID() + '.tmp';
     try {
       await writeFile(temp, JSON.stringify(record) + '\n', { encoding: 'utf8', flag: 'wx', flush: true });
       await rename(temp, destination);
     } catch (error) {
-      try { await unlink(temp); } catch (cleanup) { if ((cleanup as NodeJS.ErrnoException).code !== 'ENOENT') throw new AggregateError([error, cleanup], '报告写入及临时文件清理失败'); }
+      try { await unlink(temp); } catch (cleanup) { if ((cleanup as NodeJS.ErrnoException).code !== 'ENOENT') throw new AggregateError([error, cleanup], translate(locale, '报告写入及临时文件清理失败')); }
       throw error;
     }
   }

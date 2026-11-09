@@ -89,6 +89,7 @@ const en = {
   '审查记录损坏。': 'Review record is corrupted.',
   '报告格式不匹配。': 'Report format does not match.',
   '自定义审查要求不能为空。': 'Custom review instructions cannot be empty.',
+  '报告写入及临时文件清理失败': 'Report write and temporary file cleanup failed',
 } as const;
 
 export type MessageKey = keyof typeof en;
@@ -139,6 +140,7 @@ const ja: Record<MessageKey, string> = {
   '审查记录损坏。': 'レビュー記録が破損しています。',
   '报告格式不匹配。': 'レポート形式が一致しません。',
   '自定义审查要求不能为空。': 'カスタムレビュー指示を空にすることはできません。',
+  '报告写入及临时文件清理失败': 'レポートの書き込みおよび一時ファイルのクリーンアップに失敗しました',
 };
 
 const es: Record<MessageKey, string> = {
@@ -187,6 +189,7 @@ const es: Record<MessageKey, string> = {
   '审查记录损坏。': 'El registro de revisión está dañado.',
   '报告格式不匹配。': 'El formato del informe no coincide.',
   '自定义审查要求不能为空。': 'Las instrucciones personalizadas de revisión no pueden estar vacías.',
+  '报告写入及临时文件清理失败': 'Error al escribir el informe y limpiar los archivos temporales',
 };
 
 const fr: Record<MessageKey, string> = {
@@ -235,6 +238,7 @@ const fr: Record<MessageKey, string> = {
   '审查记录损坏。': 'L\'enregistrement de revue est corrompu.',
   '报告格式不匹配。': 'Le format du rapport ne correspond pas.',
   '自定义审查要求不能为空。': 'Les instructions personnalisées de revue ne peuvent pas être vides.',
+  '报告写入及临时文件清理失败': 'Échec de l\'écriture du rapport et du nettoyage des fichiers temporaires',
 };
 
 const de: Record<MessageKey, string> = {
@@ -283,6 +287,7 @@ const de: Record<MessageKey, string> = {
   '审查记录损坏。': 'Review-Datensatz ist beschädigt.',
   '报告格式不匹配。': 'Berichtsformat stimmt nicht überein.',
   '自定义审查要求不能为空。': 'Benutzerdefinierte Review-Anweisungen dürfen nicht leer sein.',
+  '报告写入及临时文件清理失败': 'Fehler beim Schreiben des Berichts und Bereinigen temporärer Dateien',
 };
 
 const ru: Record<MessageKey, string> = {
@@ -331,6 +336,7 @@ const ru: Record<MessageKey, string> = {
   '审查记录损坏。': 'Запись анализа повреждена.',
   '报告格式不匹配。': 'Формат отчета не соответствует.',
   '自定义审查要求不能为空。': 'Пользовательские инструкции анализа не могут быть пустыми.',
+  '报告写入及临时文件清理失败': 'Сбой записи отчета и очистки временных файлов',
 };
 
 const pt: Record<MessageKey, string> = {
@@ -379,6 +385,7 @@ const pt: Record<MessageKey, string> = {
   '审查记录损坏。': 'O registro de revisão está corrompido.',
   '报告格式不匹配。': 'O formato do relatório não coincide.',
   '自定义审查要求不能为空。': 'As instruções personalizadas de revisão não podem estar vazias.',
+  '报告写入及临时文件清理失败': 'Falha ao gravar o relatório e limpar os arquivos temporários',
 };
 
 const DICTIONARIES: Record<Exclude<Locale, 'zh'>, Record<MessageKey, string>> = {

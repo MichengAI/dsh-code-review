@@ -61,10 +61,16 @@ test('审查开始后切换语言不改变本轮选择，报告字段和路径�
 });
 test('英文宿主反馈和失败信息跟随语言，缺少 settings 默认中文', async t => {
   const s = await setup(t, empty, { locale: 'en', error: true });
+  const tool = s.ctx.tools.get('dsh_code_review', s.parent);
+  assert.match(tool.description, /^Perform a code review following Codex specifications/);
+  assert.match(tool.parameters.properties.input.description, /^Empty string opens scope selection/);
   assert.match((await s.command('/review-cancel')).result.text, /No review is running/);
   assert.match((await s.command('/review-status')).result.text, /No saved review result/);
   assert.match((await s.run('/review custom instructions')).result.text, /Code review · Failed/);
   const fallback = await setup(t);
+  const defaultTool = fallback.ctx.tools.get('dsh_code_review', fallback.parent);
+  assert.match(defaultTool.description, /^使用完整 Codex 规范/);
+  assert.match(defaultTool.parameters.properties.input.description, /^空字符串打开范围选择/);
   await fallback.run('/review 自定义要求');
   assert.match(JSON.stringify(fallback.requests[0].messages), /Write user-facing review content in Simplified Chinese/);
 });

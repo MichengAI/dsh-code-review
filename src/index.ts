@@ -70,13 +70,13 @@ export function apply(ctx: Context, config: Config = {}): void {
       const target = await selectTarget(ctx, agent, input, combined, locale);
       combined.throwIfAborted();
       try {
-        await journal.write(agent.id, { version: 1, state: 'running', commandId: 'dsh_code_review' });
+        await journal.write(agent.id, { version: 1, state: 'running', commandId: 'dsh_code_review' }, locale);
         await ctx.sessions.flush(agent.session);
       } catch (error) { throw new Error(`${t('审查启动记录持久化失败：')}${String(error)}${t('；未调用子模型。')}`); }
       const result = await runReview(ctx, agent, target, combined, undefined, config.reviewModel, locale);
       let durable;
       try {
-        await journal.write(agent.id, { version: 1, state: 'finished', result });
+        await journal.write(agent.id, { version: 1, state: 'finished', result }, locale);
         durable = await ctx.sessions.flush(agent.session);
       } catch (error) { throw new Error(`${renderOutcome(result, locale)}\n\n${t('报告持久化失败：')}${String(error)}${t('；不能确认重启后可恢复。')}`); }
       const text = renderOutcome(result, locale) + (durable ? '' : '\n\n' + t('宿主未配置会话持久化后端；结构化报告已独立保存。'));

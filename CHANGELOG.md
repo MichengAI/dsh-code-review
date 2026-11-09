@@ -8,6 +8,7 @@
 - 审查子 Agent 根据宿主语言偏好输出对应语言的 GitHub Flavored Markdown 审查报告。
 - 补充插件清单元数据，规范 author、keywords、`exports./icon` 导出与 `dsh.manifestVersion: 1`。
 - 提供全套 8 门语言独立本地化 README 文档与顶部互通导航，各语言元数据 `meta.detail` 准确指向对应文档。
+- 代码审查工具描述、参数说明及关键运行错误提示全面支持宿主语言本地化。
 - 非官方语言环境下界面文案与报告回退使用英文，与宿主表现保持一致。
 
 ## English
@@ -16,6 +17,7 @@
 - Instruct review subagents to output GitHub Flavored Markdown reports matching the host language preference.
 - Enrich plugin manifest metadata: declare author, keywords, `exports./icon`, and `dsh.manifestVersion: 1`.
 - Provide dedicated native README documentation with unified top-level navigation across all 8 languages, with `meta.detail` pointing to each localized file.
+- Localize review tool/parameter descriptions and key runtime error messages to match the host language.
 - Fallback to English for interface copy and review reports when running under unsupported non-official languages, matching the host behavior.
 
 ## 1.0.8 — 2026-11-04

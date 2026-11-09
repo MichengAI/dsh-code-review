@@ -18,3 +18,23 @@ test('原子记录从启动更新为结束，重建实例后恢复且无残留�
   const file = join(directory, 'blocked'); await writeFile(file, 'user fixture');
   await assert.rejects(new Journal(file).write('session', { version: 1, state: 'running', commandId: 'fail' }));
 });
+
+test('journal.read 在英文或多语言环境下抛出对应本地化错误', async t => {
+  const directory = await mkdtemp(join(tmpdir(), 'dsh-review-journal-i18n-'));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const journal = new Journal(directory);
+  // 写入损坏格式的记录（version=2 或缺少字段）
+  await journal.write('bad-version', { version: 2, state: 'running', commandId: 'test' });
+  await assert.rejects(
+    journal.read('bad-version', 'en'),
+    /Review record format is not supported\./
+  );
+  await assert.rejects(
+    journal.read('bad-version', 'ja'),
+    /レビュー記録の形式はサポートされていません。/
+  );
+  await assert.rejects(
+    journal.read('bad-version', 'zh'),
+    /审查记录格式不受支持。/
+  );
+});
