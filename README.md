@@ -141,7 +141,7 @@ dsh plugin --profile web add .\michengai-dsh-code-review-0.1.3.tgz --ignore-scri
 
 | 入口 | 职责 |
 | --- | --- |
-| [src/index.ts](src/index.ts) | 命令、主会话工具与报告返回 |
+| [src/index.ts](src/index.ts) | 用户命令与报告交付 |
 | [src/selection.ts](src/selection.ts) | 原生范围选择 |
 | [src/runtime.ts](src/runtime.ts) | 独立审查 Agent 与工具约束 |
 | [src/request.ts](src/request.ts) | Codex 短任务和基准引用解析 |

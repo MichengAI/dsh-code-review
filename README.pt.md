@@ -141,7 +141,7 @@ O comando `check` cobre TypeScript, hashes de prompts, tarefas, testes de regres
 
 | Ponto de entrada | Responsabilidade |
 | --- | --- |
-| [src/index.ts](src/index.ts) | Comandos, ferramenta da sessão principal e entrega do relatório |
+| [src/index.ts](src/index.ts) | Comandos e entrega do relatório |
 | [src/selection.ts](src/selection.ts) | Seleção nativa de escopo |
 | [src/runtime.ts](src/runtime.ts) | Subagente independente de revisão e restrições de ferramentas |
 | [src/request.ts](src/request.ts) | Tarefas concisas do Codex e resolução de referências base |

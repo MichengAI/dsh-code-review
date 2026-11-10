@@ -141,7 +141,7 @@ dsh plugin --profile web add .\michengai-dsh-code-review-0.1.3.tgz --ignore-scri
 
 | Entrada | Responsabilidad |
 | --- | --- |
-| [src/index.ts](src/index.ts) | Comandos, herramienta de sesión principal y entrega de informes |
+| [src/index.ts](src/index.ts) | Comandos y entrega de informes |
 | [src/selection.ts](src/selection.ts) | Selección nativa de alcance |
 | [src/runtime.ts](src/runtime.ts) | Subagente de revisión independiente y restricciones de herramientas |
 | [src/request.ts](src/request.ts) | Tareas breves de Codex y resolución de referencias base |

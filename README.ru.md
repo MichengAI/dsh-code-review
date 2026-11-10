@@ -141,7 +141,7 @@ dsh plugin --profile web add .\michengai-dsh-code-review-0.1.3.tgz --ignore-scri
 
 | Точка входа | Назначение |
 | --- | --- |
-| [src/index.ts](src/index.ts) | Команды, инструмент основной сессии и возврат отчета |
+| [src/index.ts](src/index.ts) | Команды и возврат отчета |
 | [src/selection.ts](src/selection.ts) | Нативный выбор диапазона |
 | [src/runtime.ts](src/runtime.ts) | Независимый рецензент и ограничения инструментов |
 | [src/request.ts](src/request.ts) | Шаблоны задач Codex и разрешение базовых ссылок |

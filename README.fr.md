@@ -141,7 +141,7 @@ dsh plugin --profile web add .\michengai-dsh-code-review-0.1.3.tgz --ignore-scri
 
 | Point d'entrée | Responsabilité |
 | --- | --- |
-| [src/index.ts](src/index.ts) | Commandes, outil de session principale et restitution du rapport |
+| [src/index.ts](src/index.ts) | Commandes et restitution du rapport |
 | [src/selection.ts](src/selection.ts) | Sélection native du périmètre |
 | [src/runtime.ts](src/runtime.ts) | Sous-agent de revue autonome et restrictions d'outils |
 | [src/request.ts](src/request.ts) | Tâches concises Codex et résolution des références de base |

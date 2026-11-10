@@ -1,7 +1,7 @@
-import { readHostLocale, translate, type Locale } from './i18n.js';
+import { readHostLocale, translate, outputLanguage, type Locale } from './i18n.js';
 import type { Context } from '@deepseek-ai/cordis';
 import type {} from '@deepseek-ai/dsh-commands';
-import { HarnessError } from '@deepseek-ai/dsh-llm';
+import { HarnessError, createUserMessage } from '@deepseek-ai/dsh-llm';
 import type { Agent } from '@deepseek-ai/dsh-agent';
 import type {} from '@deepseek-ai/dsh-subagent';
 import { selectTarget } from './selection.js';
@@ -9,9 +9,26 @@ import { runReview, type Outcome } from './runtime.js';
 import { renderReport } from './report.js';
 import { homedir } from 'node:os';
 import { isAbsolute, join } from 'node:path';
+import { randomUUID } from 'node:crypto';
 import { Journal } from './journal.js';
+
+declare module '@deepseek-ai/dsh-llm' {
+  interface MessageSourceMap {
+    'michengai-code-review': { readonly kind: 'michengai-code-review' };
+  }
+}
+
+declare module '@deepseek-ai/cordis' {
+  interface Events {
+    'michengai-code-review/settled'(data: { agent: Agent }): void;
+  }
+}
+
+/** V4 拒绝共享的 `plugin` 来源；用户消息使用插件自己的 kind。 */
+const reviewRequestSource = { kind: 'michengai-code-review' } as const;
+
 export const name = 'michengai-code-review';
-export const inject = ['commands', 'subagents', 'agents', 'systemPrompt', 'sessions', 'userQuestions'];
+export const inject = ['commands', 'subagents', 'agents', 'tools', 'systemPrompt', 'sessions', 'userQuestions'];
 const labels: Record<Outcome['status'], Parameters<typeof translate>[1]> = { 'no-changes': '无变更', 'completed-clean': '完成 · 零发现', 'completed-findings': '完成 · 有发现', 'completed-text': '完成', partial: '部分覆盖', failed: '失败', interrupted: '中断', 'invalid-output': '输出无效', stale: '快照过期' };
 export function renderOutcome(result: Outcome, locale: Locale = 'zh'): string {
   const t = (key: Parameters<typeof translate>[1]) => translate(locale, key);
@@ -40,18 +57,42 @@ export function apply(ctx: Context, config: Config = {}): void {
       return { kind: 'success', text: active.has(agent.id) ? t('审查或范围选择进行中。') : record?.state === 'running' ? t('审查中断：存在启动记录但没有完成报告，请重新运行。') : record?.state === 'finished' ? renderOutcome(record.result, readHostLocale(ctx)) : t('没有已保存的审查结果。') };
     } catch (error) { return { kind: 'error', text: `${t('审查记录读取失败：')}${String(error)}` }; }
   } });
+  function deliverReport(agent: Agent, text: string, locale: Locale): void {
+    if (lifetime.signal.aborted) return;
+    try {
+      agent.followup(createUserMessage({
+        content: [{ type: 'text', text: `Here is the completed code review report:\n\n${text}\n\nPresent this report directly to the user verbatim without adding, removing, or rewriting findings. Do not attempt to fix code or perform another review. ${outputLanguage(locale)}` }],
+        source: reviewRequestSource,
+      }));
+    } catch { /* session disposed or unavailable */ }
+  }
+
+  function deliverError(agent: Agent, error: unknown, locale: Locale): void {
+    const text = error instanceof HarnessError ? error.message : `${translate(locale, '审查未完成。')}\n\n${error instanceof Error ? error.message : String(error)}`;
+    try {
+      agent.followup(createUserMessage({
+        content: [{ type: 'text', text: `The code review did not complete:\n\n${text}\n\nPresent this status directly to the user verbatim without retrying. ${outputLanguage(locale)}` }],
+        source: reviewRequestSource,
+      }));
+    } catch { /* session disposed or unavailable */ }
+  }
+
   ctx.commands.register({ name: 'review', description: t('选择范围或输入自定义要求'), input: { hint: t('留空提交以选择范围；或输入完整的自定义审查要求') },
     async handler(invocation) {
       const { agent, rawInput, signal } = invocation;
+      const locale = readHostLocale(ctx);
+      if (active.has(agent.id)) {
+        return { kind: 'error', text: translate(locale, '当前会话已有审查运行，请等待或 /review-cancel。') };
+      }
       const operation = review(agent, rawInput.trim(), signal);
       operations.add(operation);
-      void operation.then(() => operations.delete(operation), () => operations.delete(operation));
-      try {
-        const text = await operation;
-        return { kind: 'success', text };
-      } catch (error) {
-        return { kind: 'error', text: error instanceof Error ? error.message : String(error) };
-      }
+      void operation
+        .then(
+          text => { deliverReport(agent, text, locale); },
+          error => { deliverError(agent, error, locale); },
+        )
+        .finally(() => operations.delete(operation));
+      return { kind: 'success', text: translate(locale, '已将审查请求提交到当前会话，将通过原生子 Agent 执行。') };
     } });
 
   async function review(agent: Agent, input: string, signal: AbortSignal): Promise<string> {
@@ -60,12 +101,14 @@ export function apply(ctx: Context, config: Config = {}): void {
     if (active.has(agent.id)) throw new Error(t('当前会话已有审查运行，请等待或 /review-cancel。'));
     const controller = new AbortController();
     active.set(agent.id, controller);
+    let started = false;
     try {
       const combined = AbortSignal.any([controller.signal, lifetime.signal, signal]);
       const target = await selectTarget(ctx, agent, input, combined, locale);
       combined.throwIfAborted();
       try {
         await journal.write(agent.id, { version: 1, state: 'running', commandId: 'review' }, locale);
+        started = true;
         await ctx.sessions.flush(agent.session);
       } catch (error) { throw new Error(`${t('审查启动记录持久化失败：')}${String(error)}${t('；未调用子模型。')}`); }
       const result = await runReview(ctx, agent, target, combined, undefined, config.reviewModel, locale);
@@ -80,6 +123,17 @@ export function apply(ctx: Context, config: Config = {}): void {
         throw new HarnessError(text, code);
       }
       return text;
-    } finally { active.delete(agent.id); }
+    } catch (error) {
+      if (started && error instanceof Error && (error.name === 'AbortError' || /abort/i.test(error.message))) {
+        try {
+          const detail = t('操作已中止。');
+          await journal.write(agent.id, { version: 1, state: 'finished', result: { id: randomUUID(), status: 'interrupted', detail } }, locale);
+        } catch { /* ignore */ }
+      }
+      throw error;
+    } finally {
+      active.delete(agent.id);
+      ctx.emit('michengai-code-review/settled', { agent });
+    }
   }
 }

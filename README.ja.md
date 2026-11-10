@@ -141,7 +141,7 @@ dsh plugin --profile web add .\michengai-dsh-code-review-0.1.3.tgz --ignore-scri
 
 | エントリ | 責務 |
 | --- | --- |
-| [src/index.ts](src/index.ts) | コマンド、メインセッションツール、レポート返却 |
+| [src/index.ts](src/index.ts) | コマンドとレポート返却 |
 | [src/selection.ts](src/selection.ts) | ネイティブ範囲選択 |
 | [src/runtime.ts](src/runtime.ts) | 独立レビュー Agent とツール制約 |
 | [src/request.ts](src/request.ts) | Codex 短文タスクとベース参照の解決 |

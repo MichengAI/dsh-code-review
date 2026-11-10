@@ -141,7 +141,7 @@ dsh plugin --profile web add .\michengai-dsh-code-review-0.1.3.tgz --ignore-scri
 
 | Einstiegspunkt | Aufgabe |
 | --- | --- |
-| [src/index.ts](src/index.ts) | Befehle, Hauptsitzungs-Tool und Berichterstellung |
+| [src/index.ts](src/index.ts) | Befehle und Berichterstellung |
 | [src/selection.ts](src/selection.ts) | Native Bereichsauswahl |
 | [src/runtime.ts](src/runtime.ts) | Unabhängiger Review-Sub-Agent und Tool-Einschränkungen |
 | [src/request.ts](src/request.ts) | Codex-Tasks und Basis-Ref-Auflösung |

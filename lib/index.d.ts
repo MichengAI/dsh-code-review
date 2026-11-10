@@ -1,6 +1,21 @@
 import { type Locale } from './i18n.js';
 import type { Context } from '@deepseek-ai/cordis';
+import type { Agent } from '@deepseek-ai/dsh-agent';
 import { type Outcome } from './runtime.js';
+declare module '@deepseek-ai/dsh-llm' {
+    interface MessageSourceMap {
+        'michengai-code-review': {
+            readonly kind: 'michengai-code-review';
+        };
+    }
+}
+declare module '@deepseek-ai/cordis' {
+    interface Events {
+        'michengai-code-review/settled'(data: {
+            agent: Agent;
+        }): void;
+    }
+}
 export declare const name = "michengai-code-review";
 export declare const inject: string[];
 export declare function renderOutcome(result: Outcome, locale?: Locale): string;

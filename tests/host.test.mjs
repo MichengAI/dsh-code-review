@@ -80,22 +80,19 @@ async function setup(t, response = empty, opts = {}) {
   const requests = [];
   class Offline extends LlmAdapter {
     async *stream(options) {
-      requests.push(options);
-      if (opts.orchestrate && options.tools?.some(tool => tool.name === 'dsh_code_review')) {
-        const sawToolResult = options.messages.some(message => message.role === 'tool' || message.content?.some(block => block.type === 'tool-result'));
-        if (!sawToolResult) {
-          const block = { type: 'tool-call', id: 'native-review', name: 'dsh_code_review', arguments: JSON.stringify({ input: opts.reviewInput ?? '' }) };
-          yield { type: 'block-start', index: 0, blockType: 'tool-call' };
-          yield { type: 'tool-call-delta', index: 0, id: block.id, name: block.name, argumentsDelta: block.arguments };
-          yield { type: 'block-end', index: 0, block };
-          yield { type: 'finish', reason: { kind: 'tool-calls' } };
-        } else {
-          const text = '主会话报告：原生审查专家已完成，零发现。';
-          yield { type: 'block-start', index: 0, blockType: 'text' };
-          yield { type: 'text-delta', index: 0, text };
-          yield { type: 'block-end', index: 0, block: { type: 'text', text } };
-          yield { type: 'finish', reason: { kind: 'stop' } };
-        }
+      const isReviewFollowup = options.messages?.some(m => m.source?.kind === 'michengai-code-review' || JSON.stringify(m).includes('code review report') || JSON.stringify(m).includes('code review did not complete'));
+      if (!isReviewFollowup) {
+        requests.push(options);
+      }
+      if (isReviewFollowup) {
+        const lastUser = options.messages?.filter(m => m.role === 'user').at(-1);
+        const reportText = lastUser?.content?.find?.(b => b.type === 'text')?.text;
+        const reportMatch = reportText?.match?.(/(?:code review report|code review did not complete):\n\n([\s\S]+?)\n\nPresent this/);
+        const text = reportMatch ? reportMatch[1] : (typeof response === 'function' ? response(root) : response);
+        yield { type: 'block-start', index: 0, blockType: 'text' };
+        yield { type: 'text-delta', index: 0, text };
+        yield { type: 'block-end', index: 0, block: { type: 'text', text } };
+        yield { type: 'finish', reason: { kind: 'stop' } };
         return;
       }
       if (opts.escalate && !opts.escalated && !options.tools?.some(tool => tool.name === 'dsh_code_review')) {
@@ -116,7 +113,10 @@ async function setup(t, response = empty, opts = {}) {
         yield { type: 'block-end', index: 0, block };
         yield { type: 'finish', reason: { kind: 'tool-calls' } };
       } else {
-        const text = typeof response === 'function' ? response(root) : response;
+        const lastUser = options.messages?.filter(m => m.role === 'user').at(-1);
+        const reportText = lastUser?.content?.find?.(b => b.type === 'text')?.text;
+        const reportMatch = reportText?.match?.(/(?:code review report|code review ended with an outcome):\n\n([\s\S]+?)\n\nPresent this/);
+        const text = reportMatch ? reportMatch[1] : (typeof response === 'function' ? response(root) : response);
         yield { type: 'block-start', index: 0, blockType: 'text' };
         yield { type: 'text-delta', index: 0, text };
         yield { type: 'block-end', index: 0, block: { type: 'text', text } };
@@ -190,8 +190,45 @@ async function setup(t, response = empty, opts = {}) {
   t.after(async () => { await parent.dispose(); await ctx.fiber.dispose(); await rm(root, { recursive: true, force: true }); });
   return { root, ctx, parent: parent.agent, installed, requests, questions, journalDirectory, executions: () => executions,
     command: input => ctx.commands.execute(parent.agent, input, [], new AbortController().signal),
+    waitReview: () => new Promise(resolve => {
+      const dispose = ctx.on('michengai-code-review/settled', ({ agent }) => {
+        if (agent.id === parent.agent.id) {
+          dispose();
+          resolve();
+        }
+      });
+    }),
     run: async input => {
-      return ctx.commands.execute(parent.agent, input, [], new AbortController().signal);
+      if (['/review-status', '/review-cancel'].includes(input)) {
+        return ctx.commands.execute(parent.agent, input, [], new AbortController().signal);
+      }
+      let resolveSettled;
+      const waitSettled = new Promise(r => { resolveSettled = r; });
+      const dispose = ctx.on('michengai-code-review/settled', ({ agent }) => {
+        if (agent.id === parent.agent.id) {
+          dispose();
+          resolveSettled();
+        }
+      });
+      const cmd = await ctx.commands.execute(parent.agent, input, [], new AbortController().signal);
+      if (cmd.result.kind === 'error') {
+        dispose();
+        return cmd;
+      }
+      await waitSettled;
+      await parent.agent.whenIdle();
+      const events = parent.agent.session.snapshotEvents();
+      const lastUser = events.findLast(e => e.type === 'user/message' && e.data?.source?.kind === 'michengai-code-review');
+      const reportText = lastUser?.data?.content?.find?.(b => b.type === 'text')?.text;
+      const reportMatch = reportText?.match?.(/(?:code review report|code review did not complete):\n\n([\s\S]+?)\n\nPresent this/);
+      let text = reportMatch ? reportMatch[1] : cmd.result.text;
+      let record;
+      try { record = await installed.value?.journal?.read?.(parent.agent.id) ?? await new plugin.Journal(journalDirectory).read(parent.agent.id, plugin.readHostLocale(ctx)); } catch { /* ignore */ }
+      if (record?.result) {
+        text = plugin.renderOutcome(record.result, plugin.readHostLocale(ctx));
+      }
+      const isFailed = record?.result?.status ? ['failed', 'interrupted', 'invalid-output', 'stale'].includes(record.result.status) : (lastUser ? JSON.stringify(lastUser.data).includes('code review did not complete') : false);
+      return { result: { kind: isFailed ? 'error' : 'success', text } };
     } };
 }
 
@@ -239,7 +276,9 @@ test('斜杠命令直接驱动原生 spawn 子 Agent，不经过主会话模型�
   });
   const executed = await s.command(`/review ${instructions}`);
   assert.equal(executed.result.kind, 'success');
-  assert.match(executed.result.text, /完成 · 零发现/);
+  assert.match(executed.result.text, /提交到当前会话/);
+  await s.waitReview();
+  await s.parent.whenIdle();
   assert.equal(starts.length, 1); assert.equal(ends.length, 1);
   assert.ok(children[0].some(event => event.type === 'subagent/descriptor'));
   const childRequest = children[0].find(event => event.type === 'user/message');
@@ -316,8 +355,12 @@ test('审查与专家一样由宿主拒绝子会话提权，不触发父会话�
   assert.equal(forwarded.length, 0);
   assert.equal(s.ctx.approval.overrideOf(s.parent.session), undefined);
   assert.ok(!s.parent.session.snapshotEvents().some(event => event.type === 'approval/asked'));
-  assert.match(result.result.text, /完成/);
-  assert.match(result.result.text, /测试受沙箱限制/);
+  assert.match(result.result.text, /提交到当前会话/);
+  await s.waitReview();
+  await s.parent.whenIdle();
+  const events = s.parent.session.snapshotEvents();
+  assert.ok(events.some(e => JSON.stringify(e.data).includes('完成')));
+  assert.ok(events.some(e => JSON.stringify(e.data).includes('测试受沙箱限制')));
 });
 
 test('模型错误不伪装为零发现，纯文本报告按 Codex 回退展示', async t => {
@@ -393,7 +436,10 @@ test('/review 命令直调不唤醒主会话模型，彻底杜绝模型自发重
   const s = await setup(t, empty);
   const result = await s.command('/review 检查边界');
   assert.equal(result.result.kind, 'success');
-  assert.match(result.result.text, /完成 · 零发现/);
+  assert.match(result.result.text, /提交到当前会话/);
+  await s.waitReview();
+  await s.parent.whenIdle();
+  assert.ok(s.parent.session.snapshotEvents().some(e => JSON.stringify(e.data).includes('完成 · 零发现')));
   assert.equal(s.ctx.tools.get('dsh_code_review', s.parent), undefined);
 });
 test('持久化后端失败明确返回错误', async t => {
@@ -479,9 +525,13 @@ test('空 /review 完整主会话链路产生原生范围选择', async t => {
   const s = await setup(t, empty, { orchestrate: true });
   const result = await s.command('/review');
   assert.equal(result.result.kind, 'success');
-  assert.match(result.result.text, /完成 · 零发现/);
+  assert.match(result.result.text, /提交到当前会话/);
+  await s.waitReview();
+  await s.parent.whenIdle();
   assert.equal(s.questions.length, 1);
   assert.equal(s.questions[0].agent, s.parent);
+  const events = s.parent.session.snapshotEvents();
+  assert.ok(events.some(e => JSON.stringify(e.data).includes('完成 · 零发现')));
 });
 
 test('范围选择取消释放并发占用，不启动模型或覆写报告', async t => {
