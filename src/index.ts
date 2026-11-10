@@ -18,12 +18,6 @@ declare module '@deepseek-ai/dsh-llm' {
   }
 }
 
-declare module '@deepseek-ai/cordis' {
-  interface Events {
-    'michengai-code-review/settled'(data: { agent: Agent }): void;
-  }
-}
-
 /** V4 拒绝共享的 `plugin` 来源；用户消息使用插件自己的 kind。 */
 const reviewRequestSource = { kind: 'michengai-code-review' } as const;
 
@@ -37,7 +31,7 @@ export function renderOutcome(result: Outcome, locale: Locale = 'zh'): string {
 }
 
 export interface Config { reportDirectory?: string; reviewModel?: string }
-/** 命令交给当前 Agent，审查工具委派原生子 Agent，报告作为工具结果回到当前会话。 */
+/** 命令秒级返回并在后台委派原生子 Agent 执行审查，完成后把报告作为会话消息交付。 */
 export function apply(ctx: Context, config: Config = {}): void {
   const t = (key: Parameters<typeof translate>[1]) => translate(readHostLocale(ctx), key);
   if (config.reportDirectory !== undefined && !isAbsolute(config.reportDirectory)) throw new Error(t('reportDirectory 必须为绝对路径。'));
@@ -68,6 +62,7 @@ export function apply(ctx: Context, config: Config = {}): void {
   }
 
   function deliverError(agent: Agent, error: unknown, locale: Locale): void {
+    if (lifetime.signal.aborted) return;
     const text = error instanceof HarnessError ? error.message : `${translate(locale, '审查未完成。')}\n\n${error instanceof Error ? error.message : String(error)}`;
     try {
       agent.followup(createUserMessage({
@@ -133,7 +128,6 @@ export function apply(ctx: Context, config: Config = {}): void {
       throw error;
     } finally {
       active.delete(agent.id);
-      ctx.emit('michengai-code-review/settled', { agent });
     }
   }
 }

@@ -20,6 +20,7 @@ import { ToolRuntime } from '@deepseek-ai/dsh-tools';
 import { validateStoredEvents } from '@deepseek-ai/dsh-session-persistence';
 import { createHash } from 'node:crypto';
 import * as plugin from '../lib/index.js';
+import { Journal } from '../lib/journal.js';
 import { runReview } from '../lib/runtime.js';
 
 const empty = JSON.stringify({ findings: [], overall_correctness: 'patch is correct', overall_explanation: '未发现有证据的新增缺陷', overall_confidence_score: 0.8 });
@@ -188,47 +189,55 @@ async function setup(t, response = empty, opts = {}) {
   const installed = ctx.plugin(plugin, { reportDirectory: journalDirectory, ...(opts.reviewModel ? { reviewModel: opts.reviewModel } : {}) }); await installed.await();
   const parent = await ctx.agents.create({ sessionId: 'parent', meta: { cwd: root }, agentOptions: { provider: 'offline-review', model: 'test' } });
   t.after(async () => { await parent.dispose(); await ctx.fiber.dispose(); await rm(root, { recursive: true, force: true }); });
+  /** 生产信号：审查结束会把报告或失败说明作为会话消息投递（source 为插件自有 kind）。 */
+  const deliveredReview = fromSeq => {
+    let settled = false;
+    let off;
+    let resolveDelivery;
+    const promise = new Promise(resolve => { resolveDelivery = resolve; });
+    const done = payload => {
+      if (settled) return;
+      settled = true;
+      off?.();
+      resolveDelivery(payload);
+    };
+    off = ctx.on('session/event', (session, event) => {
+      if (session.id !== parent.agent.id || event.type !== 'user/message') return;
+      if (event.data?.source?.kind !== 'michengai-code-review') return;
+      done(event.data);
+    });
+    const seen = parent.agent.session.snapshotEvents()
+      .find(e => e.type === 'user/message' && e.data?.source?.kind === 'michengai-code-review' && e.seq > fromSeq);
+    if (seen) done(seen.data);
+    promise.cancel = () => { if (settled) return; settled = true; off?.(); };
+    return promise;
+  };
+  /** 从投递消息里取出报告正文，去掉英文指令外壳。 */
+  const deliveredBody = payload => {
+    const text = payload?.content?.find?.(b => b.type === 'text')?.text;
+    const match = text?.match?.(/(?:code review report|code review did not complete):\n\n([\s\S]+?)\n\nPresent this/);
+    return match === undefined || match === null ? text : match[1];
+  };
   return { root, ctx, parent: parent.agent, installed, requests, questions, journalDirectory, executions: () => executions,
     command: input => ctx.commands.execute(parent.agent, input, [], new AbortController().signal),
-    waitReview: () => new Promise(resolve => {
-      const dispose = ctx.on('michengai-code-review/settled', ({ agent }) => {
-        if (agent.id === parent.agent.id) {
-          dispose();
-          resolve();
-        }
-      });
-    }),
+    waitReview: async () => { await deliveredReview(-1); },
     run: async input => {
       if (['/review-status', '/review-cancel'].includes(input)) {
         return ctx.commands.execute(parent.agent, input, [], new AbortController().signal);
       }
-      let resolveSettled;
-      const waitSettled = new Promise(r => { resolveSettled = r; });
-      const dispose = ctx.on('michengai-code-review/settled', ({ agent }) => {
-        if (agent.id === parent.agent.id) {
-          dispose();
-          resolveSettled();
-        }
-      });
+      const from = parent.agent.session.seq;
+      const delivery = deliveredReview(from);
       const cmd = await ctx.commands.execute(parent.agent, input, [], new AbortController().signal);
       if (cmd.result.kind === 'error') {
-        dispose();
+        delivery.cancel();
         return cmd;
       }
-      await waitSettled;
+      const payload = await delivery;
       await parent.agent.whenIdle();
-      const events = parent.agent.session.snapshotEvents();
-      const lastUser = events.findLast(e => e.type === 'user/message' && e.data?.source?.kind === 'michengai-code-review');
-      const reportText = lastUser?.data?.content?.find?.(b => b.type === 'text')?.text;
-      const reportMatch = reportText?.match?.(/(?:code review report|code review did not complete):\n\n([\s\S]+?)\n\nPresent this/);
-      let text = reportMatch ? reportMatch[1] : cmd.result.text;
-      let record;
-      try { record = await installed.value?.journal?.read?.(parent.agent.id) ?? await new plugin.Journal(journalDirectory).read(parent.agent.id, plugin.readHostLocale(ctx)); } catch { /* ignore */ }
-      if (record?.result) {
-        text = plugin.renderOutcome(record.result, plugin.readHostLocale(ctx));
-      }
-      const isFailed = record?.result?.status ? ['failed', 'interrupted', 'invalid-output', 'stale'].includes(record.result.status) : (lastUser ? JSON.stringify(lastUser.data).includes('code review did not complete') : false);
-      return { result: { kind: isFailed ? 'error' : 'success', text } };
+      const payloadText = payload?.content?.find?.(b => b.type === 'text')?.text ?? '';
+      const text = deliveredBody(payload) ?? cmd.result.text;
+      const failed = payloadText.includes('code review did not complete');
+      return { result: { kind: failed ? 'error' : 'success', text } };
     } };
 }
 
@@ -494,11 +503,14 @@ test('卸载插件取消运行中的审查并等待清理', { timeout: 15000 }, 
     notify();
     await new Promise(resolve => { if (options.signal.aborted) resolve(); else options.signal.addEventListener('abort', resolve, { once: true }); });
   } });
-  const running = s.run('/review');
+  const cmd = await s.command('/review');
+  assert.equal(cmd.result.kind, 'success');
   await entered;
   await s.installed.dispose();
-  const result = await running;
-  assert.equal(result.result.kind, 'error'); assert.match(result.result.text, /中断/); assert.equal(s.ctx.agents.list().length, 1);
+  assert.equal(s.ctx.agents.list().length, 1);
+  const record = await new Journal(s.journalDirectory).read(s.parent.id, 'zh');
+  assert.equal(record?.result?.status, 'interrupted');
+  assert.equal(s.parent.session.snapshotEvents().some(e => e.type === 'user/message' && e.data?.source?.kind === 'michengai-code-review'), false);
 });
 
 for (const [label, id] of [['对比基准分支', 'review-base'], ['审查某次提交', 'review-commit'], ['自定义审查要求', 'review-instructions']]) {
