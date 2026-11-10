@@ -120,7 +120,7 @@ Se o Git falhar na preparação do ambiente de segurança do Windows ou os teste
 
 ### O que fazer se não houver saída após a instalação?
 
-Certifique-se de que a instalação e a execução utilizem o mesmo perfil, reinicie o backend do DSH e verifique se `dsh --profile web --dump-config` inclui o plugin. O `/review` sem argumentos requer o respondedor de perguntas do host, e o modelo principal precisa suportar a chamada da ferramenta `dsh_code_review`. Use `/review-status` para inspecionar os registros; a confirmação de recebimento da solicitação não representa a conclusão da revisão.
+Certifique-se de que a instalação e a execução utilizem o mesmo perfil, reinicie o backend do DSH e verifique se `dsh --profile web --dump-config` inclui o plugin. A revisão adota um modo de comando direto alinhado ao Codex e não expõe ferramentas globais ao agente principal (evitando ativações automáticas do modelo durante a codificação). O `/review` sem argumentos requer apenas o respondedor de perguntas do host para a seleção interativa de escopo. Use `/review-status` para inspecionar os registros.
 
 ### Por que outro idioma ainda pode aparecer?
 

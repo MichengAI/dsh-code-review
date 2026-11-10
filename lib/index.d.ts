@@ -1,12 +1,5 @@
 import { type Locale } from './i18n.js';
 import type { Context } from '@deepseek-ai/cordis';
-declare module '@deepseek-ai/dsh-llm' {
-    interface MessageSourceMap {
-        'michengai-code-review': {
-            readonly kind: 'michengai-code-review';
-        };
-    }
-}
 import { type Outcome } from './runtime.js';
 export declare const name = "michengai-code-review";
 export declare const inject: string[];

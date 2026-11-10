@@ -61,16 +61,13 @@ test('审查开始后切换语言不改变本轮选择，报告字段和路径�
 });
 test('英文宿主反馈和失败信息跟随语言，缺少 settings 默认中文', async t => {
   const s = await setup(t, empty, { locale: 'en', error: true });
-  const tool = s.ctx.tools.get('dsh_code_review', s.parent);
-  assert.match(tool.description, /^Perform a code review following Codex specifications/);
-  assert.match(tool.parameters.properties.input.description, /^Empty string opens scope selection/);
+  assert.equal(s.ctx.tools.get('dsh_code_review', s.parent), undefined);
+  assert.equal(s.ctx.tools.get('code_review', s.parent), undefined);
   assert.match((await s.command('/review-cancel')).result.text, /No review is running/);
   assert.match((await s.command('/review-status')).result.text, /No saved review result/);
   assert.match((await s.run('/review custom instructions')).result.text, /Code review · Failed/);
   const fallback = await setup(t);
-  const defaultTool = fallback.ctx.tools.get('dsh_code_review', fallback.parent);
-  assert.match(defaultTool.description, /^使用完整 Codex 规范/);
-  assert.match(defaultTool.parameters.properties.input.description, /^空字符串打开范围选择/);
+  assert.equal(fallback.ctx.tools.get('dsh_code_review', fallback.parent), undefined);
   await fallback.run('/review 自定义要求');
   assert.match(JSON.stringify(fallback.requests[0].messages), /Write user-facing review content in Simplified Chinese/);
 });
@@ -194,19 +191,17 @@ async function setup(t, response = empty, opts = {}) {
   return { root, ctx, parent: parent.agent, installed, requests, questions, journalDirectory, executions: () => executions,
     command: input => ctx.commands.execute(parent.agent, input, [], new AbortController().signal),
     run: async input => {
-      if (['/review-status', '/review-cancel'].includes(input)) return ctx.commands.execute(parent.agent, input, [], new AbortController().signal);
-      const result = await ctx.tools.execute({ name: 'dsh_code_review', arguments: { input: input.slice('/review'.length).trim() }, agent: parent.agent, callId: 'review-test', signal: new AbortController().signal });
-      return { result: { kind: result.isError ? 'error' : 'success', text: result.content.filter(b => b.type === 'text').map(b => b.text).join('') } };
+      return ctx.commands.execute(parent.agent, input, [], new AbortController().signal);
     } };
 }
 
-test('审查工具仅注册 dsh_code_review，不保留旧名别名', async t => {
+test('审查对齐 Codex 设计：不向主 Agent 注册全局工具，避免模型在写代码时自发调用', async t => {
   const s = await setup(t);
   assert.equal(s.ctx.tools.get('code_review', s.parent), undefined);
-  assert.ok(s.ctx.tools.get('dsh_code_review', s.parent));
+  assert.equal(s.ctx.tools.get('dsh_code_review', s.parent), undefined);
 });
 
-test('新审查启动记录使用 dsh_code_review 标识', async t => {
+test('新审查启动记录使用 review 命令标识', async t => {
   const s = await setup(t);
   let commandId;
   s.ctx.on('session/flush', async () => {
@@ -215,7 +210,7 @@ test('新审查启动记录使用 dsh_code_review 标识', async t => {
     if (record.state === 'running') commandId = record.commandId;
   });
   assert.equal((await s.run('/review 自定义要求')).result.kind, 'success');
-  assert.equal(commandId, 'dsh_code_review');
+  assert.equal(commandId, 'review');
 });
 
 test('空参数经原生问题选择，带文本不弹菜单也不解析选项', async t => {
@@ -228,10 +223,9 @@ test('空参数经原生问题选择，带文本不弹菜单也不解析选项',
   assert.equal(s.questions.length, 1);
 });
 
-test('斜杠命令唤醒主会话，经原生 spawn 返回工具结果及主会话回答', async t => {
+test('斜杠命令直接驱动原生 spawn 子 Agent，不经过主会话模型转发', async t => {
   const instructions = '重点检查 "权限绕过"\n保留 user\'s token 这个术语；不要把 --staged 当作选项。';
-  const reviewInput = instructions;
-  const s = await setup(t, empty, { orchestrate: true, reviewInput });
+  const s = await setup(t, empty);
   const starts = [], ends = [], children = [];
   let liveChild;
   s.ctx.on('subagent/start', info => {
@@ -240,30 +234,18 @@ test('斜杠命令唤醒主会话，经原生 spawn 返回工具结果及主会�
   });
   s.ctx.on('subagent/end', info => {
     ends.push(info);
-    // alpha.3：end 时子 Agent 可能已从 registry 卸下，保留 start 时的引用再快照。
     const child = s.ctx.agents.get(info.id) ?? liveChild;
     if (child) children.push(child.session.snapshotEvents());
   });
-  const accepted = await s.command(`/review ${reviewInput}`);
-  assert.match(accepted.result.text, /提交到当前会话/);
-  await s.parent.whenIdle();
-  const events = s.parent.session.snapshotEvents();
-  assert.ok(events.some(event => event.type === 'user/message' && event.data.source.kind === 'michengai-code-review'));
-  assert.ok(events.some(event => event.type === 'tool/call' && event.data.name === 'dsh_code_review'));
-  assert.ok(events.some(event => event.type === 'tool/result' && JSON.stringify(event.data).includes('完成 · 零发现')));
-  assert.ok(events.some(event => event.type === 'assistant/message' && JSON.stringify(event.data).includes('主会话报告')));
-  assert.ok(events.some(event => event.type === 'subagent/catalog'));
+  const executed = await s.command(`/review ${instructions}`);
+  assert.equal(executed.result.kind, 'success');
+  assert.match(executed.result.text, /完成 · 零发现/);
   assert.equal(starts.length, 1); assert.equal(ends.length, 1);
-  assert.match(JSON.stringify(s.requests[0].messages), /calling dsh_code_review with input exactly/);
-  assert.ok(s.requests[0].tools.some(tool => tool.name === 'dsh_code_review'));
-  assert.ok(!s.requests[0].tools.some(tool => tool.name === 'code_review'));
-  assert.ok(!s.requests[1].tools.some(tool => ['dsh_code_review', 'code_review'].includes(tool.name)));
   assert.ok(children[0].some(event => event.type === 'subagent/descriptor'));
   const childRequest = children[0].find(event => event.type === 'user/message');
   assert.equal(childRequest.data.content.find(block => block.type === 'text').text, instructions);
-  assert.ok(events.some(event => event.type === 'user/message' && event.data.content.some(block => block.type === 'text' && block.text.includes(JSON.stringify(reviewInput)))));
-  assert.equal(s.ctx.agents.list().length, 1);
-  validateStoredEvents(s.parent.session.header, JSON.parse(JSON.stringify(events)));
+  assert.equal(s.requests.length, 1);
+  assert.equal(s.ctx.tools.get('dsh_code_review', s.parent), undefined);
 });
 
 test('真实 AgentLoop 独立历史、保留宿主提示和原生角色、报告重放与清理', async t => {
@@ -330,13 +312,12 @@ test('审查与专家一样由宿主拒绝子会话提权，不触发父会话�
     forwarded.push(request);
     return 'allowed-once';
   }, true);
-  await s.command('/review 检查审批');
-  await s.parent.whenIdle();
+  const result = await s.command('/review 检查审批');
   assert.equal(forwarded.length, 0);
   assert.equal(s.ctx.approval.overrideOf(s.parent.session), undefined);
   assert.ok(!s.parent.session.snapshotEvents().some(event => event.type === 'approval/asked'));
-  assert.ok(s.parent.session.snapshotEvents().some(event => event.type === 'tool/result' && JSON.stringify(event.data).includes('完成')));
-  assert.ok(s.parent.session.snapshotEvents().some(event => event.type === 'tool/result' && JSON.stringify(event.data).includes('测试受沙箱限制')));
+  assert.match(result.result.text, /完成/);
+  assert.match(result.result.text, /测试受沙箱限制/);
 });
 
 test('模型错误不伪装为零发现，纯文本报告按 Codex 回退展示', async t => {
@@ -401,19 +382,19 @@ test('hook 取消原因携带具体原因文本', async t => {
   assert.equal(result.detail, '操作已中止：安全策略限制');
 });
 
-test('审查中断与失败时抛出带有稳定 code 的 HarnessError', async t => {
-  const controller = new AbortController();
-  const s = await setup(t, empty, { before: async () => { controller.abort(); } });
-  const result = await s.ctx.tools.execute({ name: 'dsh_code_review', arguments: { input: '' }, agent: s.parent, callId: 'err-test', signal: controller.signal });
-  assert.equal(result.isError, true);
-  assert.equal(result.error?.info?.code, 'REVIEW_INTERRUPTED');
+test('审查中断与失败时返回 error 结果并输出本地化说明', async t => {
+  const s = await setup(t, empty, { error: true });
+  const result = await s.run('/review 自定义要求');
+  assert.equal(result.result.kind, 'error');
+  assert.match(result.result.text, /失败/);
 });
 
-test('/review 提示词严格禁止在失败或中断时自主重试调用工具', async t => {
-  const s = await setup(t, empty, { orchestrate: true, reviewInput: '检查边界' });
-  await s.command('/review 检查边界');
-  await s.parent.whenIdle();
-  assert.match(JSON.stringify(s.requests[0].messages), /NEVER retry or call dsh_code_review again/);
+test('/review 命令直调不唤醒主会话模型，彻底杜绝模型自发重试或死锁', async t => {
+  const s = await setup(t, empty);
+  const result = await s.command('/review 检查边界');
+  assert.equal(result.result.kind, 'success');
+  assert.match(result.result.text, /完成 · 零发现/);
+  assert.equal(s.ctx.tools.get('dsh_code_review', s.parent), undefined);
 });
 test('持久化后端失败明确返回错误', async t => {
   const s = await setup(t);
@@ -496,11 +477,11 @@ for (const [label, id] of [['对比基准分支', 'review-base'], ['审查某次
 
 test('空 /review 完整主会话链路产生原生范围选择', async t => {
   const s = await setup(t, empty, { orchestrate: true });
-  await s.command('/review');
-  await s.parent.whenIdle();
+  const result = await s.command('/review');
+  assert.equal(result.result.kind, 'success');
+  assert.match(result.result.text, /完成 · 零发现/);
   assert.equal(s.questions.length, 1);
   assert.equal(s.questions[0].agent, s.parent);
-  assert.ok(s.parent.session.snapshotEvents().some(e => e.type === 'tool/result' && JSON.stringify(e.data).includes('完成 · 零发现')));
 });
 
 test('范围选择取消释放并发占用，不启动模型或覆写报告', async t => {

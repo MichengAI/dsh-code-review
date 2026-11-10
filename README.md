@@ -120,7 +120,7 @@ dsh --profile web --dump-config
 
 ### 安装后没有输出怎么办？
 
-确认安装和运行使用同一 profile，重启 DSH 后端，再检查 `dsh --profile web --dump-config` 是否包含插件。空 `/review` 需要宿主问题回答器，主模型也必须支持 `dsh_code_review` 工具调用。可用 `/review-status` 查看记录；不要把“已提交请求”当成审查完成。
+确认安装和运行使用同一 profile，重启 DSH 后端，再检查 `dsh --profile web --dump-config` 是否包含插件。审查采用对齐 Codex 的纯命令直调模式，不向主 Agent 注入全局工具（杜绝模型在编码时自发调用）。空 `/review` 仅需宿主问题回答器支持交互式选择范围。可用 `/review-status` 查看记录。
 
 ### 中文界面为什么仍可能看到英文？
 

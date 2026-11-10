@@ -1,16 +1,7 @@
-import { readHostLocale, translate, outputLanguage, type Locale } from './i18n.js';
+import { readHostLocale, translate, type Locale } from './i18n.js';
 import type { Context } from '@deepseek-ai/cordis';
 import type {} from '@deepseek-ai/dsh-commands';
-import { HarnessError, createUserMessage } from '@deepseek-ai/dsh-llm';
-
-declare module '@deepseek-ai/dsh-llm' {
-  interface MessageSourceMap {
-    'michengai-code-review': { readonly kind: 'michengai-code-review' };
-  }
-}
-
-/** V4 拒绝共享的 `plugin` 来源；用户消息使用插件自己的 kind。 */
-const reviewRequestSource = { kind: 'michengai-code-review' } as const;
+import { HarnessError } from '@deepseek-ai/dsh-llm';
 import type { Agent } from '@deepseek-ai/dsh-agent';
 import type {} from '@deepseek-ai/dsh-subagent';
 import { selectTarget } from './selection.js';
@@ -20,7 +11,7 @@ import { homedir } from 'node:os';
 import { isAbsolute, join } from 'node:path';
 import { Journal } from './journal.js';
 export const name = 'michengai-code-review';
-export const inject = ['commands', 'subagents', 'agents', 'tools', 'systemPrompt', 'sessions', 'userQuestions'];
+export const inject = ['commands', 'subagents', 'agents', 'systemPrompt', 'sessions', 'userQuestions'];
 const labels: Record<Outcome['status'], Parameters<typeof translate>[1]> = { 'no-changes': '无变更', 'completed-clean': '完成 · 零发现', 'completed-findings': '完成 · 有发现', 'completed-text': '完成', partial: '部分覆盖', failed: '失败', interrupted: '中断', 'invalid-output': '输出无效', stale: '快照过期' };
 export function renderOutcome(result: Outcome, locale: Locale = 'zh'): string {
   const t = (key: Parameters<typeof translate>[1]) => translate(locale, key);
@@ -51,12 +42,16 @@ export function apply(ctx: Context, config: Config = {}): void {
   } });
   ctx.commands.register({ name: 'review', description: t('选择范围或输入自定义要求'), input: { hint: t('留空提交以选择范围；或输入完整的自定义审查要求') },
     async handler(invocation) {
-      const { agent, rawInput } = invocation;
-      agent.followup(createUserMessage({
-        content: [{ type: 'text', text: `Perform a code review by calling dsh_code_review with input exactly ${JSON.stringify(rawInput.trim())}. Empty input opens native scope selection. The tool uses DSH native spawn with an independent reviewer. Do not modify code or substitute other review tools. Present the returned report verbatim without adding, removing, or rewriting findings. Report failures accurately. NEVER retry or call dsh_code_review again if the review fails, is cancelled, or is interrupted; immediately present the returned outcome directly to the user. ${outputLanguage(readHostLocale(ctx))}` }],
-        source: reviewRequestSource,
-      }));
-      return { kind: 'success', text: t('已将审查请求提交到当前会话，将通过原生子 Agent 执行。') };
+      const { agent, rawInput, signal } = invocation;
+      const operation = review(agent, rawInput.trim(), signal);
+      operations.add(operation);
+      void operation.then(() => operations.delete(operation), () => operations.delete(operation));
+      try {
+        const text = await operation;
+        return { kind: 'success', text };
+      } catch (error) {
+        return { kind: 'error', text: error instanceof Error ? error.message : String(error) };
+      }
     } });
 
   async function review(agent: Agent, input: string, signal: AbortSignal): Promise<string> {
@@ -70,7 +65,7 @@ export function apply(ctx: Context, config: Config = {}): void {
       const target = await selectTarget(ctx, agent, input, combined, locale);
       combined.throwIfAborted();
       try {
-        await journal.write(agent.id, { version: 1, state: 'running', commandId: 'dsh_code_review' }, locale);
+        await journal.write(agent.id, { version: 1, state: 'running', commandId: 'review' }, locale);
         await ctx.sessions.flush(agent.session);
       } catch (error) { throw new Error(`${t('审查启动记录持久化失败：')}${String(error)}${t('；未调用子模型。')}`); }
       const result = await runReview(ctx, agent, target, combined, undefined, config.reviewModel, locale);
@@ -87,19 +82,4 @@ export function apply(ctx: Context, config: Config = {}): void {
       return text;
     } finally { active.delete(agent.id); }
   }
-
-  ctx.tools.register({
-    name: 'dsh_code_review', description: t('使用完整 Codex 规范，通过 DSH 原生 spawn 子 Agent 自行检查 Git 状态、差异与相关代码并返回报告。一次性终态工具，执行失败或中断时直接向用户呈现结果，禁止在同一轮次中自动重试。input 为空时通过原生问题选择范围；非空时整段作为自定义要求，不解析 CLI 选项。'),
-    parameters: { type: 'object', properties: { input: { type: 'string', description: t('空字符串打开范围选择；非空字符串是完整自定义审查要求，保留原文。') } }, required: ['input'], additionalProperties: false },
-    output: { schema: { type: 'string' }, render: (_args, value) => [{ type: 'text', text: String(value) }] },
-    execute(args, exec) {
-      if (!exec.agent) throw new Error(t('代码审查必须从当前会话调用。'));
-      const input = (args as { input: unknown }).input;
-      if (typeof input !== 'string') throw new Error(t('input 必须是字符串。'));
-      const operation = review(exec.agent, input, exec.signal);
-      operations.add(operation);
-      void operation.then(() => operations.delete(operation), () => operations.delete(operation));
-      return operation;
-    },
-  });
 }
