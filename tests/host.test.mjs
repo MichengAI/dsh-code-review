@@ -610,7 +610,7 @@ test('没有 startActivation 的宿主仍用 start 完成审查，并带上角�
   const ctx = {
     get() { return undefined; },
     on() { return () => {}; },
-    tools: { get(name) { return name === 'dsh_code_review' || name === 'summon_expert' ? { name } : undefined; } },
+    tools: { get(name) { return name === 'summon_expert' ? { name } : undefined; } },
     subagents: {
       getProvider(name) {
         assert.equal(name, 'spawn');
@@ -634,7 +634,7 @@ test('没有 startActivation 的宿主仍用 start 完成审查，并带上角�
   assert.equal(starts[0].request.prompt[0].text, '检查边界');
   assert.equal(starts[0].request.agentOptions.model, 'legacy-model');
   assert.match(starts[0].request.persona, /Write user-facing review content in Simplified Chinese/);
-  assert.deepEqual(starts[0].request.toolFilter.deny, ['dsh_code_review', 'summon_expert']);
+  assert.deepEqual(starts[0].request.toolFilter.deny, ['summon_expert']);
   assert.equal(disposed, true);
 });
 

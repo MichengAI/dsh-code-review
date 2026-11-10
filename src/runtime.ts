@@ -13,7 +13,7 @@ import { parseReport, REVIEW_PROMPT, type Report } from './report.js';
 export type Status = 'no-changes' | 'completed-clean' | 'completed-findings' | 'completed-text' | 'partial' | 'failed' | 'interrupted' | 'invalid-output' | 'stale';
 export interface Outcome { id: string; status: Status; detail: string; fingerprint?: string; base?: string; target?: string; report?: Report; raw?: string }
 // 与 Agency 专家一致：角色由 provider 组合，禁止递归召唤专家，权限由宿主委派。
-const delegatedTools = ['dsh_code_review', 'summon_expert', 'summon_experts', 'list_experts', 'list_expert_teams', 'get_expert_team', 'summon_expert_team'];
+const delegatedTools = ['summon_expert', 'summon_experts', 'list_experts', 'list_expert_teams', 'get_expert_team', 'summon_expert_team'];
 
 function formatAbortReason(reason: unknown, locale: Locale = 'zh'): string {
   const t = (key: Parameters<typeof translate>[1]) => translate(locale, key);
