@@ -126,7 +126,7 @@ export function apply(ctx: Context, config: Config = {}): void {
     } catch (error) {
       if (started && !(error instanceof HarnessError) && error instanceof Error && (error.name === 'AbortError' || error.message === 'This operation was aborted')) {
         try {
-          const detail = error.message && error.message !== 'This operation was aborted' ? error.message : t('操作已中止。');
+          const detail = t('操作已中止。');
           await journal.write(agent.id, { version: 1, state: 'finished', result: { id: randomUUID(), status: 'interrupted', detail } }, locale);
         } catch { /* ignore */ }
       }

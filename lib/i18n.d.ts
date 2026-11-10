@@ -65,15 +65,11 @@ declare const en: {
     readonly '\u62A5\u544A\u6301\u4E45\u5316\u5931\u8D25\uFF1A': "Failed to persist the report: ";
     readonly '\uFF1B\u4E0D\u80FD\u786E\u8BA4\u91CD\u542F\u540E\u53EF\u6062\u590D\u3002': "; recovery after restart cannot be confirmed.";
     readonly '\u5BBF\u4E3B\u672A\u914D\u7F6E\u4F1A\u8BDD\u6301\u4E45\u5316\u540E\u7AEF\uFF1B\u7ED3\u6784\u5316\u62A5\u544A\u5DF2\u72EC\u7ACB\u4FDD\u5B58\u3002': "The host has no session persistence backend; the structured report was saved separately.";
-    readonly '\u4EE3\u7801\u5BA1\u67E5\u5FC5\u987B\u4ECE\u5F53\u524D\u4F1A\u8BDD\u8C03\u7528\u3002': "Code review must be invoked from the current session.";
-    readonly 'input \u5FC5\u987B\u662F\u5B57\u7B26\u4E32\u3002': "input must be a string.";
     readonly 'reportDirectory \u5FC5\u987B\u4E3A\u7EDD\u5BF9\u8DEF\u5F84\u3002': "reportDirectory must be an absolute path.";
     readonly 'reviewModel \u4E0D\u80FD\u4E3A\u7A7A\u3002': "reviewModel must not be empty.";
     readonly '\uFF08\u57FA\u7EBF\uFF09': " (base)";
     readonly '\u8BC1\u636E\uFF1A': "Evidence: ";
     readonly '\u672A\u8986\u76D6\uFF1A': "Not covered: ";
-    readonly '\u4F7F\u7528\u5B8C\u6574 Codex \u89C4\u8303\uFF0C\u901A\u8FC7 DSH \u539F\u751F spawn \u5B50 Agent \u81EA\u884C\u68C0\u67E5 Git \u72B6\u6001\u3001\u5DEE\u5F02\u4E0E\u76F8\u5173\u4EE3\u7801\u5E76\u8FD4\u56DE\u62A5\u544A\u3002\u4E00\u6B21\u6027\u7EC8\u6001\u5DE5\u5177\uFF0C\u6267\u884C\u5931\u8D25\u6216\u4E2D\u65AD\u65F6\u76F4\u63A5\u5411\u7528\u6237\u5448\u73B0\u7ED3\u679C\uFF0C\u7981\u6B62\u5728\u540C\u4E00\u8F6E\u6B21\u4E2D\u81EA\u52A8\u91CD\u8BD5\u3002input \u4E3A\u7A7A\u65F6\u901A\u8FC7\u539F\u751F\u95EE\u9898\u9009\u62E9\u8303\u56F4\uFF1B\u975E\u7A7A\u65F6\u6574\u6BB5\u4F5C\u4E3A\u81EA\u5B9A\u4E49\u8981\u6C42\uFF0C\u4E0D\u89E3\u6790 CLI \u9009\u9879\u3002': "Perform a code review following Codex specifications using a native DSH spawned subagent that inspects Git status, diff, and source code. Terminal one-shot tool; presents outcomes directly on failure or interruption without retrying. Empty input triggers scope selection; non-empty input is treated as custom instructions without CLI flag parsing.";
-    readonly '\u7A7A\u5B57\u7B26\u4E32\u6253\u5F00\u8303\u56F4\u9009\u62E9\uFF1B\u975E\u7A7A\u5B57\u7B26\u4E32\u662F\u5B8C\u6574\u81EA\u5B9A\u4E49\u5BA1\u67E5\u8981\u6C42\uFF0C\u4FDD\u7559\u539F\u6587\u3002': "Empty string opens scope selection; non-empty string provides full custom review instructions verbatim.";
     readonly '\u5BA1\u67E5\u8BB0\u5F55\u683C\u5F0F\u4E0D\u53D7\u652F\u6301\u3002': "Review record format is not supported.";
     readonly '\u5BA1\u67E5\u8BB0\u5F55\u635F\u574F\u3002': "Review record is corrupted.";
     readonly '\u62A5\u544A\u683C\u5F0F\u4E0D\u5339\u914D\u3002': "Report format does not match.";
