@@ -6,13 +6,13 @@
 
 - 彻底对齐 OpenAI Codex 设计哲学，将审查作为用户发起的独立质量门禁，移除向主 Agent 注入的全局审查工具，杜绝模型在日常写代码与修 bug 期间自动自发触发审查。
 - 优化 `/review` 斜杠命令交互体验，命令提交后立即释放输入框，审查期间保持输入框可正常打字，支持随时通过 `/review-cancel` 取消审查或通过 `/review-status` 查看进展。
-- 审查完成后自动在当前会话中呈现完整双语 Markdown 审查报告。
+- 审查完成后自动在当前会话中呈现对应宿主语言的完整 Markdown 审查报告。
 
 ## English
 
 - Align with OpenAI Codex design philosophy by treating review as a user-initiated quality gate; remove the global review tool from the main agent to prevent autonomous model triggers during normal coding and bug-fixing.
 - Improve `/review` slash command interactivity: the command releases the composer immediately upon submission, allowing users to type freely, cancel via `/review-cancel`, or check status via `/review-status`.
-- Automatically deliver complete bilingual Markdown review reports into the active conversation upon completion.
+- Automatically deliver complete Markdown review reports matching the host language into the active conversation upon completion.
 
 ## 1.0.9 — 2026-11-09
 

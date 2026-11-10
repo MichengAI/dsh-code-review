@@ -85,7 +85,7 @@ async function setup(t, response = empty, opts = {}) {
         requests.push(options);
       }
       if (isReviewFollowup) {
-        const lastUser = options.messages?.filter(m => m.role === 'user').at(-1);
+        const lastUser = options.messages?.filter(m => m.role === 'user' && m.source?.kind === 'michengai-code-review').at(-1);
         const reportText = lastUser?.content?.find?.(b => b.type === 'text')?.text;
         const reportMatch = reportText?.match?.(/(?:code review report|code review did not complete):\n\n([\s\S]+?)\n\nPresent this/);
         const text = reportMatch ? reportMatch[1] : (typeof response === 'function' ? response(root) : response);
@@ -344,7 +344,7 @@ test('未安装专家插件时仍可委派，不把不存在的专家工具传�
 });
 
 test('审查与专家一样由宿主拒绝子会话提权，不触发父会话审批或等待', { timeout: 15000 }, async t => {
-  const s = await setup(t, '已检查源码；测试受沙箱限制未能执行，不能确认测试通过。', { orchestrate: true, tool: 'native_git', escalate: true });
+  const s = await setup(t, '已检查源码；测试受沙箱限制未能执行，不能确认测试通过。', { tool: 'native_git', escalate: true });
   const forwarded = [];
   s.ctx.on('approval/request', function (request, next) {
     if (request.agent !== s.parent) return next();
@@ -432,14 +432,15 @@ test('审查中断与失败时返回 error 结果并输出本地化说明', asyn
   assert.match(result.result.text, /失败/);
 });
 
-test('/review 命令直调不唤醒主会话模型，彻底杜绝模型自发重试或死锁', async t => {
+test('/review 命令直调杜绝模型自发调用与死锁，并在会话中自动呈现报告', async t => {
   const s = await setup(t, empty);
   const result = await s.command('/review 检查边界');
   assert.equal(result.result.kind, 'success');
   assert.match(result.result.text, /提交到当前会话/);
   await s.waitReview();
   await s.parent.whenIdle();
-  assert.ok(s.parent.session.snapshotEvents().some(e => JSON.stringify(e.data).includes('完成 · 零发现')));
+  const events = s.parent.session.snapshotEvents();
+  assert.ok(events.some(e => e.type === 'assistant/message' && JSON.stringify(e.data).includes('完成 · 零发现')));
   assert.equal(s.ctx.tools.get('dsh_code_review', s.parent), undefined);
 });
 test('持久化后端失败明确返回错误', async t => {
@@ -522,7 +523,7 @@ for (const [label, id] of [['对比基准分支', 'review-base'], ['审查某次
 }
 
 test('空 /review 完整主会话链路产生原生范围选择', async t => {
-  const s = await setup(t, empty, { orchestrate: true });
+  const s = await setup(t, empty);
   const result = await s.command('/review');
   assert.equal(result.result.kind, 'success');
   assert.match(result.result.text, /提交到当前会话/);
