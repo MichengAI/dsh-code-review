@@ -14,7 +14,7 @@
 
 [![Licence : Apache-2.0](https://img.shields.io/badge/Licence-Apache--2.0-blue.svg)](LICENSE)
 [![Plugin DSH](https://img.shields.io/badge/DSH-Plugin-0f766e.svg)](https://github.com/MichengAI/dsh-code-review)
-[![Compatible DSH jusqu'à 0.2.2-rc.1](https://img.shields.io/badge/DSH-jusqu'%C3%A0%200.2.2--rc.1-2563eb.svg)](#compatibilité-avec-lhôte)
+[![Compatible DSH jusqu'à 0.2.2-rc.2](https://img.shields.io/badge/DSH-jusqu'%C3%A0%200.2.2--rc.2-2563eb.svg)](#compatibilité-avec-lhôte)
 [![Node.js](https://img.shields.io/badge/Node.js-%E2%89%A522.19.0-339933.svg?logo=node.js&logoColor=white)](https://nodejs.org/)
 
 </div>
@@ -23,7 +23,7 @@ DSH Code Review est un plugin communautaire de revue de code pour DeepSeek Harne
 
 ## Compatibilité avec l'hôte
 
-Périmètre de prise en charge de l'hôte : ensemble de la série DeepSeek Harness `0.2.x` (`>=0.2.0-rc.1 <0.3.0-0`), vérifié avec `0.2.0-rc.1`, `0.2.0-rc.2`, `0.2.1-rc.1`～`0.2.1-rc.5`, `0.2.2-rc.1`, et compatible automatiquement avec toutes les versions RC ultérieures de 0.2.x. Les anciennes versions et les ruptures de génération `0.3.0` sont bloquées par la porte de version. Chargé via `dsh.bundle.patch`. Nécessite le fournisseur natif `spawn`, le service `userQuestions`, un répondeur aux questions pour votre environnement, et un modèle compatible avec les appels d'outils.
+Périmètre de prise en charge de l'hôte : ensemble de la série DeepSeek Harness `0.2.x` (`>=0.2.0-rc.1 <0.3.0-0`), vérifié avec `0.2.0-rc.1`, `0.2.0-rc.2`, `0.2.1-rc.1`～`0.2.1-rc.5`, `0.2.2-rc.1`, `0.2.2-rc.2`, et compatible automatiquement avec toutes les versions RC ultérieures de 0.2.x. Les anciennes versions et les ruptures de génération `0.3.0` sont bloquées par la porte de version. Chargé via `dsh.bundle.patch`. Nécessite le fournisseur natif `spawn`, le service `userQuestions`, un répondeur aux questions pour votre environnement, et un modèle compatible avec les appels d'outils.
 
 Peut être installé depuis npm ou compilé à partir des sources. Les tests hors ligne de l'hôte et de la chaîne de paquets ont été validés.
 

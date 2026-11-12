@@ -14,7 +14,7 @@
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
 [![DSH Plugin](https://img.shields.io/badge/DSH-Plugin-0f766e.svg)](https://github.com/MichengAI/dsh-code-review)
-[![DSH supported through 0.2.2-rc.1](https://img.shields.io/badge/DSH-up%20to%200.2.2--rc.1-2563eb.svg)](#host-compatibility)
+[![DSH supported through 0.2.2-rc.2](https://img.shields.io/badge/DSH-up%20to%200.2.2--rc.2-2563eb.svg)](#host-compatibility)
 [![Node.js](https://img.shields.io/badge/Node.js-%E2%89%A522.19.0-339933.svg?logo=node.js&logoColor=white)](https://nodejs.org/)
 
 </div>
@@ -23,7 +23,7 @@ DSH Code Review is a community code review plugin for DeepSeek Harness, packaged
 
 ## Host compatibility
 
-Host compatibility: Full DeepSeek Harness `0.2.x` line (`>=0.2.0-rc.1 <0.3.0-0`), verified with `0.2.0-rc.1`, `0.2.0-rc.2`, `0.2.1-rc.1`–`0.2.1-rc.5`, and `0.2.2-rc.1`, and forwards-compatible with subsequent `0.2.x` RC releases without requiring routine plugin version bumps. Legacy versions and breaking changes in the `0.3.0` generation are rejected by the version gate. It loads through `dsh.bundle.patch` and requires the native `spawn` provider, the `userQuestions` service, a question answerer for your platform, and a model that supports tool calls.
+Host compatibility: Full DeepSeek Harness `0.2.x` line (`>=0.2.0-rc.1 <0.3.0-0`), verified with `0.2.0-rc.1`, `0.2.0-rc.2`, `0.2.1-rc.1`–`0.2.1-rc.5`, `0.2.2-rc.1`, and `0.2.2-rc.2`, and forwards-compatible with subsequent `0.2.x` RC releases without requiring routine plugin version bumps. Legacy versions and breaking changes in the `0.3.0` generation are rejected by the version gate. It loads through `dsh.bundle.patch` and requires the native `spawn` provider, the `userQuestions` service, a question answerer for your platform, and a model that supports tool calls.
 
 Install the package from npm or build from source. Offline host and package integration checks have passed; review quality, language adherence, and interaction across platforms still need live validation.
 

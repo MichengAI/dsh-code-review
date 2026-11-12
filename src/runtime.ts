@@ -118,18 +118,27 @@ export async function runReview(ctx: Context, parent: Agent, target: Target, sig
         return undefined;
       });
       try {
+        const isFlatSpec = typeof (subagents as { rootOf?: unknown }).rootOf === 'function';
         activation = await subagents.startActivation({
           provider: 'spawn',
           label: t('代码审查'),
           childId,
-          request: {
-            parent,
-            prompt: [{ type: 'text', text: prompt }],
-            ...(reviewModel ? { agentOptions: { model: reviewModel } } : {}),
-          },
           signal: combined,
           delivery: 'caller',
-        });
+          ...(isFlatSpec
+            ? {
+                parent,
+                prompt: [{ type: 'text', text: prompt }],
+                ...(reviewModel ? { agentOptions: { model: reviewModel } } : {}),
+              }
+            : {
+                request: {
+                  parent,
+                  prompt: [{ type: 'text', text: prompt }],
+                  ...(reviewModel ? { agentOptions: { model: reviewModel } } : {}),
+                },
+              }),
+        } as never);
       } finally {
         stop();
       }

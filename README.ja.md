@@ -14,7 +14,7 @@
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
 [![DSH Plugin](https://img.shields.io/badge/DSH-Plugin-0f766e.svg)](https://github.com/MichengAI/dsh-code-review)
-[![DSH 0.2.2-rc.1 まで対応](https://img.shields.io/badge/DSH-up%20to%200.2.2--rc.1-2563eb.svg)](#ホスト互換性)
+[![DSH 0.2.2-rc.2 まで対応](https://img.shields.io/badge/DSH-up%20to%200.2.2--rc.2-2563eb.svg)](#ホスト互換性)
 [![Node.js](https://img.shields.io/badge/Node.js-%E2%89%A522.19.0-339933.svg?logo=node.js&logoColor=white)](https://nodejs.org/)
 
 </div>
@@ -23,7 +23,7 @@ DSH Code Review は、DeepSeek Harness 向けのコミュニティコードレ�
 
 ## ホスト互换性
 
-ホスト対応範囲：DeepSeek Harness `0.2.x` 全シリーズ（`>=0.2.0-rc.1 <0.3.0-0`）。`0.2.0-rc.1`、`0.2.0-rc.2`、`0.2.1-rc.1`〜`0.2.1-rc.5`、`0.2.2-rc.1` で検証済みであり、以降のすべての 0.2.x RC バージョンに自動対応します。初期バージョンおよび `0.3.0` 世代の破壊的変更はバージョンゲートで遮断されます。`dsh.bundle.patch` 経由で読み込まれます。ネイティブ `spawn` プロバイダー、`userQuestions` サービス、実行環境の質問回答器、およびツール呼び出しに対応したモデルが必要です。
+ホスト対応範囲：DeepSeek Harness `0.2.x` 全シリーズ（`>=0.2.0-rc.1 <0.3.0-0`）。`0.2.0-rc.1`、`0.2.0-rc.2`、`0.2.1-rc.1`〜`0.2.1-rc.5`、`0.2.2-rc.1`、`0.2.2-rc.2` で検証済みであり、以降のすべての 0.2.x RC バージョンに自動対応します。初期バージョンおよび `0.3.0` 世代の破壊的変更はバージョンゲートで遮断されます。`dsh.bundle.patch` 経由で読み込まれます。ネイティブ `spawn` プロバイダー、`userQuestions` サービス、実行環境の質問回答器、およびツール呼び出しに対応したモデルが必要です。
 
 npm からインストールするか、ソースからビルドできます。オフラインホストとパッケージリンクは検証済みです。実際のモデルのレビュー品質、言語遵守、異なるプラットフォームでの操作性は実際の検証が必要です。
 

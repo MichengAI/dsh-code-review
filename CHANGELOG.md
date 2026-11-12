@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.0.11 — 2026-11-12
+
+## 简体中文
+
+- 完成 DeepSeek Harness `0.2.2-rc.2` 全量兼容验证，支持范围涵盖 `0.2.0-rc.1` 至 `0.2.2-rc.2` 及后续同代预发布版本。
+- 适配新版宿主子 Agent 启动入参扁平化变更，保持对历史宿主激活接口的向下兼容。
+- 对齐开发依赖至官方 `0.2.2-rc.2`、Cordis `4.1.0` 与 Schemastery `3.19.0`，并同步更新多语言说明文档中的版本徽章与兼容验证列表。
+
+## English
+
+- Verified full compatibility with DeepSeek Harness `0.2.2-rc.2`, covering `0.2.0-rc.1` through `0.2.2-rc.2` and subsequent `0.2.x` pre-releases.
+- Adapt to flattened subagent activation spec parameter structure in newer hosts while preserving backward compatibility for legacy hosts.
+- Align development dependencies with official `0.2.2-rc.2`, Cordis `4.1.0`, and Schemastery `3.19.0`, and update compatibility badges and verified host lists across all README manuals.
+
 ## 1.0.10 — 2026-11-10
 
 ## 简体中文

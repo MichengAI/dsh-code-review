@@ -22,6 +22,7 @@ import { createHash } from 'node:crypto';
 import * as plugin from '../lib/index.js';
 import { Journal } from '../lib/journal.js';
 import { runReview } from '../lib/runtime.js';
+import { installToolExecutor } from './tool-executor.mjs';
 
 const empty = JSON.stringify({ findings: [], overall_correctness: 'patch is correct', overall_explanation: '未发现有证据的新增缺陷', overall_confidence_score: 0.8 });
 test('宿主语言控制菜单与模型输出指令，切换后下一次生效且原文不变', async t => {
@@ -72,6 +73,13 @@ test('英文宿主反馈和失败信息跟随语言，缺少 settings 默认中�
   await fallback.run('/review 自定义要求');
   assert.match(JSON.stringify(fallback.requests[0].messages), /Write user-facing review content in Simplified Chinese/);
 });
+class MemoryWorkingDirectory extends Service {
+  constructor(ctx) { super(ctx, 'workingDirectory'); }
+  get(session) { return session.header.cwd; }
+  async ensure(agent) { return agent.session.header.cwd; }
+  async set(agent, path) { return path; }
+}
+
 async function setup(t, response = empty, opts = {}) {
   const root = await mkdtemp(join(tmpdir(), 'dsh-review-host-'));
   const git = (...args) => execFileSync('git', args, { cwd: root, windowsHide: true, stdio: 'ignore' });
@@ -140,17 +148,13 @@ async function setup(t, response = empty, opts = {}) {
     }
     await ctx.plugin(MemorySettings).await();
   }
-  new SessionStore(ctx); new AgentRegistry(ctx); new SessionProjectionRegistry(ctx); new LlmRuntime(ctx);
-  new SystemPrompt(ctx, { includeHarnessIdentity: false, personaPrefix: 'PARENT_PERSONA' }); new ToolRuntime(ctx); new CommandRuntime(ctx); new AgentLoop(ctx, { agents: [], maxParallelToolCalls: { get: () => 10 } });
+  new SessionStore(ctx); new SessionProjectionRegistry(ctx); await ctx.plugin(AgentRegistry).await(); new LlmRuntime(ctx);
+  new SystemPrompt(ctx, { includeHarnessIdentity: false, personaPrefix: 'PARENT_PERSONA' }); new ToolRuntime(ctx); installToolExecutor(ctx); new CommandRuntime(ctx); await ctx.plugin(AgentLoop, { agents: [], maxParallelToolCalls: 10 }).await();
   // alpha.3：SubagentRuntime 依赖 workingDirectory（ensure/set）；夹具提供最小实现即可。
-  class MemoryWorkingDirectory extends Service {
-    constructor(ctx) { super(ctx, 'workingDirectory'); }
-    get(session) { return session.header.cwd; }
-    async ensure(agent) { return agent.session.header.cwd; }
-    async set(agent, path) { return path; }
-  }
   new MemoryWorkingDirectory(ctx);
-  new SubagentRuntime(ctx, SubagentRuntime.Config({})); new UserQuestionService(ctx); new ApprovalService(ctx, { policy: 'ask' });
+  await ctx.plugin(SubagentRuntime, {}).await();
+  await ctx.plugin(UserQuestionService).await();
+  await ctx.plugin(ApprovalService, { policy: 'ask' }).await();
   const questions = [];
   ctx.on('user-questions/request', async (request) => {
     questions.push(request);
@@ -478,9 +482,10 @@ test('磁盘日志 JSON 往返后新 Agent 能恢复结构化报告', async t =>
   await s.ctx.agents.get('parent').whenIdle();
   // 使用新 Context 模拟进程重启，保持原会话身份以恢复插件原子记录。
   const restarted = new Context();
-  new SessionStore(restarted); new AgentRegistry(restarted); new SessionProjectionRegistry(restarted); new LlmRuntime(restarted);
-  new SystemPrompt(restarted, { includeHarnessIdentity: false }); new ToolRuntime(restarted); new CommandRuntime(restarted); new AgentLoop(restarted, { agents: [] });
-  new SubagentRuntime(restarted, {}); new UserQuestionService(restarted); new ApprovalService(restarted, { policy: 'ask' });
+  new SessionStore(restarted); new SessionProjectionRegistry(restarted); await restarted.plugin(AgentRegistry).await(); new LlmRuntime(restarted);
+  new SystemPrompt(restarted, { includeHarnessIdentity: false }); new ToolRuntime(restarted); installToolExecutor(restarted); new CommandRuntime(restarted); await restarted.plugin(AgentLoop, { agents: [] }).await();
+  new MemoryWorkingDirectory(restarted);
+  await restarted.plugin(SubagentRuntime, {}).await(); await restarted.plugin(UserQuestionService).await(); await restarted.plugin(ApprovalService, { policy: 'ask' }).await();
   await restarted.plugin(spawn, { providerName: 'spawn' }).await();
   await restarted.plugin(plugin, { reportDirectory: s.journalDirectory }).await();
   const restored = await restarted.agents.create({ sessionId: 'parent', seed, meta: { cwd: s.root }, agentOptions: s.parent.options });
@@ -647,6 +652,42 @@ test('没有 startActivation 的宿主仍用 start 完成审查，并带上角�
   assert.equal(starts[0].request.agentOptions.model, 'legacy-model');
   assert.match(starts[0].request.persona, /Write user-facing review content in Simplified Chinese/);
   assert.deepEqual(starts[0].request.toolFilter.deny, ['summon_expert']);
+  assert.equal(disposed, true);
+});
+
+test('缺少 rootOf 的旧版 startActivation 宿主继续收到嵌套 request 载荷', async () => {
+  const specs = [];
+  let disposed = false;
+  const report = JSON.stringify({ findings: [], overall_correctness: 'patch is correct', overall_explanation: '未发现有证据的新增缺陷', overall_confidence_score: 0.8 });
+  const parent = { id: 'parent', session: { header: { cwd: 'D:/review-rc1-host' } } };
+  const ctx = {
+    get() { return undefined; },
+    on() { return () => {}; },
+    tools: { get() { return undefined; } },
+    subagents: {
+      getProvider(name) {
+        assert.equal(name, 'spawn');
+        return { inheritsParentContext: false, capabilities: {} };
+      },
+      async startActivation(spec) {
+        specs.push(spec);
+        return {
+          childId: spec.childId,
+          result: Promise.resolve({ stopReason: 'completed', output: [{ type: 'text', text: report }] }),
+          async dispose() { disposed = true; },
+        };
+      },
+    },
+  };
+  const outcome = await runReview(ctx, parent, { mode: 'custom', instructions: '检查旧版激活' }, new AbortController().signal, undefined, 'legacy-act-model');
+  assert.equal(outcome.status, 'completed-clean', outcome.detail);
+  assert.equal(specs.length, 1);
+  assert.equal(specs[0].provider, 'spawn');
+  assert.equal(specs[0].delivery, 'caller');
+  assert.equal(specs[0].request.parent, parent);
+  assert.equal(specs[0].request.prompt[0].text, '检查旧版激活');
+  assert.equal(specs[0].request.agentOptions.model, 'legacy-act-model');
+  assert.equal(specs[0].parent, undefined);
   assert.equal(disposed, true);
 });
 

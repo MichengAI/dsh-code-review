@@ -14,7 +14,7 @@
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
 [![DSH Plugin](https://img.shields.io/badge/DSH-Plugin-0f766e.svg)](https://github.com/MichengAI/dsh-code-review)
-[![DSH 支持至 0.2.2-rc.1](https://img.shields.io/badge/DSH-%E6%94%AF%E6%8C%81%E8%87%B3%200.2.2--rc.1-2563eb.svg)](#宿主兼容性)
+[![DSH 支持至 0.2.2-rc.2](https://img.shields.io/badge/DSH-%E6%94%AF%E6%8C%81%E8%87%B3%200.2.2--rc.2-2563eb.svg)](#宿主兼容性)
 [![Node.js](https://img.shields.io/badge/Node.js-%E2%89%A522.19.0-339933.svg?logo=node.js&logoColor=white)](https://nodejs.org/)
 
 </div>
@@ -23,7 +23,7 @@ DSH Code Review 是 DeepSeek Harness 的社区代码审查插件，包名 `@mich
 
 ## 宿主兼容性
 
-宿主支持范围：DeepSeek Harness `0.2.x` 全系列（`>=0.2.0-rc.1 <0.3.0-0`），已验证兼容 `0.2.0-rc.1`、`0.2.0-rc.2`、`0.2.1-rc.1`～`0.2.1-rc.5`、`0.2.2-rc.1`，并自动支持后续全部 0.2.x RC 版本，同代宿主升级无需重复等待发版。早期版本与 `0.3.0` 代际破坏性更新由版本门拦截。通过 `dsh.bundle.patch` 加载。需要原生 `spawn` provider、`userQuestions` 服务、当前平台的问题回答器，以及支持工具调用的模型。
+宿主支持范围：DeepSeek Harness `0.2.x` 全系列（`>=0.2.0-rc.1 <0.3.0-0`），已验证兼容 `0.2.0-rc.1`、`0.2.0-rc.2`、`0.2.1-rc.1`～`0.2.1-rc.5`、`0.2.2-rc.1`、`0.2.2-rc.2`，并自动支持后续全部 0.2.x RC 版本，同代宿主升级无需重复等待发版。早期版本与 `0.3.0` 代际破坏性更新由版本门拦截。通过 `dsh.bundle.patch` 加载。需要原生 `spawn` provider、`userQuestions` 服务、当前平台的问题回答器，以及支持工具调用的模型。
 
 可从 npm 安装，也可从源码构建。已验证离线宿主与安装包链路；真实模型的审查质量、语言遵循和不同平台的交互仍需实际验收。
 
