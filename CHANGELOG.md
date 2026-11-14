@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.0.13 — 2026-11-14
+
+## 简体中文
+
+- 新增 DSH 宿主版本矩阵，覆盖 `0.2.1-rc.1` 至 `0.2.2-rc.3` 的全部 RC 版本。
+
+## English
+
+- Added a DSH host version matrix covering every RC from `0.2.1-rc.1` through `0.2.2-rc.3`.
+
 ## 1.0.12 — 2026-11-14
 
 ## 简体中文
