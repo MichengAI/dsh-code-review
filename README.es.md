@@ -14,7 +14,7 @@
 
 [![Licencia: Apache-2.0](https://img.shields.io/badge/Licencia-Apache--2.0-blue.svg)](LICENSE)
 [![Plugin DSH](https://img.shields.io/badge/DSH-Plugin-0f766e.svg)](https://github.com/MichengAI/dsh-code-review)
-[![Compatible con DSH hasta 0.2.2-rc.2](https://img.shields.io/badge/DSH-hasta%200.2.2--rc.2-2563eb.svg)](#compatibilidad-con-el-host)
+[![Compatible con DSH hasta 0.2.2-rc.3](https://img.shields.io/badge/DSH-hasta%200.2.2--rc.3-2563eb.svg)](#compatibilidad-con-el-host)
 [![Node.js](https://img.shields.io/badge/Node.js-%E2%89%A522.19.0-339933.svg?logo=node.js&logoColor=white)](https://nodejs.org/)
 
 </div>
@@ -23,7 +23,7 @@ DSH Code Review es un plugin comunitario de revisión de código para DeepSeek H
 
 ## Compatibilidad con el host
 
-Rango de compatibilidad del host: Serie completa DeepSeek Harness `0.2.x` (`>=0.2.0-rc.1 <0.3.0-0`), verificado con `0.2.0-rc.1`, `0.2.0-rc.2`, `0.2.1-rc.1`～`0.2.1-rc.5`, `0.2.2-rc.1`, `0.2.2-rc.2`, y compatible automáticamente con todas las versiones RC posteriores de 0.2.x. Las versiones iniciales y las modificaciones incompatibles de la generación `0.3.0` son bloqueadas por el filtro de versiones. Se carga mediante `dsh.bundle.patch`. Requiere el proveedor nativo `spawn`, el servicio `userQuestions`, el respondedor de preguntas de su plataforma y un modelo compatible con llamadas a herramientas.
+Rango de compatibilidad del host: Serie completa DeepSeek Harness `0.2.x` (`>=0.2.0-rc.1 <0.3.0-0`), verificado con `0.2.0-rc.1`, `0.2.0-rc.2`, `0.2.1-rc.1`～`0.2.1-rc.5`, `0.2.2-rc.1`, `0.2.2-rc.2`, `0.2.2-rc.3`, y compatible automáticamente con todas las versiones RC posteriores de 0.2.x. Las versiones iniciales y las modificaciones incompatibles de la generación `0.3.0` son bloqueadas por el filtro de versiones. Se carga mediante `dsh.bundle.patch`. Requiere el proveedor nativo `spawn`, el servicio `userQuestions`, el respondedor de preguntas de su plataforma y un modelo compatible con llamadas a herramientas.
 
 Se puede instalar desde npm o compilar a partir del código fuente. Se han verificado las pruebas sin conexión del host y del empaquetado. La calidad de revisión de los modelos reales, la adherencia al idioma y la interacción en distintas plataformas requieren validación en producción.
 

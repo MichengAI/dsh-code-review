@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.0.12 — 2026-11-14
+
+## 简体中文
+
+- 完成 DeepSeek Harness `0.2.2-rc.3` 兼容验证，支持范围涵盖 `0.2.0-rc.1` 至 `0.2.2-rc.3` 及后续同代预发布版本。
+- 对齐开发依赖至官方 `0.2.2-rc.3`，并同步更新多语言说明文档中的版本徽章与兼容验证列表。
+
+## English
+
+- Verified full compatibility with DeepSeek Harness `0.2.2-rc.3`, covering `0.2.0-rc.1` through `0.2.2-rc.3` and subsequent `0.2.x` pre-releases.
+- Align development dependencies with official `0.2.2-rc.3`, and update compatibility badges and verified host lists across all README manuals.
+
 ## 1.0.11 — 2026-11-12
 
 ## 简体中文

@@ -14,7 +14,7 @@
 
 [![Lizenz: Apache-2.0](https://img.shields.io/badge/Lizenz-Apache--2.0-blue.svg)](LICENSE)
 [![DSH-Plugin](https://img.shields.io/badge/DSH-Plugin-0f766e.svg)](https://github.com/MichengAI/dsh-code-review)
-[![DSH bis 0.2.2-rc.2 unterstützt](https://img.shields.io/badge/DSH-bis%200.2.2--rc.2-2563eb.svg)](#host-kompatibilit%C3%A4t)
+[![DSH bis 0.2.2-rc.3 unterstützt](https://img.shields.io/badge/DSH-bis%200.2.2--rc.3-2563eb.svg)](#host-kompatibilit%C3%A4t)
 [![Node.js](https://img.shields.io/badge/Node.js-%E2%89%A522.19.0-339933.svg?logo=node.js&logoColor=white)](https://nodejs.org/)
 
 </div>
@@ -23,7 +23,7 @@ DSH Code Review ist ein Community-Plugin zur Code-Überprüfung für DeepSeek Ha
 
 ## Host-Kompatibilität
 
-Unterstützter Host-Bereich: Vollständige DeepSeek Harness `0.2.x`-Serie (`>=0.2.0-rc.1 <0.3.0-0`), verifiziert mit `0.2.0-rc.1`, `0.2.0-rc.2`, `0.2.1-rc.1`～`0.2.1-rc.5`, `0.2.2-rc.1`, `0.2.2-rc.2`, und automatisch kompatibel mit allen nachfolgenden 0.2.x-RC-Versionen. Frühere Versionen sowie inkompatible Neuerungen der `0.3.0`-Generation werden durch die Versionsprüfung blockiert. Geladen über `dsh.bundle.patch`. Erfordert nativen `spawn`-Provider, den `userQuestions`-Dienst, einen Fragenbeantworter Ihrer Plattform und ein Modell mit Tool-Calling-Unterstützung.
+Unterstützter Host-Bereich: Vollständige DeepSeek Harness `0.2.x`-Serie (`>=0.2.0-rc.1 <0.3.0-0`), verifiziert mit `0.2.0-rc.1`, `0.2.0-rc.2`, `0.2.1-rc.1`～`0.2.1-rc.5`, `0.2.2-rc.1`, `0.2.2-rc.2`, `0.2.2-rc.3`, und automatisch kompatibel mit allen nachfolgenden 0.2.x-RC-Versionen. Frühere Versionen sowie inkompatible Neuerungen der `0.3.0`-Generation werden durch die Versionsprüfung blockiert. Geladen über `dsh.bundle.patch`. Erfordert nativen `spawn`-Provider, den `userQuestions`-Dienst, einen Fragenbeantworter Ihrer Plattform und ein Modell mit Tool-Calling-Unterstützung.
 
 Installation über npm oder Build aus dem Quellcode möglich.
 
