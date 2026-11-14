@@ -72,3 +72,28 @@ jobs:
       - run: npm ci --ignore-scripts
       - run: npm run check
       - run: npm pack --dry-run
+
+  host-matrix:
+    needs: changes
+    if: needs.changes.outputs.run_tests == 'true'
+    name: 宿主 ${{ matrix.dsh }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      # 0.2.0 代际没有 dsh-error，且 startActivation 契约尚不存在，本插件从 0.2.1 起可构建。
+      matrix:
+        dsh: [0.2.1-rc.1, 0.2.1-rc.2, 0.2.1-rc.3, 0.2.1-rc.4, 0.2.1-rc.5, 0.2.2-rc.1, 0.2.2-rc.2, 0.2.2-rc.3]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - name: 对齐宿主版本
+        run: node scripts/host-matrix.mjs ${{ matrix.dsh }}
+      - name: 安装该版本宿主依赖
+        run: npm install --ignore-scripts --legacy-peer-deps --no-audit --no-fund
+      - name: 在该宿主上回归
+        run: npm run check
+      - name: 校验发布包
+        run: npm pack --dry-run
