@@ -23,7 +23,7 @@ DSH Code Review ist ein Community-Plugin zur Code-Überprüfung für DeepSeek Ha
 
 ## Host-Kompatibilität
 
-Unterstützter Host-Bereich: Vollständige DeepSeek Harness `0.2.x`-Serie (`>=0.2.0-rc.1 <0.3.0-0`), verifiziert mit `0.2.0-rc.1`, `0.2.0-rc.2`, `0.2.1-rc.1`～`0.2.1-rc.5`, `0.2.2-rc.1`, `0.2.2-rc.2`, `0.2.2-rc.3`, und automatisch kompatibel mit allen nachfolgenden 0.2.x-RC-Versionen. Frühere Versionen sowie inkompatible Neuerungen der `0.3.0`-Generation werden durch die Versionsprüfung blockiert. Geladen über `dsh.bundle.patch`. Erfordert nativen `spawn`-Provider, den `userQuestions`-Dienst, einen Fragenbeantworter Ihrer Plattform und ein Modell mit Tool-Calling-Unterstützung.
+Unterstützter Host-Bereich: DeepSeek Harness `0.2.2` und nachfolgende Versionen derselben Generation (`>=0.2.2-rc.1 <0.3.0-0`), verifiziert mit `0.2.2-rc.1`, `0.2.2-rc.2`, `0.2.2-rc.3`, `0.2.2-rc.4`, `0.2.2-rc.5`, und automatisch kompatibel mit allen nachfolgenden 0.2.x-RC-Versionen. Frühere Versionen sowie inkompatible Neuerungen der `0.3.0`-Generation werden durch die Versionsprüfung blockiert. Geladen über `dsh.bundle.patch`. Erfordert nativen `spawn`-Provider, den `userQuestions`-Dienst, einen Fragenbeantworter Ihrer Plattform und ein Modell mit Tool-Calling-Unterstützung.
 
 Installation über npm oder Build aus dem Quellcode möglich.
 

@@ -81,9 +81,9 @@ jobs:
     timeout-minutes: 20
     strategy:
       fail-fast: false
-      # 0.2.0 代际没有 dsh-error，且 startActivation 契约尚不存在，本插件从 0.2.1 起可构建。
+      # 覆盖 >=0.2.2-rc.1 <0.3.0-0 的官方 DSH 宿主版本。
       matrix:
-        dsh: [0.2.1-rc.1, 0.2.1-rc.2, 0.2.1-rc.3, 0.2.1-rc.4, 0.2.1-rc.5, 0.2.2-rc.1, 0.2.2-rc.2, 0.2.2-rc.3]
+        dsh: [0.2.2-rc.1, 0.2.2-rc.2, 0.2.2-rc.3, 0.2.2-rc.4, 0.2.2-rc.5]
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
