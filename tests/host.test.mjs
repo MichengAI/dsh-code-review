@@ -643,16 +643,35 @@ test('缺少 rootOf 的 0.2.2-rc.1 宿主继续收到嵌套 request 载荷', asy
       },
     },
   };
-  const outcome = await runReview(ctx, parent, { mode: 'custom', instructions: '检查旧版激活' }, new AbortController().signal, undefined, 'legacy-act-model');
+  const outcome = await runReview(ctx, parent, { mode: 'custom', instructions: '检查嵌套激活载荷' }, new AbortController().signal, undefined, 'nested-act-model');
   assert.equal(outcome.status, 'completed-clean', outcome.detail);
   assert.equal(specs.length, 1);
   assert.equal(specs[0].provider, 'spawn');
   assert.equal(specs[0].delivery, 'caller');
   assert.equal(specs[0].request.parent, parent);
-  assert.equal(specs[0].request.prompt[0].text, '检查旧版激活');
-  assert.equal(specs[0].request.agentOptions.model, 'legacy-act-model');
+  assert.equal(specs[0].request.prompt[0].text, '检查嵌套激活载荷');
+  assert.equal(specs[0].request.agentOptions.model, 'nested-act-model');
   assert.equal(specs[0].parent, undefined);
   assert.equal(disposed, true);
+});
+
+test('低于支持范围的宿主给出升级提示，不抛裸 TypeError', async () => {
+  const parent = { id: 'parent', session: { header: { cwd: 'D:/review-too-old-host' } } };
+  const calls = [];
+  const ctx = {
+    get() { return undefined; },
+    on() { calls.push('on'); return () => {}; },
+    tools: { get() { return undefined; } },
+    subagents: {
+      getProvider() { return { inheritsParentContext: false, capabilities: {} }; },
+      // 0.2.2-rc.1 以下的宿主没有 startActivation。
+    },
+  };
+  const outcome = await runReview(ctx, parent, { mode: 'custom', instructions: '检查边界' }, new AbortController().signal);
+  assert.equal(outcome.status, 'failed');
+  assert.match(outcome.detail, /请升级 DeepSeek Harness/);
+  assert.doesNotMatch(outcome.detail, /is not a function/);
+  assert.deepEqual(calls, [], '不应在缺少启动接口时注册 agent/created 监听');
 });
 
 test('命令目录提供中英文描述', async t => {

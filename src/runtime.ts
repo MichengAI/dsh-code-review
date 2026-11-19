@@ -93,6 +93,11 @@ export async function runReview(ctx: Context, parent: Agent, target: Target, sig
     const persona = `${REVIEW_PROMPT}\n\n${outputLanguage(locale)}`;
     const deny = delegatedTools.filter(name => ctx.tools.get(name, parent) !== undefined);
     const subagents = ctx.subagents;
+    // 低于 0.2.2-rc.1 的宿主没有 startActivation；版本门之外的强制安装会走到这里，
+    // 给一句可执行的升级提示，而不是把底层 TypeError 当成审查失败原因回给用户。
+    if (typeof (subagents as { startActivation?: unknown }).startActivation !== 'function') {
+      throw new Error(t('当前宿主缺少原生子 Agent 启动接口，请升级 DeepSeek Harness 后重试。'));
+    }
     const childId = SessionId(randomUUID());
     const stop = ctx.on('agent/created', ({ agent }) => {
       if (agent.id !== childId) return undefined;
@@ -105,6 +110,9 @@ export async function runReview(ctx: Context, parent: Agent, target: Target, sig
       return undefined;
     });
     try {
+      // `rootOf` 是 0.2.2-rc.2 才出现的服务方法，与「激活入参是否扁平」一一对应：
+      // rc.1 无该方法是嵌套 request，rc.2～rc.5 有该方法是扁平入参（npm pack 逐版实测）。
+      // 入参形状已被 `as never` 绕开类型检查，守它的是 CI 宿主矩阵；新宿主 RC 发布时先补进矩阵再调整判据。
       const isFlatSpec = typeof (subagents as { rootOf?: unknown }).rootOf === 'function';
       activation = await subagents.startActivation({
         provider: 'spawn',
