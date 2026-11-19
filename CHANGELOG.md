@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.0.14 — 2026-11-19
+
+## 简体中文
+
+- 支持范围调整为 DeepSeek Harness `0.2.2-rc.1` 及后续 `0.2.x` 版本。`0.2.0`、`0.2.1` 系列不再被接受：升级插件前请先升级宿主；仍停留在旧宿主时请继续使用 1.0.13。
+- 已验证兼容 `0.2.2-rc.1`、`0.2.2-rc.2`、`0.2.2-rc.3`、`0.2.2-rc.4`、`0.2.2-rc.5`，之后同代新版本无需等待插件跟版。
+- 宿主版本过低时，审查结果直接提示「请升级 DeepSeek Harness 后重试」，不再出现看不懂的英文底层报错。
+
+## English
+
+- Support now starts at DeepSeek Harness `0.2.2-rc.1` and covers later `0.2.x` releases. The `0.2.0` and `0.2.1` lines are no longer accepted: upgrade the host before upgrading the plugin, and stay on 1.0.13 while the host is older.
+- Verified with `0.2.2-rc.1`, `0.2.2-rc.2`, `0.2.2-rc.3`, `0.2.2-rc.4`, and `0.2.2-rc.5`; later releases on the same line need no plugin follow-up.
+- On a host that is too old, a review now says to upgrade DeepSeek Harness and try again instead of surfacing a raw English error.
+
 ## 1.0.13 — 2026-11-14
 
 ## 简体中文
