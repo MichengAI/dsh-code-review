@@ -83,7 +83,7 @@ jobs:
       fail-fast: false
       # 覆盖 >=0.2.2-rc.1 <0.3.0-0 的官方 DSH 宿主版本。
       matrix:
-        dsh: [0.2.2-rc.1, 0.2.2-rc.2, 0.2.2-rc.3, 0.2.2-rc.4, 0.2.2-rc.5]
+        dsh: [0.2.2-rc.1, 0.2.2-rc.2, 0.2.2-rc.3, 0.2.2-rc.4, 0.2.2-rc.5, 0.2.3-alpha.2]
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6

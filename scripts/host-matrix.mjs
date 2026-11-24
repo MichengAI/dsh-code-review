@@ -13,8 +13,10 @@ const root = fileURLToPath(new URL('..', import.meta.url));
 const manifestPath = join(root, 'package.json');
 const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
 
-// 0.2.2 代际配套的 Cordis 与 Schemastery 版本固定为 4.1.0 / 3.19.0。
-const toolchain = { cordis: '4.1.0', schemastery: '3.19.0' };
+// DSH 宿主配套的 Cordis 与 Schemastery 工具链版本。
+const toolchain = version.startsWith('0.2.3')
+  ? { cordis: '4.2.0-alpha.1', schemastery: '3.20.0-alpha.1' }
+  : { cordis: '4.1.0', schemastery: '3.19.0' };
 
 // dsh-error 自 0.2.2-rc.2 才发布，0.2.2-rc.1 保留 package.json 里钉的版本。
 const errorAvailable = version !== '0.2.2-rc.1';

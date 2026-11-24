@@ -54,10 +54,10 @@ const FACES = {
 
 type Lookup = { get?: (name: string) => unknown };
 
-/** 按宿主 locale.snapshot.active 解析语言，未选择时默认中文，未知语言回退 en。 */
+/** 按宿主 locale.snapshot.active 或 locale.getSnapshot().active 解析语言，未选择时默认中文，未知语言回退 en。 */
 function resolveClientLocale(ctx: Lookup): string {
-  const locale = ctx.get?.('locale') as { snapshot?: { active?: unknown } } | undefined;
-  return resolveHostLocale(locale?.snapshot?.active);
+  const locale = ctx.get?.('locale') as { snapshot?: { active?: unknown }; getSnapshot?: () => { active?: unknown } } | undefined;
+  return resolveHostLocale(locale?.snapshot?.active ?? locale?.getSnapshot?.()?.active);
 }
 
 function decorateSlashFaces(commandUi: unknown, ctx: Lookup): () => void {

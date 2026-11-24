@@ -192,3 +192,21 @@ test('多语言宿主环境表驱动全量覆盖 8 门语言及未知语言回�
     assert.equal(rows[2].hint, undefined, `Locale ${activeLocale} cancel hint should be undefined`);
   }
 });
+
+test('支持通过 locale.getSnapshot() 解析语言且客户端 apply 返回清理函数', async () => {
+  const client = loadClient();
+  const original = async () => ([
+    { name: 'review', description: '原描述' },
+  ]);
+  const commandUi = { candidates: original };
+  const dispose = client.apply({
+    inject: (_deps, callback) => callback({
+      get: name => name === 'commandUi' ? commandUi : name === 'locale' ? { getSnapshot: () => ({ active: 'en_US' }) } : undefined,
+    }),
+  });
+  const rows = await commandUi.candidates();
+  assert.equal(rows[0].label, 'Review');
+  assert.equal(typeof dispose, 'function');
+  dispose();
+  assert.equal(commandUi.candidates, original);
+});

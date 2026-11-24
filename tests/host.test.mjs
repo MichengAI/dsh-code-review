@@ -148,8 +148,8 @@ async function setup(t, response = empty, opts = {}) {
     }
     await ctx.plugin(MemorySettings).await();
   }
-  new SessionStore(ctx); new SessionProjectionRegistry(ctx); await ctx.plugin(AgentRegistry).await(); new LlmRuntime(ctx);
-  new SystemPrompt(ctx, { includeHarnessIdentity: false, personaPrefix: 'PARENT_PERSONA' }); new ToolRuntime(ctx); installToolExecutor(ctx); new CommandRuntime(ctx); await ctx.plugin(AgentLoop, { agents: [], maxParallelToolCalls: 10 }).await();
+  new SessionStore(ctx); await ctx.plugin(SessionProjectionRegistry).await(); await ctx.plugin(AgentRegistry).await(); new LlmRuntime(ctx);
+  await ctx.plugin(SystemPrompt, { includeHarnessIdentity: false, personaPrefix: 'PARENT_PERSONA' }).await(); new ToolRuntime(ctx); installToolExecutor(ctx); new CommandRuntime(ctx); await ctx.plugin(AgentLoop, { agents: [], maxParallelToolCalls: 10 }).await();
   // alpha.3：SubagentRuntime 依赖 workingDirectory（ensure/set）；夹具提供最小实现即可。
   new MemoryWorkingDirectory(ctx);
   await ctx.plugin(SubagentRuntime, {}).await();
@@ -295,7 +295,8 @@ test('斜杠命令直接驱动原生 spawn 子 Agent，不经过主会话模型�
   assert.equal(starts.length, 1); assert.equal(ends.length, 1);
   assert.ok(children[0].some(event => event.type === 'subagent/descriptor'));
   const childRequest = children[0].find(event => event.type === 'user/message');
-  assert.equal(childRequest.data.content.find(block => block.type === 'text').text, instructions);
+  const taskText = childRequest.data.content.filter(block => block.type === 'text').map(b => b.text).join('').replace(/^Agent \w+ sent a message:\s*/, '');
+  assert.equal(taskText, instructions);
   assert.equal(s.requests.length, 1);
   assert.equal(s.ctx.tools.get('dsh_code_review', s.parent), undefined);
 });
@@ -532,8 +533,9 @@ for (const [label, id] of [['对比基准分支', 'review-base'], ['审查某次
     assert.equal(result.result.kind, 'success', result.result.text);
     assert.equal(s.questions.length, 2);
     assert.equal(s.requests.length, 1);
-    const data = s.requests[0].messages.filter(m => m.role === 'user').flatMap(m => m.content).find(b => b.type === 'text').text;
-    if (id === 'review-instructions') assert.equal(data, instructions);
+    const textBlocks = s.requests[0].messages.filter(m => m.role === 'user').flatMap(m => m.content).filter(b => b.type === 'text');
+    const data = textBlocks.map(b => b.text).join('').replace(/^Agent \w+ sent a message:\s*/, '').replace(/<system-reminder>[\s\S]*?<\/system-reminder>/, '').trim();
+    if (id === 'review-instructions') assert.equal(data, instructions.trim());
     if (id === 'review-base') assert.match(data, /Run `git diff [a-f0-9]{40}`/);
     if (id === 'review-commit') assert.match(data, /commit [a-f0-9]{40}/);
   });
@@ -602,7 +604,9 @@ test('自定义历史要求不会被工作区无变更短路，也不预读仓�
   const instruction = '审查上一提交，请自行检查 git show HEAD';
   assert.equal((await s.run('/review ' + instruction)).result.kind, 'success');
   assert.equal(s.requests.length, 1);
-  assert.equal(s.requests[0].messages.filter(m => m.role === 'user')[0].content[0].text, instruction);
+  const userContent = s.requests[0].messages.filter(m => m.role === 'user')[0].content;
+  const userText = userContent.filter(b => b.type === 'text').map(b => b.text).join('').replace(/^Agent \w+ sent a message:\s*/, '').replace(/<system-reminder>[\s\S]*?<\/system-reminder>/, '').trim();
+  assert.equal(userText, instruction.trim());
 });
 
 test('subagent 仅在父子 Agent 本地注册时仍可启动审查，局部委派可以执行', async t => {
