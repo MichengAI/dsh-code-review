@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.0.15 — 2026-11-24
+
+## 简体中文
+
+- 支持 DeepSeek Harness `0.2.3-alpha.2` 最新宿主环境。
+- 适配客户端多语言服务新增的快照读取机制，保障在各类宿主界面下中文与多语言本地化文案稳定呈现。
+- 规范客户端扩展生命周期清理，完善卸载与热重载注销逻辑。
+
+## English
+
+- Support the latest DeepSeek Harness `0.2.3-alpha.2` host environment.
+- Adapt to the client locale service snapshot mechanism to ensure consistent localization across host UI surfaces.
+- Normalize client extension lifecycle cleanup for clean unmount and hot reload behavior.
+
 ## 1.0.14 — 2026-11-19
 
 ## 简体中文
