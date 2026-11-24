@@ -295,7 +295,7 @@ test('斜杠命令直接驱动原生 spawn 子 Agent，不经过主会话模型�
   assert.equal(starts.length, 1); assert.equal(ends.length, 1);
   assert.ok(children[0].some(event => event.type === 'subagent/descriptor'));
   const childRequest = children[0].find(event => event.type === 'user/message');
-  const taskText = childRequest.data.content.filter(block => block.type === 'text').map(b => b.text).join('').replace(/^Agent \w+ sent a message:\s*/, '');
+  const taskText = childRequest.data.content.filter(block => block.type === 'text').map(b => b.text).join('').replace(/^Agent \w+ sent a message:\s*/, '').replace(/<system-reminder>[\s\S]*?<\/system-reminder>/, '').replace(/Current runtime context[\s\S]*/, '').trim();
   assert.equal(taskText, instructions);
   assert.equal(s.requests.length, 1);
   assert.equal(s.ctx.tools.get('dsh_code_review', s.parent), undefined);
@@ -534,7 +534,7 @@ for (const [label, id] of [['对比基准分支', 'review-base'], ['审查某次
     assert.equal(s.questions.length, 2);
     assert.equal(s.requests.length, 1);
     const textBlocks = s.requests[0].messages.filter(m => m.role === 'user').flatMap(m => m.content).filter(b => b.type === 'text');
-    const data = textBlocks.map(b => b.text).join('').replace(/^Agent \w+ sent a message:\s*/, '').replace(/<system-reminder>[\s\S]*?<\/system-reminder>/, '').trim();
+    const data = textBlocks.map(b => b.text).join('').replace(/^Agent \w+ sent a message:\s*/, '').replace(/<system-reminder>[\s\S]*?<\/system-reminder>/, '').replace(/Current runtime context[\s\S]*/, '').trim();
     if (id === 'review-instructions') assert.equal(data, instructions.trim());
     if (id === 'review-base') assert.match(data, /Run `git diff [a-f0-9]{40}`/);
     if (id === 'review-commit') assert.match(data, /commit [a-f0-9]{40}/);
@@ -605,7 +605,7 @@ test('自定义历史要求不会被工作区无变更短路，也不预读仓�
   assert.equal((await s.run('/review ' + instruction)).result.kind, 'success');
   assert.equal(s.requests.length, 1);
   const userContent = s.requests[0].messages.filter(m => m.role === 'user')[0].content;
-  const userText = userContent.filter(b => b.type === 'text').map(b => b.text).join('').replace(/^Agent \w+ sent a message:\s*/, '').replace(/<system-reminder>[\s\S]*?<\/system-reminder>/, '').trim();
+  const userText = userContent.filter(b => b.type === 'text').map(b => b.text).join('').replace(/^Agent \w+ sent a message:\s*/, '').replace(/<system-reminder>[\s\S]*?<\/system-reminder>/, '').replace(/Current runtime context[\s\S]*/, '').trim();
   assert.equal(userText, instruction.trim());
 });
 
